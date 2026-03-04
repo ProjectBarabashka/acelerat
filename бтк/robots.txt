@@ -1,4 +1,26 @@
+# TurboTX — Bitcoin Transaction Accelerator
+# https://acelerat.vercel.app/
+
 User-agent: *
 Allow: /
 
+# Запрещаем индексацию служебных путей
+Disallow: /api/
+Disallow: /_next/
+Disallow: /cdn-cgi/
+
+# Основной sitemap
 Sitemap: https://acelerat.vercel.app/sitemap.xml
+
+# Ускоренная индексация для основных ботов
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Yandexbot
+Allow: /
+Crawl-delay: 2
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 2

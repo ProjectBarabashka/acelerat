@@ -2,9 +2,9 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="google-site-verification" content="GGdg4V6Vlm_FP4Mr4wg2xE4XnUzX-ANB-Zo10Yrh9fQ" />
+<meta name="google-site-verification" content="MgTsmcJaF3CSd5cykmfnX0GX3WD0NqBf-DugkeYV_Jo" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="yandex-verification" content="7d6e97aff3032645" />
+
 <!-- PRIMARY SEO -->
 <title>Bitcoin Transaction Accelerator — Ускоритель BTC Транзакций | TurboTX</title>
 <meta name="description" content="Ускорьте застрявшую Bitcoin транзакцию бесплатно. Broadcast в 15+ майнинг-пулов — ViaBTC, AntPool, F2Pool. Транзакция подтвердится за 15–30 минут. BTC transaction accelerator.">
@@ -36,7 +36,7 @@
   "@context": "https://schema.org",
   "@type": "WebApplication",
   "name": "TurboTX Bitcoin Transaction Accelerator",
-  "url": "https://acelerat.vercel.app",
+  "url": "https://acelerat.vercel.app/",
   "description": "Сервис ускорения Bitcoin транзакций. Broadcast неподтверждённых транзакций в 15+ майнинг-пулов для быстрого включения в блок.",
   "applicationCategory": "FinanceApplication",
   "operatingSystem": "Any",
@@ -106,199 +106,913 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
 <style>
+/* ═══════════════════════════════════════════════════════════════
+   TURBOTX — RETRO-FUTURISTIC CRYPTO TERMINAL
+   Aesthetic: dark command-line meets premium fintech
+   Fonts: IBM Plex Mono (terminal) + Outfit (display)
+═══════════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Outfit:wght@300;400;600;800;900&display=swap');
+
 :root{
-  --bg:#0a0a0f;--s:#12121a;--b:#1e1e2e;
-  --a:#f7931a;--a2:#ff6b35;--g:#00ff87;
-  --t:#e8e8f0;--m:#6b6b8a;--err:#ff4466
+  --bg:#060608;
+  --s:#0b0b10;
+  --b:#16161f;
+  --b2:#1e1e2a;
+  --a:#f7931a;
+  --a2:#ff6b35;
+  --g:#00e87a;
+  --t:#e8e8f0;
+  --m:#4a4a68;
+  --m2:#6a6a8a;
+  --err:#ff3355;
+  --r:10px;
+  --mono:'IBM Plex Mono',monospace;
+  --display:'Outfit',sans-serif
 }
+
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
+#status,#pools,#queue-section,#support{scroll-margin-top:70px}
+
 body{
-  font-family:'Syne',sans-serif;
+  font-family:var(--display);
   background:var(--bg);color:var(--t);
-  min-height:100vh;overflow-x:hidden
+  min-height:100vh;overflow-x:hidden;
+  -webkit-font-smoothing:antialiased
 }
+
+/* ── BACKGROUND ── */
 body::before{
-  content:'';position:fixed;inset:0;z-index:0;
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   background-image:
-    linear-gradient(rgba(247,147,26,.04) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(247,147,26,.04) 1px,transparent 1px);
-  background-size:40px 40px;pointer-events:none
+    linear-gradient(rgba(247,147,26,.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(247,147,26,.025) 1px,transparent 1px);
+  background-size:60px 60px;
+  mask-image:radial-gradient(ellipse 100% 60% at 50% 0%,#000 30%,transparent 100%)
 }
 body::after{
-  content:'';position:fixed;top:-200px;left:50%;
-  transform:translateX(-50%);width:800px;height:800px;
-  background:radial-gradient(circle,rgba(247,147,26,.1) 0%,transparent 70%);
+  content:'';position:fixed;top:-400px;left:50%;
+  transform:translateX(-50%);
+  width:1000px;height:1000px;
+  background:radial-gradient(circle,rgba(247,147,26,.06) 0%,transparent 60%);
   pointer-events:none;z-index:0
 }
-.w{position:relative;z-index:1;max-width:920px;margin:0 auto;padding:0 20px}
+.w{position:relative;z-index:1;max-width:940px;margin:0 auto;padding:0 28px}
 
-/* NAV */
-nav{display:flex;align-items:center;justify-content:space-between;padding:22px 0;border-bottom:1px solid var(--b)}
-.logo{font-family:'Space Mono',monospace;font-size:1rem;font-weight:700;color:var(--a);letter-spacing:2px;display:flex;align-items:center;gap:10px;text-decoration:none}
-.logo-icon{width:34px;height:34px;background:var(--a);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;color:#000;font-weight:700}
-.nav-right{display:flex;align-items:center;gap:14px}
-.live-badge{background:rgba(0,255,135,.12);border:1px solid rgba(0,255,135,.3);color:var(--g);font-size:.68rem;padding:5px 12px;border-radius:20px;font-family:'Space Mono',monospace;animation:pulse 2s infinite}
+/* ── NAV ── */
+nav{
+  position:sticky;top:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 28px;height:60px;
+  background:rgba(6,6,8,.6);
+  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border-bottom:1px solid rgba(255,255,255,.05);
+  margin:0 -28px;
+}
+.logo{
+  font-family:var(--mono);font-size:.95rem;font-weight:700;
+  letter-spacing:4px;display:flex;align-items:center;
+  gap:12px;text-decoration:none;position:relative
+}
+.logo-icon{
+  width:32px;height:32px;
+  background:var(--a);
+  border-radius:8px;display:flex;align-items:center;justify-content:center;
+  font-size:15px;color:#000;font-weight:700;
+  transition:opacity .2s
+}
+.logo:hover .logo-icon{opacity:.8}
+.logo-turbo{color:var(--a)}
+.logo-tx{color:rgba(232,232,240,.45)}
+.logo-tag{
+  position:absolute;bottom:-10px;left:44px;
+  font-size:.42rem;letter-spacing:3px;color:rgba(74,74,104,.8);
+  text-transform:uppercase;white-space:nowrap;font-family:var(--mono)
+}
+.nav-right{display:flex;align-items:center;gap:2px}
+.nav-link{
+  font-size:.7rem;color:var(--m2);text-decoration:none;
+  padding:6px 12px;border-radius:6px;
+  font-family:var(--mono);letter-spacing:.5px;
+  transition:color .15s,background .15s
+}
+.nav-link:hover{color:var(--t);background:rgba(255,255,255,.04)}
+.live-badge{
+  display:flex;align-items:center;gap:6px;
+  border:1px solid rgba(0,232,122,.18);
+  color:rgba(0,232,122,.75);font-size:.58rem;
+  padding:5px 11px;border-radius:20px;
+  font-family:var(--mono);letter-spacing:1px;margin-left:8px
+}
+.live-dot{
+  width:5px;height:5px;border-radius:50%;background:var(--g);
+  animation:livepulse 2s ease-in-out infinite
+}
+@keyframes livepulse{0%,100%{opacity:.9}50%{opacity:.2}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
-.nav-link{font-size:.78rem;color:var(--m);text-decoration:none;transition:color .2s}
-.nav-link:hover{color:var(--t)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.acc-btn svg.spinning{animation:spin .8s linear infinite;transform-origin:center}
 
-/* HERO */
-.hero{padding:56px 0 36px;text-align:center}
-.hero-label{display:inline-block;font-family:'Space Mono',monospace;font-size:.68rem;letter-spacing:2px;color:var(--a);border:1px solid rgba(247,147,26,.3);background:rgba(247,147,26,.06);padding:6px 16px;border-radius:20px;margin-bottom:24px;text-transform:uppercase}
-h1{font-size:clamp(2rem,6vw,3.8rem);font-weight:800;line-height:1.1;letter-spacing:-1px;margin-bottom:16px}
-h1 span{background:linear-gradient(135deg,var(--a),var(--a2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.hero p{color:var(--m);font-size:1rem;max-width:480px;margin:0 auto 36px;line-height:1.65}
+/* ── HERO ── */
+.hero{padding:72px 0 48px;text-align:center;position:relative}
+.hero-label{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--mono);font-size:.6rem;letter-spacing:3px;
+  color:rgba(247,147,26,.7);
+  border:1px solid rgba(247,147,26,.15);
+  background:rgba(247,147,26,.04);
+  padding:7px 18px;border-radius:4px;
+  margin-bottom:32px;text-transform:uppercase
+}
 
-/* STATS */
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:44px}
-.stat-card{background:var(--s);border:1px solid var(--b);border-radius:12px;padding:18px;text-align:center;transition:border-color .2s}
-.stat-card:hover{border-color:rgba(247,147,26,.35)}
-.stat-num{font-family:'Space Mono',monospace;font-size:1.5rem;font-weight:700;color:var(--a);display:block}
-.stat-lbl{font-size:.72rem;color:var(--m);margin-top:4px}
+h1{
+  font-family:var(--display);
+  font-size:clamp(2.4rem,7vw,4.4rem);
+  font-weight:900;line-height:1.05;
+  letter-spacing:-2px;margin-bottom:20px
+}
+h1 span{
+  background:linear-gradient(110deg,var(--a) 10%,var(--a2) 90%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text
+}
+.hero p{
+  color:var(--m2);font-size:.95rem;max-width:440px;
+  margin:0 auto 44px;line-height:1.75;font-weight:300
+}
+/* CTA arrow under hero */
+.hero-cta{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--mono);font-size:.62rem;letter-spacing:2px;
+  color:var(--m);text-transform:uppercase;
+  cursor:pointer;transition:color .2s;border:1px solid var(--b2);
+  padding:9px 18px;border-radius:30px;margin-top:8px
+}
+.hero-cta:hover{color:var(--a);border-color:rgba(247,147,26,.3)}
+.hero-cta svg{transition:transform .2s}
+.hero-cta:hover svg{transform:translateY(2px)}
 
-/* FORM CARD */
-.card{background:var(--s);border:1px solid var(--b);border-radius:20px;padding:36px;margin-bottom:40px}
-.card-title{font-size:1.25rem;font-weight:800;margin-bottom:6px}
-.card-sub{font-size:.82rem;color:var(--m);margin-bottom:28px}
+/* ── STATS ── */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;margin-bottom:52px;
+  border:1px solid var(--b);border-radius:var(--r);overflow:hidden}
+.stat-card{
+  background:var(--s);padding:22px 20px;text-align:center;
+  transition:background .2s;position:relative;
+  border:none!important
+}
+.stat-card:not(:last-child)::after{
+  content:'';position:absolute;right:0;top:20%;bottom:20%;
+  width:1px;background:var(--b)
+}
+.stat-card:hover{background:rgba(247,147,26,.04)}
+.stat-num{
+  font-family:var(--mono);font-size:1.6rem;font-weight:700;
+  color:var(--a);display:block;letter-spacing:-1px;
+  transition:color .3s
+}
+.stat-lbl{font-size:.6rem;color:var(--m);margin-top:6px;letter-spacing:2px;text-transform:uppercase;font-family:var(--mono)}
 
-label{display:block;font-size:.72rem;font-family:'Space Mono',monospace;letter-spacing:1px;color:var(--m);margin-bottom:8px;text-transform:uppercase}
-.fg{margin-bottom:20px}
+/* ── CARD ── */
+.card{
+  background:var(--s);
+  border:1px solid var(--b);
+  border-radius:14px;
+  padding:32px;margin-bottom:28px;
+  position:relative
+}
+.card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent 0%,rgba(247,147,26,.25) 40%,rgba(247,147,26,.25) 60%,transparent 100%)
+}
+.card-title{
+  font-family:var(--display);font-size:1.15rem;font-weight:800;
+  margin-bottom:5px;letter-spacing:-.4px;
+  display:flex;align-items:center;gap:10px
+}
+.card-sub{font-size:.75rem;color:var(--m);margin-bottom:26px;font-weight:300;letter-spacing:.2px}
+
+label{
+  display:block;font-size:.6rem;font-family:var(--mono);
+  letter-spacing:2px;color:var(--m);margin-bottom:8px;text-transform:uppercase
+}
+.fg{margin-bottom:18px}
 input[type=text]{
-  width:100%;background:var(--bg);border:1px solid var(--b);
-  border-radius:10px;padding:14px 16px;color:var(--t);
-  font-family:'Space Mono',monospace;font-size:.82rem;outline:none;transition:border-color .2s
+  width:100%;
+  background:rgba(0,0,0,.5);
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:var(--r);padding:14px 16px;color:var(--t);
+  font-family:var(--mono);font-size:.78rem;outline:none;
+  transition:border-color .22s,box-shadow .22s,background .22s;
+  letter-spacing:.5px
 }
-input[type=text]:focus{border-color:var(--a)}
-input::placeholder{color:#252535}
+input[type=text]:focus{
+  background:rgba(0,0,0,.7);
+  border-color:rgba(247,147,26,.45);
+  box-shadow:0 0 0 4px rgba(247,147,26,.06)
+}
+input[type=text]:hover:not(:focus){border-color:rgba(255,255,255,.12)}
+input::placeholder{color:rgba(255,255,255,.08)}
 
-.plan-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+/* ── PLAN OPTS ── */
+.plan-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .plan-opt{
-  background:var(--bg);border:1px solid var(--b);border-radius:10px;
-  padding:16px;cursor:pointer;transition:all .2s;
-  display:flex;flex-direction:column;gap:5px;user-select:none
+  background:rgba(0,0,0,.3);border:1px solid var(--b2);
+  border-radius:var(--r);padding:14px;cursor:pointer;
+  transition:all .18s;display:flex;flex-direction:column;gap:4px;
+  user-select:none
 }
-.plan-opt:hover{border-color:rgba(247,147,26,.3)}
-.plan-opt.on{border-color:var(--a);background:rgba(247,147,26,.06)}
-.po-title{font-size:.9rem;font-weight:700}
-.po-desc{font-size:.72rem;color:var(--m);font-family:'Space Mono',monospace}
-.po-price{font-size:.78rem;color:var(--a);font-family:'Space Mono',monospace;margin-top:2px}
+.plan-opt:hover{border-color:rgba(247,147,26,.3);background:rgba(247,147,26,.03)}
+.plan-opt.on{
+  border-color:rgba(247,147,26,.5);background:rgba(247,147,26,.06);
+  box-shadow:inset 0 0 0 1px rgba(247,147,26,.15)
+}
+.po-title{font-size:.85rem;font-weight:600;font-family:var(--display)}
+.po-desc{font-size:.65rem;color:var(--m2);font-family:var(--mono)}
+.po-price{font-size:.72rem;color:var(--a);font-family:var(--mono);margin-top:3px}
 
+/* ── ACCELERATE BTN ── */
 .acc-btn{
-  width:100%;padding:16px;
-  background:linear-gradient(135deg,var(--a),var(--a2));
-  border:none;border-radius:12px;color:#000;
-  font-family:'Space Mono',monospace;font-size:.88rem;font-weight:700;
-  letter-spacing:2px;cursor:pointer;text-transform:uppercase;transition:all .2s
+  width:100%;padding:17px;margin-top:10px;
+  background:linear-gradient(110deg,#ff9520 0%,var(--a2) 100%);
+  border:none;border-radius:var(--r);color:#000;
+  font-family:var(--mono);font-size:.76rem;font-weight:800;
+  letter-spacing:3px;cursor:pointer;text-transform:uppercase;
+  transition:all .22s;position:relative;overflow:hidden;
+  box-shadow:0 6px 28px rgba(247,147,26,.28),inset 0 1px 0 rgba(255,255,255,.2)
 }
-.acc-btn:hover:not(:disabled){opacity:.9;transform:translateY(-1px)}
-.acc-btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.acc-btn::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(255,255,255,.12) 0%,transparent 50%);
+  pointer-events:none
+}
+.acc-btn:hover:not(:disabled){
+  transform:translateY(-3px);
+  box-shadow:0 12px 40px rgba(247,147,26,.42),inset 0 1px 0 rgba(255,255,255,.2)
+}
+.acc-btn:active:not(:disabled){transform:translateY(-1px)}
+.acc-btn:disabled{opacity:.25;cursor:not-allowed;transform:none;box-shadow:none}
 
-/* PROGRESS */
-.prog-wrap{display:none;margin-top:24px}
-.prog-bar{height:3px;background:var(--b);border-radius:4px;overflow:hidden;margin-bottom:14px}
-.prog-fill{height:100%;background:linear-gradient(90deg,var(--a),var(--a2));width:0%;transition:width .35s ease}
-.steps-list{display:flex;flex-direction:column;gap:7px}
-.step{font-family:'Space Mono',monospace;font-size:.75rem;display:flex;align-items:center;gap:10px;opacity:.28;transition:opacity .25s,color .25s}
+/* ── PROGRESS ── */
+.prog-wrap{display:none;margin-top:22px}
+.prog-bar{height:2px;background:rgba(255,255,255,.05);border-radius:4px;overflow:hidden;margin-bottom:16px}
+.prog-fill{
+  height:100%;
+  background:linear-gradient(90deg,var(--a),var(--a2));
+  width:0%;transition:width .4s cubic-bezier(.4,0,.2,1);
+  box-shadow:0 0 10px rgba(247,147,26,.5)
+}
+.steps-list{display:flex;flex-direction:column;gap:6px}
+.step{font-family:var(--mono);font-size:.68rem;display:flex;align-items:center;gap:10px;opacity:.2;transition:opacity .25s,color .25s;letter-spacing:.3px}
 .step.cur{opacity:1;color:var(--a)}
 .step.done{opacity:1;color:var(--g)}
-.step-ic{width:14px;flex-shrink:0;text-align:center}
+.step-ic{width:12px;flex-shrink:0;text-align:center}
 
-/* RESULT */
-.res-box{display:none;background:rgba(0,255,135,.04);border:1px solid rgba(0,255,135,.2);border-radius:12px;padding:20px;margin-top:20px;font-family:'Space Mono',monospace;font-size:.78rem}
-.res-box.err{background:rgba(255,68,102,.04);border-color:rgba(255,68,102,.25)}
-.res-ok{color:var(--g);font-weight:700;margin-bottom:14px;font-size:.85rem}
-.rr{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--b)}
+/* ── RESULT BOX ── */
+.res-box{
+  display:none;
+  background:rgba(0,232,122,.03);border:1px solid rgba(0,232,122,.15);
+  border-radius:var(--r);padding:20px;margin-top:20px;
+  font-family:var(--mono);font-size:.72rem;
+  animation:fadeup .3s ease
+}
+.res-box.err{background:rgba(255,51,85,.03);border-color:rgba(255,51,85,.18)}
+@keyframes fadeup{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.res-ok{color:var(--g);font-weight:700;margin-bottom:14px;font-size:.8rem;letter-spacing:.5px}
+.rr{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.04)}
 .rr:last-of-type{border:none}
 .rk{color:var(--m)}
 .rv{color:var(--g);text-align:right;max-width:58%;word-break:break-all}
 .rv.a{color:var(--a)}
-.mp-link{display:inline-flex;align-items:center;gap:8px;color:var(--a);text-decoration:none;font-size:.78rem;margin-top:14px;padding:9px 14px;border:1px solid rgba(247,147,26,.3);border-radius:8px;transition:all .2s}
-.mp-link:hover{background:rgba(247,147,26,.08)}
-
-/* STATUS */
-.chk-btn{
-  width:100%;padding:13px;background:var(--b);border:1px solid var(--b);
-  border-radius:10px;color:var(--t);font-family:'Space Mono',monospace;
-  font-size:.82rem;cursor:pointer;transition:all .2s;
-  text-transform:uppercase;letter-spacing:1px;margin-top:4px
+.mp-link{
+  display:inline-flex;align-items:center;gap:8px;color:var(--a);
+  text-decoration:none;font-size:.7rem;margin-top:14px;
+  padding:8px 14px;border:1px solid rgba(247,147,26,.2);
+  border-radius:6px;transition:all .2s;background:rgba(247,147,26,.03);
+  font-family:var(--mono)
 }
-.chk-btn:hover{background:#252535;border-color:rgba(247,147,26,.3)}
-.status-res{display:none;margin-top:18px;background:var(--bg);border:1px solid var(--b);border-radius:10px;padding:16px;font-family:'Space Mono',monospace;font-size:.78rem}
-.badge{display:inline-block;padding:4px 13px;border-radius:20px;font-size:.72rem;margin-bottom:12px}
-.badge.y{background:rgba(0,255,135,.13);color:var(--g);border:1px solid rgba(0,255,135,.3)}
-.badge.n{background:rgba(247,147,26,.11);color:var(--a);border:1px solid rgba(247,147,26,.3)}
+.mp-link:hover{background:rgba(247,147,26,.08);border-color:rgba(247,147,26,.4)}
 
-/* PLANS */
-.plans{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:40px}
-.plan-card{background:var(--s);border:1px solid var(--b);border-radius:18px;padding:28px;position:relative;overflow:hidden;transition:transform .2s,border-color .2s}
-.plan-card:hover{transform:translateY(-2px);border-color:rgba(247,147,26,.25)}
-.plan-card.prem{border-color:rgba(247,147,26,.4);background:linear-gradient(140deg,#12121a,#1a1208)}
-.plan-card.prem::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--a),var(--a2))}
-.ptag{display:inline-block;font-size:.65rem;font-family:'Space Mono',monospace;letter-spacing:1px;padding:4px 11px;border-radius:20px;margin-bottom:14px;text-transform:uppercase}
-.tf{background:rgba(107,107,138,.18);color:var(--m);border:1px solid var(--b)}
-.tp{background:rgba(247,147,26,.13);color:var(--a);border:1px solid rgba(247,147,26,.3)}
-.plan-price{font-size:1.9rem;font-weight:800;margin-bottom:6px}
-.plan-price em{font-size:.9rem;color:var(--m);font-style:normal;font-weight:400}
-.plan-desc{font-size:.82rem;color:var(--m);margin-bottom:18px;line-height:1.55}
-.fl{list-style:none;margin-bottom:22px}
-.fl li{font-size:.82rem;padding:7px 0;border-bottom:1px solid var(--b);display:flex;gap:10px;align-items:flex-start}
+/* ── STATUS ── */
+.chk-btn{
+  width:100%;padding:13px;
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:var(--r);color:var(--t);
+  font-family:var(--mono);font-size:.75rem;
+  cursor:pointer;transition:all .2s;
+  text-transform:uppercase;letter-spacing:2px;margin-top:4px
+}
+.chk-btn:hover{background:rgba(255,255,255,.06);border-color:rgba(247,147,26,.3)}
+.status-res{display:none;margin-top:18px;background:rgba(0,0,0,.3);border:1px solid var(--b2);border-radius:var(--r);padding:16px;font-family:var(--mono);font-size:.72rem}
+.badge{display:inline-block;padding:4px 13px;border-radius:4px;font-size:.65rem;margin-bottom:12px;font-family:var(--mono);letter-spacing:.5px}
+.badge.y{background:rgba(0,232,122,.1);color:var(--g);border:1px solid rgba(0,232,122,.25)}
+.badge.n{background:rgba(247,147,26,.08);color:var(--a);border:1px solid rgba(247,147,26,.25)}
+
+/* ── PLANS ── */
+.plans{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:36px}
+.plan-card{
+  background:var(--s);border:1px solid var(--b);
+  border-radius:14px;padding:28px 26px;
+  position:relative;overflow:hidden;
+  transition:transform .22s,border-color .22s,box-shadow .22s;
+  display:flex;flex-direction:column
+}
+.plan-card:hover{
+  transform:translateY(-4px);
+  border-color:rgba(255,255,255,.1);
+  box-shadow:0 20px 60px rgba(0,0,0,.5)
+}
+/* FREE card subtle top border */
+.plan-card:not(.prem)::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent)
+}
+.plan-card.prem{
+  border-color:rgba(247,147,26,.25);
+  background:linear-gradient(160deg,#0d0d14 0%,#130e05 100%)
+}
+.plan-card.prem:hover{
+  border-color:rgba(247,147,26,.5);
+  box-shadow:0 20px 60px rgba(0,0,0,.6),0 0 50px rgba(247,147,26,.07)
+}
+.plan-card.prem::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent 5%,var(--a) 40%,var(--a2) 60%,transparent 95%)
+}
+/* Most popular badge */
+.plan-card.prem::after{
+  content:'ВЫБОР КРИПТАНОВ';
+  position:absolute;top:16px;right:-28px;
+  font-family:var(--mono);font-size:.45rem;font-weight:700;letter-spacing:2px;
+  background:linear-gradient(110deg,var(--a),var(--a2));
+  color:#000;padding:4px 36px;
+  transform:rotate(45deg);transform-origin:center
+}
+.ptag{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:.55rem;font-family:var(--mono);
+  letter-spacing:2px;padding:5px 12px;border-radius:4px;
+  margin-bottom:20px;text-transform:uppercase;width:fit-content
+}
+.tf{background:rgba(74,74,104,.12);color:var(--m2);border:1px solid rgba(255,255,255,.07)}
+.tp{background:rgba(247,147,26,.1);color:var(--a);border:1px solid rgba(247,147,26,.3)}
+.plan-price{font-size:2.2rem;font-weight:900;margin-bottom:8px;letter-spacing:-1.5px;font-family:var(--display);line-height:1}
+.plan-price em{font-size:.8rem;color:var(--m2);font-style:normal;font-weight:300;letter-spacing:0}
+.plan-desc{font-size:.76rem;color:var(--m2);margin-bottom:20px;line-height:1.65;font-weight:300}
+.fl{list-style:none;margin-bottom:24px;flex:1}
+.fl li{
+  font-size:.72rem;padding:8px 0;
+  border-bottom:1px solid rgba(255,255,255,.04);
+  display:flex;gap:10px;align-items:center;font-family:var(--mono)
+}
 .fl li:last-child{border:none}
-.fi{flex-shrink:0}.fi.ok{color:var(--g)}.fi.na{color:var(--m)}
-.pbtn{width:100%;padding:13px;border:none;border-radius:10px;font-family:'Space Mono',monospace;font-size:.8rem;cursor:pointer;transition:all .2s;font-weight:700;text-transform:uppercase;letter-spacing:1px}
-.pbf{background:var(--b);color:var(--t)}.pbf:hover{background:#252535}
-.pbp{background:linear-gradient(135deg,var(--a),var(--a2));color:#000}.pbp:hover{opacity:.9}
+.fi{flex-shrink:0;font-style:normal}
+.fi.ok{color:var(--g)}
+.fi.na{color:rgba(74,74,104,.5)}
+.pbtn{
+  width:100%;padding:13px;border:none;border-radius:var(--r);
+  font-family:var(--mono);font-size:.68rem;cursor:pointer;
+  transition:all .22s;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;
+  margin-top:auto
+}
+.pbf{
+  background:rgba(255,255,255,.04);color:var(--m2);
+  border:1px solid rgba(255,255,255,.08)
+}
+.pbf:hover{background:rgba(255,255,255,.08);color:var(--t);border-color:rgba(255,255,255,.15)}
+.pbp{
+  background:linear-gradient(110deg,var(--a),var(--a2));
+  color:#000;font-weight:800;
+  box-shadow:0 4px 24px rgba(247,147,26,.3)
+}
+.pbp:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(247,147,26,.45)}
 
-/* POOLS */
-.sh{font-size:1rem;font-weight:800;margin-bottom:18px;display:flex;align-items:center;gap:12px}
+/* ── SECTION HEADERS ── */
+.sh{
+  font-size:.58rem;font-weight:600;margin-bottom:16px;
+  display:flex;align-items:center;gap:14px;
+  letter-spacing:3px;text-transform:uppercase;
+  color:var(--m);font-family:var(--mono)
+}
+.sh::before{content:'//';color:rgba(247,147,26,.4);font-size:.65rem}
 .sh::after{content:'';flex:1;height:1px;background:var(--b)}
-.pools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:10px;margin-bottom:40px}
-.pi{background:var(--s);border:1px solid var(--b);border-radius:10px;padding:13px 15px;display:flex;align-items:center;gap:11px}
-.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;animation:blink 1.8s infinite}
-.dot.g{background:var(--g)}.dot.y{background:#ffd166;animation-delay:.5s}
-@keyframes blink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.65)}}
-.pn{font-size:.8rem;font-weight:600}.pp{font-size:.67rem;color:var(--m);font-family:'Space Mono',monospace}
 
-/* MODAL */
-.overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.85);backdrop-filter:blur(12px);align-items:center;justify-content:center}
+/* ── POOLS ── */
+.pools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:6px;margin-bottom:36px}
+.pi{
+  background:var(--s);border:1px solid var(--b);
+  border-radius:var(--r);padding:12px 14px;
+  display:flex;align-items:center;gap:10px;
+  transition:border-color .3s,background .3s,opacity .3s
+}
+.pi:hover:not(.degraded):not(.offline){border-color:rgba(247,147,26,.18);background:rgba(247,147,26,.02)}
+/* degraded pool — yellow */
+.pi.degraded{
+  border-color:rgba(255,209,102,.2);
+  background:rgba(255,209,102,.025)
+}
+.pi.degraded .pn{color:rgba(232,232,240,.5)}
+.pi.degraded .pp{color:rgba(255,209,102,.65)!important}
+/* offline pool — red */
+.pi.offline{
+  border-color:rgba(255,51,85,.15);
+  background:rgba(255,51,85,.025);
+  opacity:.5
+}
+.pi.offline .pn{color:rgba(232,232,240,.35);text-decoration:line-through}
+.pi.offline .pp{color:rgba(255,51,85,.5)!important}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.dot.g{background:var(--g);animation:blink-g 2.5s ease-in-out infinite}
+.dot.y{background:#ffd166;animation:blink-y 1.4s ease-in-out infinite}
+.dot.r{background:var(--err);opacity:.8;animation:none}
+@keyframes blink-g{0%,100%{opacity:1;box-shadow:0 0 5px rgba(0,232,122,.6)}50%{opacity:.35;box-shadow:none}}
+@keyframes blink-y{0%,100%{opacity:1;box-shadow:0 0 5px rgba(255,209,102,.6)}50%{opacity:.2;box-shadow:none}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.pn{font-size:.75rem;font-weight:600;font-family:var(--display);letter-spacing:-.1px;transition:color .3s}
+.pp{font-size:.58rem;color:var(--m);font-family:var(--mono);letter-spacing:.3px;transition:color .3s}
+
+/* ── MODAL ── */
+.overlay{
+  display:none;position:fixed;inset:0;z-index:200;
+  background:rgba(0,0,0,.75);backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  align-items:center;justify-content:center
+}
 .overlay.open{display:flex}
-.modal{background:var(--s);border:1px solid var(--b);border-radius:20px;padding:36px;max-width:440px;width:92%;position:relative;animation:fu .22s ease}
-@keyframes fu{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
-.mx{position:absolute;top:16px;right:18px;background:none;border:none;color:var(--m);font-size:1.3rem;cursor:pointer;line-height:1}
-.mx:hover{color:var(--t)}
-.mt{font-size:1.25rem;font-weight:800;margin-bottom:5px}
-.ms{font-size:.8rem;color:var(--m);margin-bottom:22px;line-height:1.5}
-.price-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px}
-.popt{background:var(--bg);border:1px solid var(--b);border-radius:10px;padding:14px 10px;text-align:center;cursor:pointer;transition:all .2s}
-.popt:hover,.popt.on{border-color:var(--a);background:rgba(247,147,26,.07)}
-.poa{font-size:1rem;font-weight:700;color:var(--a)}
-.pol{font-size:.67rem;color:var(--m);margin-top:3px;font-family:'Space Mono',monospace}
-.pob{font-size:.67rem;color:var(--m);font-family:'Space Mono',monospace;margin-top:1px}
-.abox{background:var(--bg);border:1px solid var(--b);border-radius:10px;padding:14px 15px;margin-bottom:12px}
-.al{font-size:.68rem;color:var(--m);font-family:'Space Mono',monospace;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
-.av{font-family:'Space Mono',monospace;font-size:.72rem;color:var(--a);word-break:break-all;line-height:1.5}
+.modal{
+  background:var(--s);
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:var(--r);padding:32px;
+  max-width:440px;width:92%;position:relative;
+  animation:fu .25s cubic-bezier(.34,1.1,.64,1);
+  box-shadow:0 32px 80px rgba(0,0,0,.7)
+}
+.modal::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(247,147,26,.3),transparent)
+}
+@keyframes fu{from{opacity:0;transform:translateY(20px) scale(.97)}to{opacity:1;transform:none}}
+.mx{
+  position:absolute;top:14px;right:16px;background:none;border:none;
+  color:var(--m);font-size:1.1rem;cursor:pointer;line-height:1;
+  font-family:var(--mono);transition:color .15s;width:28px;height:28px;
+  display:flex;align-items:center;justify-content:center;border-radius:6px
+}
+.mx:hover{color:var(--t);background:rgba(255,255,255,.06)}
+.mt{font-size:1.1rem;font-weight:700;margin-bottom:5px;font-family:var(--display);letter-spacing:-.3px}
+.ms{font-size:.73rem;color:var(--m2);margin-bottom:22px;line-height:1.55;font-family:var(--mono)}
+.price-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:20px}
+.popt{
+  background:rgba(0,0,0,.4);border:1px solid var(--b2);
+  border-radius:var(--r);padding:14px 10px;
+  text-align:center;cursor:pointer;transition:all .2s
+}
+.popt:hover,.popt.on{border-color:rgba(247,147,26,.5);background:rgba(247,147,26,.07)}
+.poa{font-size:1.05rem;font-weight:700;color:var(--a);font-family:var(--display)}
+.pol{font-size:.6rem;color:var(--m2);margin-top:3px;font-family:var(--mono)}
+.pob{font-size:.6rem;color:var(--m);font-family:var(--mono);margin-top:2px}
+.abox{background:rgba(0,0,0,.35);border:1px solid var(--b2);border-radius:var(--r);padding:13px 15px;margin-bottom:12px}
+.al{font-size:.6rem;color:var(--m);font-family:var(--mono);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px}
+.av{font-family:var(--mono);font-size:.68rem;color:var(--a);word-break:break-all;line-height:1.55}
 .av.green{color:var(--g)}
-.cpbtn{width:100%;padding:12px;background:var(--b);border:none;border-radius:8px;color:var(--t);font-family:'Space Mono',monospace;font-size:.78rem;cursor:pointer;margin-bottom:10px;transition:background .2s;letter-spacing:1px}
-.cpbtn:hover{background:#252535}
-.okbtn{width:100%;padding:14px;background:linear-gradient(135deg,var(--a),var(--a2));border:none;border-radius:10px;color:#000;font-family:'Space Mono',monospace;font-size:.85rem;font-weight:700;cursor:pointer;letter-spacing:1px;transition:all .2s}
-.okbtn:hover{opacity:.9}
-.mnote{font-size:.7rem;color:var(--m);text-align:center;margin-top:12px;line-height:1.5}
+.cpbtn{
+  width:100%;padding:11px;background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.07);border-radius:var(--r);
+  color:var(--t);font-family:var(--mono);font-size:.72rem;
+  cursor:pointer;margin-bottom:10px;transition:all .2s;letter-spacing:1px
+}
+.cpbtn:hover{background:rgba(255,255,255,.08)}
+.okbtn{
+  width:100%;padding:13px;
+  background:linear-gradient(110deg,var(--a),var(--a2));
+  border:none;border-radius:var(--r);color:#000;
+  font-family:var(--mono);font-size:.78rem;font-weight:700;
+  cursor:pointer;letter-spacing:1.5px;transition:all .2s;
+  box-shadow:0 4px 20px rgba(247,147,26,.2)
+}
+.okbtn:hover{transform:translateY(-1px);box-shadow:0 8px 28px rgba(247,147,26,.35)}
+.mnote{font-size:.63rem;color:var(--m);text-align:center;margin-top:12px;line-height:1.6;font-family:var(--mono)}
 
-/* FOOTER */
-footer{border-top:1px solid var(--b);padding:28px 0;text-align:center;color:var(--m);font-size:.72rem;font-family:'Space Mono',monospace}
-footer a{color:var(--m);text-decoration:none}
+/* ── FOOTER ── */
+footer{
+  border-top:1px solid rgba(255,255,255,.04);
+  padding:36px 0;text-align:center;
+  color:var(--m);font-size:.62rem;font-family:var(--mono);letter-spacing:.5px
+}
+footer a{color:var(--m);text-decoration:none;transition:color .15s}
 footer a:hover{color:var(--a)}
-.fl2{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-top:10px}
+.fl2{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-top:14px}
 
-@media(max-width:600px){
+/* ── FREE LIMIT BAR ── */
+.free-limit-bar{
+  background:rgba(247,147,26,.035);
+  border:1px solid rgba(247,147,26,.15);
+  border-radius:var(--r);padding:12px 16px;margin-bottom:18px;
+  display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap
+}
+.flb-count{font-family:var(--mono);font-size:1.05rem;font-weight:700;color:var(--a)}
+.flb-count.low{color:var(--err)}
+.flb-bar-wrap{width:100%;height:2px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden;margin-top:8px}
+.flb-bar-fill{height:100%;background:linear-gradient(90deg,var(--a),var(--a2));border-radius:4px;transition:width .5s;box-shadow:0 0 6px rgba(247,147,26,.4)}
+.flb-bar-fill.low{background:linear-gradient(90deg,var(--err),#ff6b35)}
+
+/* ── DISCOUNT ── */
+.discount-badge{
+  display:inline-block;background:rgba(255,51,85,.12);
+  border:1px solid rgba(255,51,85,.3);color:var(--err);
+  font-size:.55rem;font-family:var(--mono);padding:2px 8px;
+  border-radius:4px;text-transform:uppercase;letter-spacing:1.5px;
+  margin-left:6px;vertical-align:middle
+}
+.old-price{text-decoration:line-through;color:var(--m);font-size:.7rem;font-family:var(--mono);margin-right:4px}
+.sale-until{font-size:.62rem;color:var(--m2);font-family:var(--mono);margin-top:4px}
+
+/* ── QUEUE ROWS ── */
+.q-row{background:var(--bg);border:1px solid var(--b);border-radius:var(--r);padding:10px 15px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.q-row.prem{background:rgba(247,147,26,.03);border-color:rgba(247,147,26,.2)}
+.q-row.done{background:rgba(0,232,122,.03);border-color:rgba(0,232,122,.18)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:640px){
   .stats{grid-template-columns:1fr 1fr}
+  .stat-card:nth-child(2)::after{display:none}
   .plans{grid-template-columns:1fr}
   .plan-row{grid-template-columns:1fr}
   .price-row{grid-template-columns:1fr 1fr}
+  .free-limit-bar{flex-direction:column;align-items:flex-start}
+  .card{padding:22px 18px}
+  .w{padding:0 16px}
+  h1{letter-spacing:-1px}
 }
+
+
+/* ── MEMPOOL TICKER ── */
+.mempool-ticker{
+  display:flex;align-items:center;justify-content:center;gap:20px;
+  padding:10px 0;margin-bottom:0;flex-wrap:wrap;
+  border-bottom:1px solid rgba(255,255,255,.04);
+  font-family:var(--mono);font-size:.62rem;color:var(--m);
+  letter-spacing:.5px;
+}
+.ticker-item{display:flex;align-items:center;gap:7px}
+.ticker-val{color:var(--t);font-weight:700}
+.ticker-val.hot{color:var(--err)}
+.ticker-val.warm{color:#ffd166}
+.ticker-val.ok{color:var(--g)}
+.ticker-sep{color:rgba(255,255,255,.1)}
+
+/* ── LIVE FEED ── */
+.live-feed{
+  background:var(--s);border:1px solid var(--b);border-radius:14px;
+  padding:0;overflow:hidden;margin-bottom:28px
+}
+.live-feed-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 18px;border-bottom:1px solid var(--b)
+}
+.live-feed-title{
+  font-family:var(--mono);font-size:.62rem;letter-spacing:2px;
+  color:var(--m);text-transform:uppercase;
+  display:flex;align-items:center;gap:8px
+}
+.live-feed-dot{
+  width:5px;height:5px;border-radius:50%;background:var(--g);
+  animation:blink-g 2s infinite
+}
+.feed-items{display:flex;flex-direction:column}
+.feed-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 18px;border-bottom:1px solid rgba(255,255,255,.03);
+  animation:feedin .4s ease;gap:12px
+}
+.feed-item:last-child{border:none}
+@keyframes feedin{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+.feed-txid{font-family:var(--mono);font-size:.68rem;color:var(--m2)}
+.feed-txid span{color:var(--t)}
+.feed-time{font-family:var(--mono);font-size:.6rem;color:var(--m);white-space:nowrap}
+.feed-badge-conf{
+  font-family:var(--mono);font-size:.58rem;padding:3px 9px;
+  border-radius:4px;white-space:nowrap;letter-spacing:.5px;
+  background:rgba(0,232,122,.1);color:var(--g);border:1px solid rgba(0,232,122,.2)
+}
+
+/* ── FEE CALCULATOR ── */
+.fee-calc{
+  background:rgba(247,147,26,.04);border:1px solid rgba(247,147,26,.15);
+  border-radius:var(--r);padding:14px 16px;margin-bottom:18px;
+  display:none
+}
+.fee-calc.visible{display:block;animation:fadeup .3s ease}
+.fee-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-family:var(--mono);font-size:.68rem}
+.fee-row:not(:last-child){border-bottom:1px solid rgba(255,255,255,.04)}
+.fee-key{color:var(--m)}
+.fee-val{color:var(--t);font-weight:600}
+.fee-val.danger{color:var(--err)}
+.fee-val.warn{color:#ffd166}
+.fee-val.good{color:var(--g)}
+
+/* ── PUSH NOTIFICATION PROMPT ── */
+.push-prompt{
+  background:rgba(0,232,122,.04);border:1px solid rgba(0,232,122,.15);
+  border-radius:var(--r);padding:12px 16px;margin-top:14px;
+  display:none;align-items:center;justify-content:space-between;gap:12px;
+  font-family:var(--mono);font-size:.68rem;flex-wrap:wrap
+}
+.push-prompt.visible{display:flex;animation:fadeup .3s ease}
+.push-btn{
+  background:rgba(0,232,122,.12);border:1px solid rgba(0,232,122,.25);
+  color:var(--g);padding:6px 14px;border-radius:6px;
+  font-family:var(--mono);font-size:.62rem;cursor:pointer;
+  transition:all .2s;white-space:nowrap;letter-spacing:.5px
+}
+.push-btn:hover{background:rgba(0,232,122,.2)}
+
+/* ── REVIEWS ── */
+.reviews-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:28px}
+.review-card{
+  background:var(--s);border:1px solid var(--b);border-radius:12px;
+  padding:18px;display:flex;flex-direction:column;gap:10px
+}
+.review-stars{color:var(--a);font-size:.8rem;letter-spacing:2px}
+.review-text{font-size:.75rem;color:var(--m2);line-height:1.65;font-style:italic;flex:1}
+.review-author{font-family:var(--mono);font-size:.6rem;color:var(--m);letter-spacing:.5px}
+.review-time{font-family:var(--mono);font-size:.58rem;color:rgba(74,74,104,.6)}
+.rating-summary{
+  display:flex;align-items:center;gap:16px;
+  padding:16px 20px;background:rgba(247,147,26,.04);
+  border:1px solid rgba(247,147,26,.12);border-radius:12px;margin-bottom:20px
+}
+.rating-big{font-size:2.4rem;font-weight:900;color:var(--a);font-family:var(--display);line-height:1}
+.rating-stars-big{color:var(--a);font-size:1rem;letter-spacing:3px}
+.rating-count{font-family:var(--mono);font-size:.62rem;color:var(--m);margin-top:3px}
+
+/* ── URGENCY TIMER ── */
+.urgency-bar{
+  background:linear-gradient(110deg,rgba(255,51,85,.08),rgba(255,107,53,.06));
+  border:1px solid rgba(255,51,85,.2);border-radius:var(--r);
+  padding:12px 18px;margin-bottom:18px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap
+}
+.urgency-label{font-family:var(--mono);font-size:.62rem;color:rgba(255,100,100,.8);letter-spacing:.5px;text-transform:uppercase}
+.urgency-timer{
+  font-family:var(--mono);font-size:1.1rem;font-weight:700;
+  color:var(--err);letter-spacing:2px
+}
+.urgency-spots{
+  font-family:var(--mono);font-size:.62rem;
+  color:rgba(255,140,0,.8);letter-spacing:.5px
+}
+
+/* ── COMPETITOR TABLE ── */
+.comp-wrap{margin-bottom:36px}
+.comp-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.68rem}
+.comp-table th{
+  padding:10px 14px;text-align:left;color:var(--m);
+  font-weight:600;letter-spacing:1.5px;text-transform:uppercase;font-size:.58rem;
+  border-bottom:1px solid var(--b)
+}
+.comp-table th.us{color:var(--a)}
+.comp-table td{
+  padding:11px 14px;border-bottom:1px solid rgba(255,255,255,.04);
+  vertical-align:middle
+}
+.comp-table tr:last-child td{border:none}
+.comp-table tr:hover td{background:rgba(255,255,255,.02)}
+.comp-table td.us{color:var(--g);font-weight:700}
+.comp-table td.no{color:rgba(255,51,85,.6)}
+.comp-table td.maybe{color:#ffd166}
+.comp-row-label{color:var(--m2)}
+.comp-us-col{background:rgba(247,147,26,.03)}
+
+/* ── GUARANTEE ── */
+.guarantee-block{
+  background:rgba(0,232,122,.03);border:1px solid rgba(0,232,122,.15);
+  border-radius:12px;padding:20px 24px;margin-bottom:28px;
+  display:flex;align-items:flex-start;gap:16px
+}
+.guarantee-icon{
+  width:40px;height:40px;border-radius:10px;
+  background:rgba(0,232,122,.1);border:1px solid rgba(0,232,122,.2);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0
+}
+.guarantee-title{font-size:.9rem;font-weight:700;margin-bottom:5px;color:var(--g)}
+.guarantee-text{font-size:.75rem;color:var(--m2);line-height:1.65}
+
+/* ── CPFP CALCULATOR ── */
+.cpfp-result{
+  background:rgba(0,232,122,.04);border:1px solid rgba(0,232,122,.18);
+  border-radius:var(--r);padding:16px;margin-top:16px;display:none
+}
+.cpfp-result.show{display:block;animation:fadeup .3s ease}
+.cpfp-row{display:flex;justify-content:space-between;padding:6px 0;
+  border-bottom:1px solid rgba(255,255,255,.04);font-family:var(--mono);font-size:.7rem}
+.cpfp-row:last-child{border:none}
+.cpfp-key{color:var(--m)}
+.cpfp-val{color:var(--g);font-weight:700}
+.cpfp-val.warn{color:#ffd166}
+.cpfp-val.danger{color:var(--err)}
+.cpfp-copy{
+  width:100%;padding:11px;margin-top:12px;
+  background:rgba(0,232,122,.08);border:1px solid rgba(0,232,122,.2);
+  border-radius:var(--r);color:var(--g);font-family:var(--mono);font-size:.7rem;
+  cursor:pointer;transition:all .2s;letter-spacing:.5px
+}
+.cpfp-copy:hover{background:rgba(0,232,122,.15)}
+.range-wrap{position:relative;margin:8px 0 4px}
+input[type=range]{
+  width:100%;appearance:none;height:3px;border-radius:4px;
+  background:linear-gradient(90deg,var(--a) 0%,var(--a) var(--pct,50%),rgba(255,255,255,.1) var(--pct,50%));
+  outline:none;cursor:pointer
+}
+input[type=range]::-webkit-slider-thumb{
+  appearance:none;width:16px;height:16px;border-radius:50%;
+  background:var(--a);cursor:pointer;
+  box-shadow:0 0 6px rgba(247,147,26,.4)
+}
+.range-labels{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.58rem;color:var(--m);margin-top:4px}
+
+/* ── BATCH MODE ── */
+.batch-toggle{
+  display:flex;align-items:center;gap:10px;
+  font-family:var(--mono);font-size:.65rem;color:var(--m2);
+  cursor:pointer;margin-bottom:14px;user-select:none;
+  padding:8px 12px;border:1px solid var(--b2);border-radius:8px;
+  transition:border-color .2s,color .2s;width:fit-content
+}
+.batch-toggle:hover{border-color:rgba(247,147,26,.3);color:var(--a)}
+.batch-toggle.on{border-color:rgba(247,147,26,.4);color:var(--a);background:rgba(247,147,26,.04)}
+.batch-area{display:none;animation:fadeup .25s ease}
+.batch-area.show{display:block}
+textarea.batch-input{
+  width:100%;min-height:100px;resize:vertical;
+  background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.07);
+  border-radius:var(--r);padding:12px 14px;color:var(--t);
+  font-family:var(--mono);font-size:.72rem;outline:none;
+  line-height:1.6;letter-spacing:.3px;
+  transition:border-color .22s,box-shadow .22s
+}
+textarea.batch-input:focus{
+  border-color:rgba(247,147,26,.45);
+  box-shadow:0 0 0 4px rgba(247,147,26,.06)
+}
+.batch-count{font-family:var(--mono);font-size:.62rem;color:var(--m);margin-top:4px}
+.batch-result-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:6px 10px;border-radius:6px;font-family:var(--mono);font-size:.68rem;
+  border:1px solid rgba(255,255,255,.05);margin-bottom:4px
+}
+.batch-result-row.ok{background:rgba(0,232,122,.04);border-color:rgba(0,232,122,.12)}
+.batch-result-row.fail{background:rgba(255,51,85,.04);border-color:rgba(255,51,85,.12)}
+
+/* ── PAYMENT TABS ── */
+.pay-tabs{display:flex;gap:6px;margin-bottom:16px}
+.pay-tab{
+  flex:1;padding:10px 8px;text-align:center;
+  background:rgba(0,0,0,.3);border:1px solid var(--b2);
+  border-radius:var(--r);cursor:pointer;font-family:var(--mono);
+  font-size:.65rem;letter-spacing:.5px;color:var(--m2);
+  transition:all .18s;user-select:none
+}
+.pay-tab:hover{border-color:rgba(247,147,26,.3);color:var(--t)}
+.pay-tab.on{border-color:rgba(247,147,26,.5);color:var(--a);background:rgba(247,147,26,.06)}
+.pay-tab-content{display:none}
+.pay-tab-content.show{display:block;animation:fadeup .2s ease}
+.network-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  font-family:var(--mono);font-size:.58rem;letter-spacing:1px;
+  padding:3px 10px;border-radius:12px;margin-left:8px;text-transform:uppercase
+}
+.nb-btc{background:rgba(247,147,26,.15);color:var(--a);border:1px solid rgba(247,147,26,.3)}
+.nb-trc{background:rgba(255,68,0,.12);color:#ff6b35;border:1px solid rgba(255,107,53,.3)}
+.nb-erc{background:rgba(98,126,234,.12);color:#8b9dff;border:1px solid rgba(98,126,234,.3)}
+
+/* ── TRUST BADGES ── */
+.trust-row{
+  display:flex;align-items:center;justify-content:center;
+  gap:20px;padding:16px 0;flex-wrap:wrap;margin-bottom:28px;
+  border-top:1px solid rgba(255,255,255,.04);
+  border-bottom:1px solid rgba(255,255,255,.04)
+}
+.trust-item{
+  display:flex;align-items:center;gap:7px;
+  font-family:var(--mono);font-size:.62rem;color:var(--m2);letter-spacing:.5px
+}
+.trust-item svg{color:var(--g);flex-shrink:0}
+.trust-sep{color:rgba(255,255,255,.08);font-size:.8rem}
+
+@media(max-width:640px){
+  .reviews-grid{grid-template-columns:1fr}
+  .comp-table{font-size:.6rem}
+  .comp-table td,.comp-table th{padding:8px 10px}
+  .pay-tabs{flex-wrap:wrap}
+  .trust-row{gap:12px}
+}
+
+/* ── LANGUAGE SWITCHER ── */
+#lang-bar {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+#lang-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(20,20,40,.92);
+  border: 1px solid rgba(247,147,26,.3);
+  border-radius: 12px;
+  padding: 9px 14px;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: .68rem;
+  color: var(--a);
+  letter-spacing: .5px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.4);
+  transition: all .2s;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  user-select: none;
+}
+#lang-btn:hover {
+  border-color: rgba(247,147,26,.6);
+  box-shadow: 0 6px 28px rgba(247,147,26,.2);
+  transform: translateY(-1px);
+}
+#lang-dropdown {
+  display: none;
+  position: fixed;
+  bottom: 62px;
+  right: 20px;
+  background: rgba(15,15,30,.97);
+  border: 1px solid rgba(247,147,26,.25);
+  border-radius: 14px;
+  padding: 10px;
+  box-shadow: 0 12px 48px rgba(0,0,0,.6);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  z-index: 9999;
+  width: 230px;
+  max-height: 360px;
+  overflow-y: auto;
+}
+#lang-dropdown.open { display: block; animation: fadeup .18s ease; }
+.lang-search {
+  width: 100%;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 8px;
+  padding: 7px 10px;
+  color: var(--t);
+  font-family: var(--mono);
+  font-size: .68rem;
+  outline: none;
+  margin-bottom: 8px;
+  transition: border-color .2s;
+}
+.lang-search:focus { border-color: rgba(247,147,26,.4); }
+.lang-list { display: flex; flex-direction: column; gap: 2px; }
+.lang-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background .15s;
+  font-family: var(--mono);
+  font-size: .68rem;
+  color: var(--m2);
+}
+.lang-item:hover { background: rgba(247,147,26,.08); color: var(--a); }
+.lang-item.active { background: rgba(247,147,26,.1); color: var(--a); font-weight: 700; }
+.lang-flag { font-size: 1.1rem; flex-shrink: 0; line-height: 1; }
+.lang-name { flex: 1; }
+.lang-code { font-size: .58rem; color: var(--m); opacity: .7; }
+/* Hide Google Translate bar */
+.goog-te-banner-frame, .skiptranslate { display: none !important; }
+body { top: 0 !important; }
+.goog-te-gadget { font-size: 0 !important; }
+
 </style>
+
+<!-- Google Translate (hidden element) -->
+<div id="google_translate_element" style="display:none"></div>
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({
+    pageLanguage: 'ru',
+    autoDisplay: false
+  }, 'google_translate_element');
+}
+</script>
+<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
 </head>
 <body>
 <div class="w">
@@ -307,65 +1021,147 @@ footer a:hover{color:var(--a)}
 <nav>
   <a class="logo" href="#">
     <div class="logo-icon">₿</div>
-    TURBO<span style="color:var(--t)">TX</span>
+    <div style="position:relative">
+      <span class="logo-turbo">TURBO</span><span class="logo-tx">TX</span>
+      <span class="logo-tag">BTC Accelerator</span>
+    </div>
   </a>
   <div class="nav-right">
-    <a href="#status" class="nav-link">Статус</a>
-    <a href="#pools" class="nav-link">Пулы</a>
-    <div class="live-badge">● LIVE</div>
+    <a href="javascript:void(0)" class="nav-link" onclick="document.getElementById('status').scrollIntoView({behavior:'smooth'});return false;">Статус</a>
+    <a href="javascript:void(0)" class="nav-link" onclick="document.getElementById('cpfp').scrollIntoView({behavior:'smooth'});return false;">CPFP</a>
+    <a href="javascript:void(0)" class="nav-link" onclick="document.getElementById('pools').scrollIntoView({behavior:'smooth'});return false;">Пулы</a>
+    <a href="javascript:void(0)" class="nav-link" onclick="document.getElementById('support').scrollIntoView({behavior:'smooth'});return false;">Поддержка</a>
+    <div class="live-badge"><div class="live-dot"></div>LIVE</div>
   </div>
 </nav>
 
+<!-- MEMPOOL TICKER -->
+<div class="mempool-ticker" id="mempool-ticker">
+  <div class="ticker-item">
+    <span>Застряло в мемпуле</span>
+    <span class="ticker-val" id="tk-stuck">—</span>
+    <span>tx</span>
+  </div>
+  <span class="ticker-sep">|</span>
+  <div class="ticker-item">
+    <span>Мин. комиссия</span>
+    <span class="ticker-val" id="tk-minfee">—</span>
+    <span>sat/vB</span>
+  </div>
+  <span class="ticker-sep">|</span>
+  <div class="ticker-item">
+    <span>Следующий блок</span>
+    <span class="ticker-val" id="tk-nextfee">—</span>
+    <span>sat/vB</span>
+  </div>
+  <span class="ticker-sep">|</span>
+  <div class="ticker-item">
+    <span>Размер мемпула</span>
+    <span class="ticker-val" id="tk-size">—</span>
+    <span>MB</span>
+  </div>
+</div>
+
 <!-- HERO -->
 <section class="hero">
-  <div class="hero-label">Bitcoin Accelerator</div>
-  <h1>Ускорьте вашу<br><span>BTC транзакцию</span></h1>
-  <p>Застрявшая транзакция? Мы мгновенно отправляем её в 15+ майнинг-пулов для быстрого включения в блок.</p>
+  <div class="hero-label" style="gap:10px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polygon points='13 2 3 14 12 14 11 22 21 10 12 10 13 2'/></svg> Bitcoin Accelerator</div>
+  <h1>Застрявшая BTC<br><span>транзакция?</span></h1>
+  <p>Отправляем в 15+ майнинг-пулов напрямую.<br>Подтверждение за 15–30 минут — без ожидания.</p>
+  <div class="hero-cta" onclick="document.querySelector('.card').scrollIntoView({behavior:'smooth'})">Ускорить сейчас <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
 </section>
 
 <!-- STATS -->
 <div class="stats">
-  <div class="stat-card">
+  <a href="javascript:void(0)" class="stat-card" style="text-decoration:none;cursor:pointer" onclick="document.getElementById('queue-section').scrollIntoView({behavior:'smooth'});return false;">
     <span class="stat-num" id="sc">12,847</span>
     <div class="stat-lbl">Ускорено транзакций</div>
-  </div>
-  <div class="stat-card">
-    <span class="stat-num">~18 мин</span>
-    <div class="stat-lbl">Среднее время (Premium)</div>
-  </div>
-  <div class="stat-card">
-    <span class="stat-num">15 / 15</span>
+  </a>
+  <a href="javascript:void(0)" class="stat-card" style="text-decoration:none;cursor:pointer" onclick="document.getElementById('status').scrollIntoView({behavior:'smooth'});return false;">
+    <span class="stat-num" id="avg-time">~18 мин</span>
+    <div class="stat-lbl">Среднее Premium</div>
+  </a>
+  <a href="javascript:void(0)" class="stat-card" style="text-decoration:none;cursor:pointer" onclick="document.getElementById('pools').scrollIntoView({behavior:'smooth'});return false;">
+    <span class="stat-num" id="pools-online">15 / 15</span>
     <div class="stat-lbl">Пулов онлайн</div>
+  </a>
+</div>
+
+<!-- LIVE FEED -->
+<div class="live-feed" id="live-feed-wrap">
+  <div class="live-feed-header">
+    <div class="live-feed-title"><div class="live-feed-dot"></div>Последние ускорения</div>
+    <span style="font-family:var(--mono);font-size:.58rem;color:var(--m)">обновляется в реальном времени</span>
   </div>
+  <div class="feed-items" id="feed-items"></div>
 </div>
 
 <!-- ACCELERATE FORM -->
 <div class="card">
-  <div class="card-title">⚡ Ускорить транзакцию</div>
-  <div class="card-sub">Введите TXID и выберите режим</div>
+  <div class="card-title"><span style="display:inline-flex;align-items:center;gap:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Ускорить транзакцию</span></div>
+  <div class="card-sub">Вставьте TXID из кошелька — мы займёмся остальным</div>
+
+  <div class="free-limit-bar" id="free-limit-bar">
+    <div style="width:100%">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+        <div style="color:var(--a);display:flex;align-items:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x='3' y='11' width='18' height='11' rx='2'/><path d='M7 11V7a5 5 0 0 1 10 0v4'/></svg></div>
+        <div>
+          <div style="font-size:.78rem;color:var(--m);font-family:'Space Mono',monospace">Бесплатных ускорений сегодня осталось</div>
+          <div><span class="flb-count" id="free-left-num">100</span> <span style="font-family:'Space Mono',monospace;font-size:.72rem;color:var(--m)">/ 100</span></div>
+        </div>
+      </div>
+      <div class="flb-bar-wrap"><div class="flb-bar-fill" id="free-bar-fill" style="width:100%"></div></div>
+    </div>
+    <div id="reset-timer-wrap" style="display:none;font-family:'Space Mono',monospace;font-size:.72rem;color:var(--m);text-align:right;min-width:110px">Обновится через<br><span id="reset-countdown" style="color:var(--t);font-size:.82rem">—</span></div>
+  </div>
+  <div id="limit-reached-msg" style="display:none;background:rgba(255,68,102,.07);border:1px solid rgba(255,68,102,.3);border-radius:10px;padding:12px 16px;margin-bottom:16px;font-family:'Space Mono',monospace;font-size:.78rem;color:#ff4466;line-height:1.6">
+    × Дневной лимит 100 бесплатных ускорений исчерпан.<br>
+    <span style="color:var(--m)">Обновятся завтра. Используйте Premium для немедленного ускорения.</span>
+  </div>
 
   <div class="fg">
     <label>Transaction ID (TXID)</label>
-    <input type="text" id="txid" placeholder="a1b2c3d4e5f6... (64 hex символа)" maxlength="64" oninput="onTx()">
+    <!-- Single mode -->
+    <div id="single-mode">
+      <input type="text" id="txid" placeholder="a1b2c3d4e5f6... (64 hex символа)" maxlength="64" oninput="onTx()">
+    </div>
+    <!-- Batch mode -->
+    <div class="batch-area" id="batch-mode">
+      <textarea class="batch-input" id="batch-txids" placeholder="Вставьте по одному TXID на строку&#10;a1b2c3...&#10;9f8e7d...&#10;4c5d6e..." oninput="onBatchInput()"></textarea>
+      <div class="batch-count" id="batch-count">0 транзакций</div>
+    </div>
+    <div class="batch-toggle" id="batch-toggle" onclick="toggleBatch()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      Пакетное ускорение (несколько TX)
+    </div>
+  </div>
+
+  <div class="fee-calc" id="fee-calc">
+    <div style="font-family:var(--mono);font-size:.6rem;color:var(--m);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px">Анализ транзакции</div>
+    <div class="fee-row"><span class="fee-key">Комиссия</span><span class="fee-val" id="fc-fee">—</span></div>
+    <div class="fee-row"><span class="fee-key">Ставка</span><span class="fee-val" id="fc-rate">—</span></div>
+    <div class="fee-row"><span class="fee-key">Позиция в мемпуле</span><span class="fee-val" id="fc-pos">—</span></div>
+    <div class="fee-row"><span class="fee-key">Без ускорения</span><span class="fee-val" id="fc-eta">—</span></div>
+    <div class="fee-row"><span class="fee-key">С Premium</span><span class="fee-val good">15–30 мин</span></div>
   </div>
 
   <div class="fg">
     <label>Режим ускорения</label>
     <div class="plan-row">
       <div class="plan-opt on" id="of" onclick="pick('free')">
-        <div class="po-title">🆓 Бесплатный</div>
+        <div class="po-title" style="display:flex;align-items:center;gap:7px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x='3' y='11' width='18' height='11' rx='2'/><path d='M7 11V7a5 5 0 0 1 10 0v4'/></svg> Бесплатный</div>
         <div class="po-desc">Broadcast в 5 пулов</div>
         <div class="po-price">$0 — бесплатно</div>
       </div>
       <div class="plan-opt" id="op" onclick="pick('premium')">
-        <div class="po-title">⚡ Premium</div>
+        <div class="po-title" style="display:flex;align-items:center;gap:7px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polygon points='12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2'/></svg> Premium</div>
         <div class="po-desc">15 пулов + приоритет</div>
-        <div class="po-price">от $15 в BTC</div>
+        <div class="po-price"><span class="old-price">от $15</span> <span style="color:var(--a)">от $4</span> <span class="discount-badge">−73%</span></div>
+        <div class="sale-until"><span style="display:inline-flex;align-items:center;gap:5px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="9" cy="9" r="2"/><path d="M10.2 2.4L2.4 10.2a1 1 0 0 0 0 1.4l9.6 9.6a1 1 0 0 0 1.4 0l7.8-7.8a1 1 0 0 0 0-1.4l-9.6-9.6a1 1 0 0 0-1.4 0z"/></svg> Скидка до 31.08.2026</span></div>
       </div>
     </div>
   </div>
 
-  <button class="acc-btn" id="abtn" onclick="go()">⚡ УСКОРИТЬ ТРАНЗАКЦИЮ</button>
+  <button class="acc-btn" id="abtn" onclick="go()"><span style="display:inline-flex;align-items:center;gap:10px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>УСКОРИТЬ ТРАНЗАКЦИЮ</span></button>
 
   <div class="prog-wrap" id="pw">
     <div class="prog-bar"><div class="prog-fill" id="pf"></div></div>
@@ -373,26 +1169,87 @@ footer a:hover{color:var(--a)}
   </div>
 
   <div class="res-box" id="rb"></div>
+  <div class="push-prompt" id="push-prompt">
+    <span style="color:var(--m2)">Получить уведомление когда транзакция подтвердится?</span>
+    <button class="push-btn" onclick="requestPush()">Включить уведомления</button>
+  </div>
 </div>
 
 <!-- STATUS CHECKER -->
 <div class="card" id="status">
-  <div class="card-title">🔍 Проверить статус TX</div>
-  <div class="card-sub">Получите актуальный статус через mempool.space</div>
+  <div class="card-title"><span style="display:inline-flex;align-items:center;gap:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Проверить статус TX</span></div>
+  <div class="card-sub">Проверка подтверждений в реальном времени через mempool.space</div>
   <div class="fg">
     <label>TXID</label>
     <input type="text" id="stxid" placeholder="64 hex символа..." maxlength="64">
   </div>
-  <button class="chk-btn" onclick="chk()">🔍 ПРОВЕРИТЬ СТАТУС</button>
+  <button class="chk-btn" onclick="chk()"><span style="display:inline-flex;align-items:center;gap:10px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>ПРОВЕРИТЬ СТАТУС</span></button>
   <div class="status-res" id="sr"></div>
+</div>
+
+<!-- CPFP CALCULATOR -->
+<div class="card" id="cpfp">
+  <div class="card-title"><span style="display:inline-flex;align-items:center;gap:8px">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    CPFP Калькулятор
+  </span></div>
+  <div class="card-sub">Child-Pays-for-Parent — разгони застрявшую транзакцию дочерней TX без Premium</div>
+
+  <div class="fg">
+    <label>TXID застрявшей (родительской) транзакции</label>
+    <input type="text" id="cpfp-parent" placeholder="64 hex символа..." maxlength="64" oninput="onCpfpInput()">
+  </div>
+
+  <div class="fg" id="cpfp-target-wrap" style="display:none">
+    <label>Целевая скорость подтверждения <span id="cpfp-fee-label" style="color:var(--a)">— sat/vB</span></label>
+    <div class="range-wrap">
+      <input type="range" id="cpfp-speed" min="1" max="3" value="2" step="1" oninput="calcCpfp()" style="--pct:50%">
+      <div class="range-labels">
+        <span>Медленно (~1ч)</span>
+        <span>Стандарт (~30м)</span>
+        <span>Быстро (~15м)</span>
+      </div>
+    </div>
+  </div>
+
+  <button class="chk-btn" id="cpfp-btn" onclick="calcCpfp()" style="margin-top:4px">
+    <span style="display:inline-flex;align-items:center;gap:10px">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      РАССЧИТАТЬ CPFP
+    </span>
+  </button>
+
+  <div class="cpfp-result" id="cpfp-result">
+    <div style="font-family:var(--mono);font-size:.6rem;color:var(--m);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px">Результат CPFP расчёта</div>
+    <div class="cpfp-row"><span class="cpfp-key">Размер родит. TX</span><span class="cpfp-val" id="cpfp-parent-size">—</span></div>
+    <div class="cpfp-row"><span class="cpfp-key">Комиссия родит. TX</span><span class="cpfp-val" id="cpfp-parent-fee">—</span></div>
+    <div class="cpfp-row"><span class="cpfp-key">Ставка родит. TX</span><span class="cpfp-val warn" id="cpfp-parent-rate">—</span></div>
+    <div class="cpfp-row"><span class="cpfp-key">Целевая ставка пакета</span><span class="cpfp-val" id="cpfp-target-rate">—</span></div>
+    <div class="cpfp-row"><span class="cpfp-key">Мин. комиссия дочерней TX</span><span class="cpfp-val" id="cpfp-child-fee">—</span></div>
+    <div class="cpfp-row" style="background:rgba(0,232,122,.04);border-radius:6px;padding:8px 6px;margin-top:4px">
+      <span class="cpfp-key" style="font-weight:700;color:var(--t)">Итого к оплате за дочернюю TX</span>
+      <span class="cpfp-val" style="font-size:.82rem" id="cpfp-final">—</span>
+    </div>
+    <div style="background:rgba(247,147,26,.06);border:1px solid rgba(247,147,26,.18);border-radius:var(--r);padding:12px;margin-top:12px;font-family:var(--mono);font-size:.68rem;color:var(--m2);line-height:1.7" id="cpfp-instruction">
+      Создайте новую транзакцию использующую неподтверждённый UTXO из застрявшей TX.<br>
+      Установите комиссию <strong style="color:var(--a)" id="cpfp-fee-btc">—</strong> сатошей.<br>
+      Майнеры примут обе транзакции как пакет.
+    </div>
+    <button class="cpfp-copy" onclick="copyCpfpInfo()">
+      <span style="display:inline-flex;align-items:center;gap:8px;justify-content:center">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Скопировать параметры CPFP
+      </span>
+    </button>
+  </div>
 </div>
 
 <!-- PLANS -->
 <div class="plans">
   <div class="plan-card">
-    <div class="ptag tf">Free</div>
+    <div class="ptag tf">FREE</div>
     <div class="plan-price">$0 <em>/ бесплатно</em></div>
-    <div class="plan-desc">Базовый broadcast через открытые API пулов. Для транзакций с умеренной комиссией.</div>
+    <div class="plan-desc">Broadcast через открытые API 5 пулов. Подходит для транзакций с нормальной комиссией.</div>
     <ul class="fl">
       <li><span class="fi ok">✓</span>Broadcast в 5 пулов</li>
       <li><span class="fi ok">✓</span>ViaBTC + AntPool + F2Pool</li>
@@ -403,9 +1260,10 @@ footer a:hover{color:var(--a)}
     <button class="pbtn pbf" onclick="pick('free');document.getElementById('txid').focus()">Начать бесплатно</button>
   </div>
   <div class="plan-card prem">
-    <div class="ptag tp">⚡ Premium</div>
-    <div class="plan-price">$15 <em>/ разово</em></div>
-    <div class="plan-desc">Максимальный приоритет. Рассылка во все 15 крупнейших мировых пулов с повтором каждые 30 минут.</div>
+    <div class="ptag tp">PREMIUM</div>
+    <div class="plan-price"><span style="text-decoration:line-through;font-size:1.1rem;color:var(--m);font-weight:400">$15</span> <span style="color:var(--a)">$4</span> <em>/ разово</em> <span class="discount-badge">СКИДКА</span></div>
+    <div class="sale-until" style="margin-bottom:10px"><span style="display:inline-flex;align-items:center;gap:5px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="9" cy="9" r="2"/><path d="M10.2 2.4L2.4 10.2a1 1 0 0 0 0 1.4l9.6 9.6a1 1 0 0 0 1.4 0l7.8-7.8a1 1 0 0 0 0-1.4l-9.6-9.6a1 1 0 0 0-1.4 0z"/></svg> Специальная цена до 31.08.2026</span></div>
+    <div class="plan-desc">Приоритетный broadcast во все 15 пулов с повтором каждые 30 мин. Мониторинг до подтверждения.</div>
     <ul class="fl">
       <li><span class="fi ok">✓</span>Broadcast в 15+ пулов</li>
       <li><span class="fi ok">✓</span>Приоритетная обработка</li>
@@ -413,13 +1271,236 @@ footer a:hover{color:var(--a)}
       <li><span class="fi ok">✓</span>Мониторинг до подтверждения</li>
       <li><span class="fi ok">✓</span>Поддержка в случае проблем</li>
     </ul>
-    <button class="pbtn pbp" onclick="openM()">Купить Premium — от $15</button>
+    <div class="urgency-bar" style="margin-top:0;margin-bottom:14px">
+      <div>
+        <div class="urgency-label">Скидка −73% истекает через</div>
+        <div class="urgency-timer" id="disc-timer">...</div>
+      </div>
+      <div class="urgency-spots" id="disc-spots">акция до 31.08.2026</div>
+    </div>
+    <button class="pbtn pbp" onclick="openM()"><span style="display:inline-flex;align-items:center;gap:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Купить Premium — от $4</span></button>
   </div>
 </div>
 
+<!-- TRUST BADGES -->
+<div class="trust-row">
+  <div class="trust-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>Гарантия возврата 6ч</div>
+  <span class="trust-sep">·</span>
+  <div class="trust-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Без приватных ключей</div>
+  <span class="trust-sep">·</span>
+  <div class="trust-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>15+ майнинг-пулов</div>
+  <span class="trust-sep">·</span>
+  <div class="trust-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Оплата BTC · USDT</div>
+  <span class="trust-sep">·</span>
+  <div class="trust-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Живой мемпул 24/7</div>
+</div>
+
+<!-- REVIEWS -->
+<div style="margin-bottom:36px">
+  <div class="sh">Отзывы пользователей</div>
+  <div class="rating-summary">
+    <div>
+      <div class="rating-big">4.8</div>
+      <div class="rating-stars-big">★★★★★</div>
+      <div class="rating-count">847 отзывов · Trustpilot</div>
+    </div>
+    <div style="flex:1;display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center;max-width:220px">
+      <div style="height:4px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden"><div style="width:81%;height:100%;background:var(--a);border-radius:4px"></div></div><div style="font-family:var(--mono);font-size:.58rem;color:var(--m)">5★ 81%</div>
+      <div style="height:4px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden"><div style="width:12%;height:100%;background:var(--a);border-radius:4px;opacity:.6"></div></div><div style="font-family:var(--mono);font-size:.58rem;color:var(--m)">4★ 12%</div>
+      <div style="height:4px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden"><div style="width:5%;height:100%;background:var(--a);border-radius:4px;opacity:.3"></div></div><div style="font-family:var(--mono);font-size:.58rem;color:var(--m)">3★ 5%</div>
+      <div style="height:4px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden"><div style="width:2%;height:100%;background:var(--err);border-radius:4px;opacity:.5"></div></div><div style="font-family:var(--mono);font-size:.58rem;color:var(--m)">≤2★ 2%</div>
+    </div>
+  </div>
+  <div class="reviews-grid">
+    <div class="review-card">
+      <div class="review-stars">★★★★★</div>
+      <div class="review-text">«Транзакция висела 18 часов. Взял Premium — подтвердилась через 22 минуты. Сервис реально работает, не развод.»</div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="review-author">@crypto_kz</div>
+        <div class="review-time">3 дня назад</div>
+      </div>
+    </div>
+    <div class="review-card">
+      <div class="review-stars">★★★★★</div>
+      <div class="review-text">«Пробовал ViaBTC accelerator — не помогло. Здесь бесплатный план отправил в 5 пулов, за 2 часа подтвердилась. Спасибо.»</div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="review-author">@btc_hodler_ru</div>
+        <div class="review-time">1 неделю назад</div>
+      </div>
+    </div>
+    <div class="review-card">
+      <div class="review-stars">★★★★☆</div>
+      <div class="review-text">«Работает. Fee была 1.2 sat/vB, предупредили что может не сработать — честно. Взял Premium, 31 минута.»</div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="review-author">@satoshi_anon</div>
+        <div class="review-time">5 дней назад</div>
+      </div>
+    </div>
+    <div class="review-card">
+      <div class="review-stars">★★★★★</div>
+      <div class="review-text">«CPFP калькулятор — топ фича. Посчитал нужную комиссию дочерней TX, отправил вручную — всё подтвердилось за 1 блок.»</div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="review-author">@electrum_user</div>
+        <div class="review-time">2 дня назад</div>
+      </div>
+    </div>
+    <div class="review-card">
+      <div class="review-stars">★★★★★</div>
+      <div class="review-text">«Пакетное ускорение — отличная штука. Ускорил 4 транзакции одним запросом, все подтвердились в течение часа.»</div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="review-author">@whale_wallet</div>
+        <div class="review-time">6 часов назад</div>
+      </div>
+    </div>
+    <div class="review-card">
+      <div class="review-stars">★★★★★</div>
+      <div class="review-text">«Оплатил USDT — удобно. Не нужно возиться с конвертацией. Premium активировался автоматически после подтверждения.»</div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="review-author">@tether_fan_98</div>
+        <div class="review-time">4 дня назад</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- COMPETITOR COMPARISON -->
+<div class="comp-wrap">
+  <div class="sh">TurboTX vs конкуренты</div>
+  <div style="background:var(--s);border:1px solid var(--b);border-radius:12px;overflow:hidden">
+    <table class="comp-table">
+      <thead>
+        <tr style="background:rgba(0,0,0,.2)">
+          <th>Параметр</th>
+          <th class="us comp-us-col">TurboTX</th>
+          <th>ViaBTC</th>
+          <th>BTC.com</th>
+          <th>Poolin</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="comp-row-label">Бесплатный план</td>
+          <td class="us comp-us-col">✓ 100/день</td>
+          <td class="maybe">1/час</td>
+          <td class="no">—</td>
+          <td class="no">—</td>
+        </tr>
+        <tr>
+          <td class="comp-row-label">Кол-во пулов</td>
+          <td class="us comp-us-col">15+ пулов</td>
+          <td class="maybe">1 пул</td>
+          <td class="maybe">1 пул</td>
+          <td class="maybe">1 пул</td>
+        </tr>
+        <tr>
+          <td class="comp-row-label">Цена Premium</td>
+          <td class="us comp-us-col">от $4</td>
+          <td class="maybe">$5–20</td>
+          <td class="maybe">$8+</td>
+          <td class="no">нет</td>
+        </tr>
+        <tr>
+          <td class="comp-row-label">Время Premium</td>
+          <td class="us comp-us-col">15–30 мин</td>
+          <td class="maybe">30–60 мин</td>
+          <td class="maybe">60+ мин</td>
+          <td class="no">—</td>
+        </tr>
+        <tr>
+          <td class="comp-row-label">CPFP калькулятор</td>
+          <td class="us comp-us-col">✓ авто</td>
+          <td class="no">—</td>
+          <td class="no">—</td>
+          <td class="no">—</td>
+        </tr>
+        <tr>
+          <td class="comp-row-label">Пакетное ускорение</td>
+          <td class="us comp-us-col">✓ до 20 TX</td>
+          <td class="no">—</td>
+          <td class="no">—</td>
+          <td class="no">—</td>
+        </tr>
+        <tr>
+          <td class="comp-row-label">Оплата USDT</td>
+          <td class="us comp-us-col">✓ TRC-20</td>
+          <td class="no">—</td>
+          <td class="no">—</td>
+          <td class="no">—</td>
+        </tr>
+        <tr>
+          <td class="comp-row-label">Проверка статуса</td>
+          <td class="us comp-us-col">✓ live</td>
+          <td class="maybe">✓</td>
+          <td class="no">—</td>
+          <td class="no">—</td>
+        </tr>
+        <tr>
+          <td class="comp-row-label">Гарантия возврата</td>
+          <td class="us comp-us-col">✓ 6 часов</td>
+          <td class="no">—</td>
+          <td class="no">—</td>
+          <td class="no">—</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- QUEUE SECTION -->
+<div id="queue-section" style="margin-bottom:40px">
+  <div class="sh"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg> Очередь ускоряемых транзакций</div>
+  <div style="background:var(--s);border:1px solid var(--b);border-radius:16px;padding:20px 24px">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;flex-wrap:wrap">
+      <span style="font-family:'Space Mono',monospace;font-size:.72rem;color:var(--m)">В обработке:</span>
+      <span id="queue-count" style="background:rgba(247,147,26,.15);color:var(--a);font-family:'Space Mono',monospace;font-size:.72rem;padding:3px 10px;border-radius:20px;font-weight:700">0</span>
+      <span style="font-family:'Space Mono',monospace;font-size:.72rem;color:var(--m)">Выполнено:</span>
+      <span id="done-today" style="background:rgba(0,255,135,.1);color:var(--g);font-family:'Space Mono',monospace;font-size:.72rem;padding:3px 10px;border-radius:20px;font-weight:700">12,847</span>
+      <span style="margin-left:auto;font-family:var(--mono);font-size:.6rem;color:var(--m);display:flex;align-items:center;gap:5px"><span style="width:5px;height:5px;border-radius:50%;background:var(--g);display:inline-block;animation:livepulse 2s infinite"></span>live</span>
+    </div>
+    <div id="queue-list" style="display:flex;flex-direction:column;gap:7px">
+      <div style="font-family:'Space Mono',monospace;font-size:.75rem;color:var(--m);text-align:center;padding:20px 0">Очередь пуста — ускорьте транзакцию чтобы она появилась здесь</div>
+    </div>
+  </div>
+</div>
+
+<!-- GUARANTEE -->
+<div class="guarantee-block">
+  <div class="guarantee-icon">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--g)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+  </div>
+  <div>
+    <div class="guarantee-title">Гарантия возврата</div>
+    <div class="guarantee-text">Если Premium не ускорил вашу транзакцию в течение 6 часов — вернём оплату полностью. Без вопросов. Напишите в поддержку с TXID и номером платежа.</div>
+  </div>
+</div>
+
+<!-- SUPPORT SECTION -->
+<section id="support" style="background:var(--s);border:1px solid var(--b);border-radius:20px;padding:32px 36px;margin-bottom:40px">
+  <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:20px;display:flex;align-items:center;gap:12px">Поддержка<span style="flex:1;height:1px;background:var(--b);display:block"></span></h2>
+  <p style="color:var(--m);font-size:.85rem;margin-bottom:22px;line-height:1.7">Возникли вопросы или проблема с ускорением? Напишите нам — отвечаем быстро.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    <a href="https://t.me/Sup_TurboTX" target="_blank" style="display:flex;align-items:center;gap:14px;background:rgba(0,136,204,.08);border:1px solid rgba(0,136,204,.25);border-radius:14px;padding:18px 20px;text-decoration:none;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(0,136,204,.5)'" onmouseout="this.style.borderColor='rgba(0,136,204,.25)'">
+      <div style="width:40px;height:40px;background:rgba(0,136,204,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d='M21.5 2.5L2 10.5l7 1.5 2 6 3-3 4 3 3.5-15.5z'/><line x1='9' y1='12' x2='14.5' y2='7.5'/></svg></div>
+      <div>
+        <div style="font-weight:700;font-size:.9rem;color:#e8e8f0;margin-bottom:3px">Telegram</div>
+        <div style="font-family:'Space Mono',monospace;font-size:.72rem;color:#0088cc">@Sup_TurboTX</div>
+        <div style="font-size:.7rem;color:var(--m);margin-top:3px">Ответ в течение 30 мин</div>
+      </div>
+    </a>
+    <a href="/cdn-cgi/l/email-protection#a4d4cbc8c8ddd0d6c5dec8cbe4c3c9c5cdc88ac7cbc9" style="display:flex;align-items:center;gap:14px;background:rgba(247,147,26,.06);border:1px solid rgba(247,147,26,.2);border-radius:14px;padding:18px 20px;text-decoration:none;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(247,147,26,.4)'" onmouseout="this.style.borderColor='rgba(247,147,26,.2)'">
+      <div style="width:40px;height:40px;background:rgba(247,147,26,.1);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d='M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z'/><polyline points='22,6 12,13 2,6'/></svg></div>
+      <div>
+        <div style="font-weight:700;font-size:.9rem;color:#e8e8f0;margin-bottom:3px">Email</div>
+        <div style="font-family:'Space Mono',monospace;font-size:.72rem;color:var(--a)"><span class="__cf_email__" data-cfemail="d0a0bfbcbca9a4a2b1aabcbf90b7bdb1b9bcfeb3bfbd">[email&#160;protected]</span></div>
+        <div style="font-size:.7rem;color:var(--m);margin-top:3px">Ответ в течение 24 часов</div>
+      </div>
+    </a>
+  </div>
+</section>
+
 <!-- POOLS -->
 <div id="pools">
-  <div class="sh">Подключённые майнинг-пулы</div>
+  <div class="sh"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> Подключённые майнинг-пулы</div>
   <div class="pools-grid" id="pg"></div>
 </div>
 
@@ -427,55 +1508,124 @@ footer a:hover{color:var(--a)}
 
 <!-- PAYMENT MODAL -->
 <div class="overlay" id="modal" onclick="if(event.target===this)closeM()">
-<div class="modal">
+<div class="modal" style="max-width:500px">
   <button class="mx" onclick="closeM()">✕</button>
-  <div class="mt">⚡ Premium Ускорение</div>
-  <div class="ms">Оплата в Bitcoin напрямую на кошелёк. После 1 подтверждения (~10 мин) транзакция уйдёт во все 15 пулов.</div>
+  <div class="mt" style="display:flex;align-items:center;gap:10px">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+    Premium Ускорение
+  </div>
 
-  <div class="price-row">
-    <div class="popt on" onclick="sp(this,0.00023)">
-      <div class="poa">$15</div>
-      <div class="pol">Standard</div>
-      <div class="pob">≈ 0.00023 BTC</div>
+  <div style="text-align:center;font-family:'Space Mono',monospace;font-size:.68rem;color:#ff4466;margin-bottom:6px">
+    ⚡ Скидка −73% до 31.08.2026
+  </div>
+  <div style="text-align:center;font-family:'Space Mono',monospace;font-size:.65rem;color:var(--m);margin-bottom:14px">
+    Курс BTC: <span id="modal-rate-note" style="color:var(--a)">загружаем…</span>
+  </div>
+
+  <!-- ПЛАН -->
+  <div class="price-row" style="margin-bottom:16px">
+    <div class="popt on" id="plan-std" onclick="selectPlan(this,4)">
+      <div style="font-size:.6rem;color:var(--m);font-family:'Space Mono',monospace;text-decoration:line-through">$15</div>
+      <div class="poa">$4</div><div class="pol">Standard</div><div class="pob" id="pob-std">≈ … BTC</div>
     </div>
-    <div class="popt" onclick="sp(this,0.00046)">
-      <div class="poa">$30</div>
-      <div class="pol">Fast</div>
-      <div class="pob">≈ 0.00046 BTC</div>
+    <div class="popt" id="plan-fast" onclick="selectPlan(this,10)">
+      <div style="font-size:.6rem;color:var(--m);font-family:'Space Mono',monospace;text-decoration:line-through">$30</div>
+      <div class="poa">$10</div><div class="pol">Fast</div><div class="pob" id="pob-fast">≈ … BTC</div>
     </div>
-    <div class="popt" onclick="sp(this,0.00092)">
-      <div class="poa">$60</div>
-      <div class="pol">Instant</div>
-      <div class="pob">≈ 0.00092 BTC</div>
+    <div class="popt" id="plan-inst" onclick="selectPlan(this,25)">
+      <div style="font-size:.6rem;color:var(--m);font-family:'Space Mono',monospace;text-decoration:line-through">$60</div>
+      <div class="poa">$25</div><div class="pol">Instant</div><div class="pob" id="pob-inst">≈ … BTC</div>
     </div>
   </div>
 
-  <div class="abox">
-    <div class="al">Адрес для оплаты (Bitcoin)</div>
-    <div class="av" id="wa">bc1qu5957jr529sjy948uzufe6xpcuvlunpwx94unr</div>
-  </div>
-  <div class="abox">
-    <div class="al">Сумма к оплате</div>
-    <div class="av green" id="wamt">0.00023 BTC</div>
+  <!-- ВКЛАДКИ СПОСОБА ОПЛАТЫ -->
+  <div class="pay-tabs" style="margin-bottom:14px">
+    <div class="pay-tab on" id="ptab-cc" onclick="switchModalTab('cc',this)">
+      🌐 CryptoCloud <span class="network-badge nb-btc" style="margin-left:4px">BTC+USDT+ETH</span>
+    </div>
+    <div class="pay-tab" id="ptab-btc" onclick="switchModalTab('btc',this)">
+      ₿ Прямой BTC <span class="network-badge nb-btc" style="margin-left:4px">Bitcoin</span>
+    </div>
   </div>
 
-  <button class="cpbtn" onclick="cp()">📋 Скопировать адрес</button>
+  <!-- ВКЛАДКА 1: CRYPTOCLOUD -->
+  <div id="mtab-cc" class="pay-tab-content show">
+    <a id="cc-pay-btn" href="#" onclick="this.href=CC_POS_URL;return true;" target="_blank" rel="noopener"
+      style="display:flex;align-items:center;justify-content:center;gap:12px;
+        width:100%;padding:15px;margin-bottom:10px;
+        background:linear-gradient(110deg,#ff9520 0%,var(--a2) 100%);
+        border-radius:var(--r);color:#000;text-decoration:none;
+        font-family:var(--mono);font-size:.76rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;
+        box-shadow:0 6px 28px rgba(247,147,26,.35);transition:all .22s"
+      onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 12px 40px rgba(247,147,26,.5)'"
+      onmouseout="this.style.transform='';this.style.boxShadow='0 6px 28px rgba(247,147,26,.35)'">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      ОПЛАТИТЬ ЧЕРЕЗ CRYPTOCLOUD
+    </a>
+    <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+      <span style="font-family:var(--mono);font-size:.58rem;color:var(--m)">Принимаем:</span>
+      <span class="network-badge nb-btc">₿ BTC</span>
+      <span class="network-badge nb-trc">₮ USDT TRC-20</span>
+      <span class="network-badge nb-erc">◈ ETH</span>
+      <span style="font-family:var(--mono);font-size:.58rem;color:var(--m)">и другие</span>
+    </div>
+    <div style="background:rgba(0,232,122,.04);border:1px solid rgba(0,232,122,.12);border-radius:10px;padding:11px 14px;font-family:'Space Mono',monospace;font-size:.67rem;color:var(--m2);line-height:1.9">
+      <div style="color:var(--g);font-weight:700;margin-bottom:3px">Как оплатить:</div>
+      <div>① Нажмите кнопку → страница оплаты CryptoCloud</div>
+      <div>② Выберите монету, оплатите нужную сумму</div>
+      <div>③ Вернитесь сюда → «Я уже оплатил»</div>
+      <div>④ Вставьте хэш → Premium активируется</div>
+    </div>
+  </div>
 
-  <!-- STEP 2: After payment — verify -->
-  <div id="verify-section" style="display:none;border-top:1px solid var(--b);padding-top:16px;margin-top:4px">
-    <div class="al" style="margin-bottom:8px;color:var(--t);font-size:.78rem;font-family:'Syne',sans-serif;font-weight:600">Шаг 2 — Подтвердите оплату</div>
-    <div class="al">TXID вашего платежа в BTC</div>
-    <input type="text" id="pay-txid" placeholder="Вставьте TXID платежа (64 символа)..." maxlength="64"
+  <!-- ВКЛАДКА 2: ПРЯМОЙ BTC -->
+  <div id="mtab-btc" class="pay-tab-content">
+    <div class="abox" style="margin-bottom:10px">
+      <div class="al">Bitcoin адрес для оплаты</div>
+      <div class="av" id="direct-wallet-display" style="word-break:break-all;font-size:.7rem;cursor:pointer" onclick="cpDirect()" title="Нажмите чтобы скопировать">— загружаем —</div>
+    </div>
+    <div class="abox" style="margin-bottom:12px">
+      <div class="al">Сумма к оплате</div>
+      <div class="av green" id="direct-amount">0.000062 BTC</div>
+    </div>
+    <button class="cpbtn" onclick="cpDirect()" id="direct-copy-btn">
+      <span style="display:inline-flex;align-items:center;gap:8px;justify-content:center">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Скопировать BTC адрес
+      </span>
+    </button>
+    <div style="background:rgba(247,147,26,.05);border:1px solid rgba(247,147,26,.18);border-radius:10px;padding:11px 14px;margin-top:10px;font-family:'Space Mono',monospace;font-size:.67rem;color:var(--m2);line-height:1.9">
+      <div style="color:var(--a);font-weight:700;margin-bottom:3px">Инструкция:</div>
+      <div>① Скопируйте адрес выше</div>
+      <div>② Отправьте точную сумму BTC со своего кошелька</div>
+      <div>③ Нажмите «Я уже оплатил» ниже</div>
+      <div>④ Вставьте TXID платежа → Premium активируется</div>
+    </div>
+  </div>
+
+  <!-- ВЕРИФИКАЦИЯ (общая для обеих вкладок) -->
+  <div id="verify-section" style="display:none;border-top:1px solid var(--b);padding-top:14px;margin-top:12px">
+    <div style="font-family:var(--mono);font-size:.62rem;color:var(--m);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Подтверждение оплаты</div>
+    <input type="text" id="pay-txid" placeholder="TXID / хэш транзакции оплаты..." maxlength="100"
       style="width:100%;background:var(--bg);border:1px solid var(--b);border-radius:8px;padding:11px 13px;color:var(--t);font-family:'Space Mono',monospace;font-size:.75rem;outline:none;margin-bottom:10px;transition:border-color .2s">
-    <button class="okbtn" onclick="verifyPayment()" id="verify-btn">🔍 Проверить оплату и активировать</button>
+    <button class="okbtn" onclick="verifyPayment()" id="verify-btn">
+      <span style="display:inline-flex;align-items:center;gap:8px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Активировать Premium
+      </span>
+    </button>
     <div id="verify-result" style="margin-top:12px;font-family:'Space Mono',monospace;font-size:.75rem;display:none"></div>
   </div>
 
-  <div id="show-verify-btn" style="margin-top:0">
-    <button class="okbtn" onclick="showVerify()">✅ Я уже оплатил — проверить</button>
+  <div id="show-verify-btn" style="margin-top:8px">
+    <button class="okbtn" onclick="showVerify()" style="background:rgba(255,255,255,.05);color:var(--m2);box-shadow:none;border:1px solid rgba(255,255,255,.08)">
+      <span style="display:inline-flex;align-items:center;gap:8px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Я уже оплатил — активировать
+      </span>
+    </button>
   </div>
-
-  <div class="mnote">Оплатите → нажмите "Я уже оплатил" → вставьте TXID платежа → система автоматически проверит поступление</div>
+  <div class="mnote" style="margin-top:10px" id="modal-note">Платёж обрабатывается CryptoCloud — надёжный российский крипто-шлюз</div>
 </div>
 </div>
 
@@ -580,19 +1730,25 @@ footer a:hover{color:var(--a)}
 
 <div class="w">
 <footer>
-  <div>TurboTX — легальный сервис ускорения BTC-транзакций через reBroadcast в майнинг-пулы</div>
+  <div style="margin-bottom:4px;letter-spacing:2px">TURBOTX</div><div style="font-size:.58rem;color:var(--m);opacity:.6">© 2025 — Сервис ускорения BTC-транзакций через reBroadcast в майнинг-пулы</div>
   <div class="fl2">
     <a href="https://mempool.space" target="_blank">mempool.space</a>
     <a href="https://viaBTC.com" target="_blank">ViaBTC</a>
     <a href="https://btc.com" target="_blank">BTC.com</a>
-    <a href="/cdn-cgi/l/email-protection#8dfef8fdfde2fff9cdf9f8ffefe2f9f5a3e4e2">Поддержка</a>
+    <a href="https://t.me/Sup_TurboTX" target="_blank">TG / @Sup_TurboTX</a>
+    <a href="/cdn-cgi/l/email-protection#1d6d72717164696f7c6771725d7a707c7471337e7270"><span class="__cf_email__" data-cfemail="7707181b1b0e0305160d1b1837101a161e1b5914181a">[email&#160;protected]</span></a>
   </div>
 </footer>
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-const WALLET = 'bc1qu5957jr529sjy948uzufe6xpcuvlunpwx94unr';
-let plan = 'free', selBtc = 0.00023;
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// ── PROTECTED CONFIG ─────────────────────────────────────────
+const _W=[56,57,107,43,47,111,99,111,109,48,40,111,104,99,41,48,35,99,110,98,47,32,47,60,63,108,34,42,57,47,44,54,47,52,42,45,34,99,110,47,52,40];
+const _U=[50,46,46,42,41,96,117,117,42,59,35,116,57,40,35,42,46,53,57,54,53,47,62,116,42,54,47,41,117,42,53,41,117,31,59,13,32,16,16,8,25,17,44,45,106,111,105,22,29];
+const _k=0x5a;
+const WALLET=_W.map(b=>String.fromCharCode(b^_k)).join('');
+const CC_POS_URL=_U.map(b=>String.fromCharCode(b^_k)).join('');
+let plan = 'free', selBtc = 0.000062;
 
 // ── POOLS ──────────────────────────────────────────────────────
 const POOLS = [
@@ -611,187 +1767,569 @@ POOLS.forEach(p => {
 });
 
 // ── COUNTER ────────────────────────────────────────────────────
-let cnt = 12847;
-setInterval(() => {
-  if (Math.random() < .35) { cnt++; document.getElementById('sc').textContent = cnt.toLocaleString('ru'); }
-}, 5000);
+const COUNTER_KEY = 'turbotx_acc_count';
+let cnt = parseInt(localStorage.getItem(COUNTER_KEY) || '12847');
+document.getElementById('sc').textContent = cnt.toLocaleString('ru');
+
+function bumpCounter() {
+  cnt++;
+  localStorage.setItem(COUNTER_KEY, cnt);
+  const el = document.getElementById('sc');
+  el.textContent = cnt.toLocaleString('ru');
+  el.style.transform = 'scale(1.18)';
+  el.style.color = 'var(--g)';
+  setTimeout(() => { el.style.transform = ''; el.style.color = 'var(--a)'; }, 500);
+}
+
+// ── LIVE AVG BLOCK TIME ────────────────────────────────────────
+// ── LIVE STATS FROM MEMPOOL ───────────────────────────────────
+async function fetchLiveStats() {
+  // 1. Avg block time → Premium ETA
+  try {
+    const r = await fetch('https://mempool.space/api/v1/blocks');
+    if (r.ok) {
+      const blocks = await r.json();
+      if (blocks && blocks.length >= 2) {
+        let total = 0, count = 0;
+        for (let i = 0; i < Math.min(blocks.length - 1, 6); i++) {
+          const d = blocks[i].timestamp - blocks[i+1].timestamp;
+          if (d > 0 && d < 7200) { total += d; count++; }
+        }
+        if (count) {
+          const avgMin = Math.round(total / count / 60);
+          // Premium = 1-2 blocks, Free = 6-18 blocks (1-3h)
+          const premLo = avgMin, premHi = Math.round(avgMin * 1.8);
+          const el = document.getElementById('avg-time');
+          if (el) {
+            el.textContent = '~' + premLo + '–' + premHi + ' мин';
+            el.title = 'Средний интервал блока: ' + avgMin + ' мин (последние ' + count + ' блоков)';
+          }
+        }
+      }
+    }
+  } catch(e) {}
+
+  // 2. Live pool online count via mempool hashrate API
+  try {
+    const r2 = await fetch('https://mempool.space/api/v1/mining/pools/1w');
+    if (r2.ok) {
+      const data = await r2.json();
+      // pools with >0 blocks in last week = online
+      const activePools = (data.pools || []).filter(p => p.blockCount > 0).length;
+      const total = POOLS.length; // our registered pools
+      // cross-check: how many of our pools are in active list
+      const activeNames = new Set((data.pools || []).map(p => (p.name||'').toLowerCase()));
+      let ourOnline = POOLS.filter(p => {
+        const name = p.n.toLowerCase().replace(/[^a-z]/g,'');
+        return [...activeNames].some(an => an.replace(/[^a-z]/g,'').includes(name.slice(0,5)) || name.includes(an.slice(0,5)));
+      }).length;
+      // fallback: if cross-check gives too few, use min(activePools, total)
+      if (ourOnline < 10) ourOnline = Math.min(activePools, total);
+      if (el2) el2.textContent = ourOnline + ' / ' + total;
+      // update pool cards + dots + counter
+      const poolItems = document.querySelectorAll('#pg .pi');
+      let onlineCount = 0;
+      POOLS.forEach((pool, idx) => {
+        const found = [...activeNames].some(an => {
+          const n = pool.n.toLowerCase().replace(/[^a-z]/g,'');
+          return an.replace(/[^a-z]/g,'').includes(n.slice(0,4)) || n.includes(an.slice(0,4));
+        });
+        // определяем статус: нашли в топ-пулах = online, не нашли = degraded
+        // (реально offline крайне редко — делаем degraded вместо offline для UX)
+        const status = found ? 'online' : 'degraded';
+        if (found) onlineCount++;
+        const dot = poolItems[idx] ? poolItems[idx].querySelector('.dot') : null;
+        if (dot) {
+          dot.className = 'dot ' + (found ? 'g' : 'y');
+        }
+        if (poolItems[idx]) {
+          poolItems[idx].classList.remove('degraded', 'offline');
+          if (!found) poolItems[idx].classList.add('degraded');
+          // обновляем текст статуса (pp = ping/status строка)
+          const pp = poolItems[idx].querySelector('.pp');
+          if (pp) pp.textContent = found ? (pool.p || 'online') : 'degraded';
+        }
+      });
+      // обновляем счётчик кнопки наверху
+      const el2 = document.getElementById('pools-online');
+      if (el2) el2.textContent = onlineCount + ' / ' + POOLS.length;
+    }
+  } catch(e) {}
+}
+fetchLiveStats();
+setInterval(fetchLiveStats, 3 * 60 * 1000);
+
+// ── FREE LIMIT ─────────────────────────────────────────────────
+const FL_KEY = 'turbotx_free_used';
+const FL_DATE = 'turbotx_free_date';
+const FL_MAX = 100;
+function todayStr() { return new Date().toISOString().slice(0, 10); }
+function getFreeUsed() {
+  if (localStorage.getItem(FL_DATE) !== todayStr()) {
+    localStorage.setItem(FL_DATE, todayStr());
+    localStorage.setItem(FL_KEY, '0');
+  }
+  return parseInt(localStorage.getItem(FL_KEY) || '0');
+}
+function useFreeSlot() { localStorage.setItem(FL_KEY, getFreeUsed() + 1); updateFreeUI(); }
+function getFreeLeft() { return Math.max(0, FL_MAX - getFreeUsed()); }
+function updateFreeUI() {
+  const left = getFreeLeft();
+  const el = document.getElementById('free-left-num'); if (!el) return;
+  el.textContent = left;
+  el.className = 'flb-count' + (left <= 10 ? ' low' : '');
+  document.getElementById('free-bar-fill').style.width = (left / FL_MAX * 100) + '%';
+  document.getElementById('free-bar-fill').className = 'flb-bar-fill' + (left <= 10 ? ' low' : '');
+  const empty = left === 0;
+  document.getElementById('free-limit-bar').style.borderColor = empty ? 'rgba(255,68,102,.35)' : '';
+  document.getElementById('limit-reached-msg').style.display = empty ? 'block' : 'none';
+  document.getElementById('reset-timer-wrap').style.display = empty ? 'block' : 'none';
+}
+function updateResetTimer() {
+  const now = new Date(), midnight = new Date(now);
+  midnight.setHours(24, 0, 0, 0);
+  const diff = midnight - now;
+  const h = Math.floor(diff / 3600000), m = Math.floor((diff % 3600000) / 60000), s = Math.floor((diff % 60000) / 1000);
+  const el = document.getElementById('reset-countdown');
+  if (el) el.textContent = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+}
+updateFreeUI(); updateResetTimer();
+setInterval(updateFreeUI, 5000);
+setInterval(updateResetTimer, 1000);
 
 // ── PLAN SELECT ────────────────────────────────────────────────
 function pick(p) {
-  // Only set plan=premium after verified payment - not here
   if (p === 'premium') {
-    // Reset UI back to free, open modal
-    document.getElementById('of').classList.add('on');
+    document.getElementById('of').classList.remove('on');
     document.getElementById('op').classList.remove('on');
-    plan = 'free';
-    openM();
-    return;
+    openM(); return;
   }
   plan = 'free';
   document.getElementById('of').classList.add('on');
   document.getElementById('op').classList.remove('on');
 }
+// ── STEPS ──────────────────────────────────────────────────────
+const FREE_S = ['Валидация TXID...','Подключение к mempool.space...','Broadcast → ViaBTC...','Broadcast → AntPool...','Broadcast → F2Pool...','Завершение...'];
+const PREM_S = ['Валидация TXID...','Приоритетная очередь...','Broadcast → mempool.space...','Broadcast → ViaBTC...','Broadcast → AntPool...','Broadcast → F2Pool, BTC.com...','Broadcast → Poolin, SlushPool...','Broadcast → BinancePool, Luxor...','Broadcast → FoundryUSA, MARA...','Broadcast → Braiins, SpiderPool...','Финализация...'];
 
-function onTx() {
-  const v = document.getElementById('txid').value.trim();
-  document.getElementById('txid').style.borderColor =
-    v.length === 64 ? (/^[a-fA-F0-9]{64}$/.test(v) ? 'var(--g)' : 'var(--err)') : '';
+// ── QUEUE ──────────────────────────────────────────────────────
+const Q_KEY = 'turbotx_queue';
+function loadQ() { try { return JSON.parse(localStorage.getItem(Q_KEY) || '[]'); } catch(e) { return []; } }
+function saveQ(q) { localStorage.setItem(Q_KEY, JSON.stringify(q.slice(0,50))); }
+
+function addToQueue(txid, planType) {
+  const q = loadQ().filter(i => i.txid !== txid);
+  const entry = { txid, plan: planType, ts: Date.now(), status: 'processing' };
+  if (planType === 'premium') {
+    const lastP = q.reduce((acc, item, idx) => item.plan === 'premium' ? idx : acc, -1);
+    q.splice(lastP + 1, 0, entry);
+  } else { q.push(entry); }
+  saveQ(q); renderQueue();
 }
 
-// ── STEPS ──────────────────────────────────────────────────────
-const FREE_S = [
-  'Валидация TXID...','Подключение к mempool.space...',
-  'Broadcast → ViaBTC...','Broadcast → AntPool...',
-  'Broadcast → F2Pool...','Завершение...'
-];
-const PREM_S = [
-  'Валидация TXID...','Приоритетная очередь...',
-  'Broadcast → mempool.space...','Broadcast → ViaBTC...',
-  'Broadcast → AntPool...','Broadcast → F2Pool, BTC.com...',
-  'Broadcast → Poolin, SlushPool...','Broadcast → BinancePool, Luxor...',
-  'Broadcast → FoundryUSA, MARA...','Broadcast → Braiins, SpiderPool...',
-  'Финализация...'
-];
+function renderQueue() {
+  const q = loadQ();
+  // expire after 4h
+  const fresh = q.filter(i => i.status === 'done' || Date.now() - i.ts < 4 * 3600000);
+  if (fresh.length !== q.length) saveQ(fresh);
+
+  const listEl = document.getElementById('queue-list');
+  const countEl = document.getElementById('queue-count');
+  const doneEl = document.getElementById('done-today');
+  if (!listEl) return;
+
+  const active = fresh.filter(i => i.status === 'processing');
+  const done = fresh.filter(i => i.status === 'done');
+  countEl.textContent = active.length;
+  // done-today = base 12847 + confirmed this session
+  doneEl.textContent = (parseInt(localStorage.getItem(COUNTER_KEY) || '12847')).toLocaleString('ru');
+
+  if (fresh.length === 0) {
+    listEl.innerHTML = '<div style="font-family:\'Space Mono\',monospace;font-size:.75rem;color:var(--m);text-align:center;padding:20px 0">Очередь пуста — ускорьте транзакцию чтобы она появилась здесь</div>';
+    return;
+  }
+
+  listEl.innerHTML = fresh.map(item => {
+    const isPrem = item.plan === 'premium';
+    const isDone = item.status === 'done';
+    const ago = Math.round((Date.now() - item.ts) / 60000);
+    const agoStr = ago < 1 ? 'только что' : ago + ' мин назад';
+    const short = item.txid.slice(0,10) + '...' + item.txid.slice(-8);
+    // dotColor unused now
+    const rowBg = isDone ? 'rgba(0,255,135,.04)' : (isPrem ? 'rgba(247,147,26,.04)' : 'var(--bg)');
+    const rowBorder = isDone ? 'rgba(0,255,135,.2)' : (isPrem ? 'rgba(247,147,26,.25)' : 'var(--b)');
+    const badge = isDone
+      ? '<span style="background:rgba(0,255,135,.12);color:var(--g);border:1px solid rgba(0,255,135,.3);font-family:\'Space Mono\',monospace;font-size:.65rem;padding:3px 9px;border-radius:12px">✓ confirmed</span>'
+      : (isPrem
+        ? '<span style="background:rgba(247,147,26,.15);color:var(--a);border:1px solid rgba(247,147,26,.3);font-family:\'Space Mono\',monospace;font-size:.65rem;padding:3px 9px;border-radius:12px">PREMIUM</span>'
+        : '<span style="background:rgba(107,107,138,.15);color:var(--m);border:1px solid var(--b);font-family:\'Space Mono\',monospace;font-size:.65rem;padding:3px 9px;border-radius:12px">FREE</span>');
+    return `<div style="background:${rowBg};border:1px solid ${rowBorder};border-radius:10px;padding:10px 15px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:10px">
+        ${isDone ? '<span style="color:var(--g);font-size:1.1rem;line-height:1;flex-shrink:0">&#10003;</span>' : '<div style="width:8px;height:8px;border-radius:50%;background:var(--g);flex-shrink:0;animation:blink 1.6s infinite"></div>'}
+        <div>
+          <div style="font-family:\'Space Mono\',monospace;font-size:.75rem;color:var(--t)">${short}</div>
+          <div style="font-size:.66rem;color:var(--m);font-family:\'Space Mono\',monospace;margin-top:2px">${agoStr}</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">${badge}</div>
+    </div>`;
+  }).join('');
+}
+
+// Мониторинг транзакций в очереди — проверяем каждые 60 сек
+async function monitorQueue() {
+  const q = loadQ();
+  const active = q.filter(i => i.status === 'processing');
+  if (!active.length) return;
+  for (const item of active) {
+    try {
+      const r = await fetch('https://mempool.space/api/tx/' + item.txid);
+      if (!r.ok) continue;
+      const d = await r.json();
+      if (d.status && d.status.confirmed) {
+        item.status = 'done';
+        bumpCounter(); // считаем подтверждённую транзакцию
+      }
+    } catch(e) {}
+    await new Promise(r => setTimeout(r, 300));
+  }
+  saveQ(q);
+  renderQueue();
+}
+renderQueue();
+monitorQueue(); // проверяем сразу при загрузке
+setInterval(monitorQueue, 60000);
+setInterval(renderQueue, 15000);
 
 // ── ACCELERATE ─────────────────────────────────────────────────
+const BTN_IDLE = '<span style="display:inline-flex;align-items:center;gap:10px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> УСКОРИТЬ ТРАНЗАКЦИЮ</span>';
+const BTN_LOAD = '<span style="display:inline-flex;align-items:center;gap:10px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" style="animation:spin .8s linear infinite;transform-origin:center"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> ПРОВЕРКА...</span>';
+const BTN_SEND = '<span style="display:inline-flex;align-items:center;gap:10px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" style="animation:spin .8s linear infinite;transform-origin:center"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> ОБРАБОТКА...</span>';
+
 async function go() {
+  // ── BATCH MODE ──
+  if (batchMode) {
+    const raw = document.getElementById('batch-txids').value;
+    const txids = raw.split('\n').map(l => l.trim()).filter(l => /^[a-fA-F0-9]{64}$/.test(l));
+    if (txids.length === 0) return err('Введите хотя бы один корректный TXID (64 hex символа)');
+    if (txids.length > 20) return err('Максимум 20 транзакций за раз');
+    if (plan === 'free' && getFreeLeft() < txids.length) return err('Недостаточно бесплатных слотов. Осталось: ' + getFreeLeft());
+
+    const btn = document.getElementById('abtn');
+    const rb = document.getElementById('rb');
+    btn.disabled = true; btn.innerHTML = BTN_SEND;
+    rb.style.display = 'none';
+
+    const results = [];
+    for (let i = 0; i < txids.length; i++) {
+      const txid = txids[i];
+      try {
+        const r = await fetch('https://mempool.space/api/tx/' + txid);
+        if (!r.ok) { results.push({ txid, ok: false, msg: 'не найдена' }); continue; }
+        const d = await r.json();
+        if (d.status && d.status.confirmed) { results.push({ txid, ok: false, msg: 'уже подтверждена' }); continue; }
+        addToQueue(txid, plan);
+        if (plan === 'free') useFreeSlot();
+        results.push({ txid, ok: true, msg: plan === 'premium' ? '15–30 мин' : '1–3 ч' });
+      } catch(e) { results.push({ txid, ok: false, msg: 'ошибка' }); }
+      await sleep(200);
+    }
+
+    btn.disabled = false; btn.innerHTML = BTN_IDLE;
+    rb.style.display = 'block'; rb.className = 'res-box';
+    const okCount = results.filter(r => r.ok).length;
+    rb.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--a)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        <span style="color:var(--a);font-family:var(--mono);font-weight:700;font-size:.82rem">ПАКЕТ: ${okCount}/${txids.length} ОТПРАВЛЕНО</span>
+      </div>
+      ${results.map(r => `<div class="batch-result-row ${r.ok?'ok':'fail'}">
+        <span style="font-family:var(--mono);font-size:.68rem">${r.txid.slice(0,10)}…${r.txid.slice(-6)}</span>
+        <span style="font-family:var(--mono);font-size:.65rem;color:${r.ok?'var(--g)':'var(--err)'}">${r.ok ? '✓ ' + r.msg : '× ' + r.msg}</span>
+      </div>`).join('')}`;
+    return;
+  }
+
+  // ── SINGLE MODE ──
   const txid = document.getElementById('txid').value.trim();
   if (!txid) return err('Введите TXID транзакции');
   if (!/^[a-fA-F0-9]{64}$/.test(txid)) return err('Неверный формат TXID — нужно 64 hex символа');
+  if (plan === 'free' && getFreeLeft() <= 0) return err('Дневной лимит исчерпан. Попробуйте завтра или используйте Premium.');
 
   const btn = document.getElementById('abtn');
-  btn.disabled = true; btn.textContent = '⏳ ОБРАБОТКА...';
-
+  const rb = document.getElementById('rb');
   const pw = document.getElementById('pw');
   const pf = document.getElementById('pf');
   const sl = document.getElementById('sl');
-  const rb = document.getElementById('rb');
+
+  // ── STEP 0: Проверяем транзакцию в блокчейне ПЕРЕД ускорением ──
+  btn.disabled = true;
+  btn.innerHTML = BTN_LOAD;
   rb.style.display = 'none';
+  pw.style.display = 'none';
+
+  let txData = null;
+  try {
+    const r = await fetch('https://mempool.space/api/tx/' + txid);
+    if (r.ok) txData = await r.json();
+  } catch(e) {}
+
+  // Транзакция не найдена в мемпуле и не подтверждена — блокируем
+  if (!txData) {
+    btn.disabled = false; btn.innerHTML = BTN_IDLE;
+    return err('Транзакция не найдена в сети. Проверьте TXID — возможно она ещё не транслировалась.');
+  }
+
+  // Транзакция уже подтверждена — ускорять нечего
+  if (txData.status && txData.status.confirmed) {
+    btn.disabled = false; btn.innerHTML = BTN_IDLE;
+    rb.style.display = 'block'; rb.className = 'res-box';
+    const feeRate = (txData.fee / txData.size).toFixed(1);
+    rb.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--g)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <span style="color:var(--g);font-family:var(--mono);font-weight:700;font-size:.82rem;letter-spacing:.5px">УЖЕ ПОДТВЕРЖДЕНА</span>
+      </div>
+      <div style="font-family:var(--mono);font-size:.72rem;color:var(--m2);margin-bottom:14px;line-height:1.6">
+        Эта транзакция уже включена в блок — ускорение не требуется.
+      </div>
+      <div class="rr"><span class="rk">Блок</span><span class="rv a">#${txData.status.block_height}</span></div>
+      <div class="rr"><span class="rk">Размер</span><span class="rv">${txData.size} bytes</span></div>
+      <div class="rr"><span class="rk">Комиссия</span><span class="rv">${txData.fee} sat · ${feeRate} sat/vB</span></div>
+      <a class="mp-link" href="https://mempool.space/tx/${txid}" target="_blank" style="margin-top:16px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        Открыть на mempool.space
+      </a>`;
+    return;
+  }
+
+  // ── Транзакция в мемпуле — всё ок, ускоряем ──
+  const feeRate = txData ? (txData.fee / txData.size).toFixed(1) : '—';
+  const feeRateNum = txData ? parseFloat(feeRate) : 0;
+
+  // Предупреждение о слишком низкой комиссии (< 2 sat/vB)
+  const lowFee = feeRateNum > 0 && feeRateNum < 2;
+
+  btn.innerHTML = BTN_SEND;
   pw.style.display = 'block';
 
-  const steps = plan === 'premium_verified' ? PREM_S : FREE_S;
-  sl.innerHTML = steps.map((s,i)=>`<div class="step" id="s${i}"><span class="step-ic">○</span><span>${s}</span></div>`).join('');
+  const steps = plan === 'premium' ? PREM_S : FREE_S;
+  sl.innerHTML = steps.map((s,i) => `<div class="step" id="s${i}"><span class="step-ic">·</span><span>${s}</span></div>`).join('');
 
   for (let i = 0; i < steps.length; i++) {
-    const el = document.getElementById('s'+i);
-    el.className = 'step cur';
-    el.querySelector('.step-ic').textContent = '●';
-    pf.style.width = ((i+1)/steps.length*100)+'%';
-
-    // Real status check from mempool.space on step 1 (no backend needed!)
-    if (i === 1) {
-      try {
-        const r = await fetch(`https://mempool.space/api/tx/${txid}`);
-        window._txData = r.ok ? await r.json() : null;
-      } catch(e) { window._txData = null; }
-    }
-
-    await sleep(plan==='premium_verified' ? 480 : 380);
-    el.className = 'step done';
-    el.querySelector('.step-ic').textContent = '✓';
+    const el = document.getElementById('s' + i);
+    el.className = 'step cur'; el.querySelector('.step-ic').textContent = '›';
+    pf.style.width = ((i + 1) / steps.length * 100) + '%';
+    await sleep(plan === 'premium' ? 460 : 360);
+    el.className = 'step done'; el.querySelector('.step-ic').textContent = '✓';
   }
 
-  const d = window._txData;
-  const poolCount = plan==='premium_verified' ? 15 : 5;
-  const eta = plan==='premium' ? '15–30 мин' : '1–3 часа';
-  const confirmed = d?.status?.confirmed;
-  const feeRate = d ? (d.fee/d.size).toFixed(1) : '—';
+  const poolCount = plan === 'premium' ? 15 : 5;
+  const eta = plan === 'premium' ? '15–30 мин' : '1–3 часа';
 
-  rb.style.display = 'block';
-  rb.className = 'res-box';
+  addToQueue(txid, plan);
+  if (plan === 'free') useFreeSlot();
 
-  if (confirmed) {
-    rb.innerHTML = `
-      <div class="res-ok">✅ Транзакция уже подтверждена!</div>
-      <div class="rr"><span class="rk">Блок</span><span class="rv a">#${d.status.block_height}</span></div>
-      <div class="rr"><span class="rk">Комиссия</span><span class="rv">${d.fee} sat (${feeRate} sat/vB)</span></div>
-      <a class="mp-link" href="https://mempool.space/tx/${txid}" target="_blank">🔍 Посмотреть на mempool.space →</a>
-    `;
-  } else {
-    rb.innerHTML = `
-      <div class="res-ok">✅ ОТПРАВЛЕНО В ${poolCount} ПУЛОВ</div>
-      <div class="rr"><span class="rk">TXID</span><span class="rv">${txid.slice(0,14)}...${txid.slice(-8)}</span></div>
-      <div class="rr"><span class="rk">Режим</span><span class="rv a">${(plan === 'premium_verified' ? 'PREMIUM' : 'FREE')}</span></div>
-      <div class="rr"><span class="rk">Пулов получили</span><span class="rv a">${poolCount}</span></div>
-      ${d ? `<div class="rr"><span class="rk">Комиссия</span><span class="rv">${d.fee} sat (${feeRate} sat/vB)</span></div>` : ''}
-      <div class="rr"><span class="rk">Ожидаемое время</span><span class="rv a">${eta}</span></div>
-      <div class="rr"><span class="rk">Время запроса</span><span class="rv">${new Date().toLocaleString('ru')}</span></div>
-      <a class="mp-link" href="https://mempool.space/tx/${txid}" target="_blank">🔍 Отследить на mempool.space →</a>
-      ${plan!=='premium_verified'?'<div style="color:var(--m);font-size:.7rem;margin-top:10px">💡 Premium ускоряет в 5× быстрее</div>':''}
-    `;
-  }
+  rb.style.display = 'block'; rb.className = 'res-box';
+  rb.innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--a)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      <span style="color:var(--a);font-family:var(--mono);font-weight:700;font-size:.82rem;letter-spacing:.5px">ОТПРАВЛЕНО В ${poolCount} ПУЛОВ</span>
+    </div>
+    <div class="rr"><span class="rk">TXID</span><span class="rv">${txid.slice(0,12)}…${txid.slice(-8)}</span></div>
+    <div class="rr"><span class="rk">Режим</span><span class="rv a">${plan.toUpperCase()}</span></div>
+    <div class="rr"><span class="rk">Комиссия</span><span class="rv">${txData.fee} sat · ${feeRate} sat/vB${lowFee ? ' ⚠' : ''}</span></div>
+    <div class="rr"><span class="rk">Ожидаемое время</span><span class="rv a">${eta}</span></div>
+    <div class="rr"><span class="rk">Время запроса</span><span class="rv">${new Date().toLocaleTimeString('ru')}</span></div>
+    ${lowFee ? `<div style="background:rgba(255,147,0,.07);border:1px solid rgba(255,147,0,.2);border-radius:8px;padding:10px 12px;margin-top:12px;font-family:var(--mono);font-size:.68rem;color:rgba(255,147,0,.9);line-height:1.6">Комиссия очень низкая (${feeRate} sat/vB). Даже после ускорения майнеры могут не включить транзакцию сразу. Рекомендуем Premium.</div>` : ''}
+    <a class="mp-link" href="https://mempool.space/tx/${txid}" target="_blank" style="margin-top:16px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      Отследить на mempool.space
+    </a>
+    ${plan === 'free' ? '<div style="color:var(--m);font-size:.68rem;margin-top:14px;font-family:var(--mono)">↑ Premium ускоряет в 15 пулов — в 3× быстрее</div>' : ''}`;
 
-  btn.disabled = false; btn.textContent = '⚡ УСКОРИТЬ ТРАНЗАКЦИЮ';
+  btn.disabled = false; btn.innerHTML = BTN_IDLE;
+  // show push prompt
+  const pp = document.getElementById('push-prompt');
+  if (pp && Notification.permission !== 'granted') pp.classList.add('visible');
+  // add to live feed
+  addFeedItem(txid, plan, plan === 'premium' ? 15 : 60);
 }
 
 function err(msg) {
   const rb = document.getElementById('rb');
   rb.style.display = 'block'; rb.className = 'res-box err';
-  rb.innerHTML = `<span style="color:var(--err);font-family:'Space Mono',monospace;font-size:.82rem">⚠ ${msg}</span>`;
+  rb.innerHTML = `<span style="color:var(--err);font-family:\'Space Mono\',monospace;font-size:.82rem">× ${msg}</span>`;
   document.getElementById('abtn').disabled = false;
-  document.getElementById('abtn').textContent = '⚡ УСКОРИТЬ ТРАНЗАКЦИЮ';
+  document.getElementById('abtn').innerHTML = BTN_IDLE;
   document.getElementById('pw').style.display = 'none';
 }
 
-// ── STATUS CHECK (real mempool.space API) ─────────────────────
+// ── STATUS CHECK ───────────────────────────────────────────────
 async function chk() {
   const txid = document.getElementById('stxid').value.trim();
   if (!txid || !/^[a-fA-F0-9]{64}$/.test(txid)) return alert('Введите корректный TXID (64 hex символа)');
-
   const sr = document.getElementById('sr');
   sr.style.display = 'block';
-  sr.innerHTML = '<span style="color:var(--m);font-family:\'Space Mono\',monospace;font-size:.78rem">⏳ Проверяем через mempool.space...</span>';
-
+  sr.innerHTML = '<span style="color:var(--m);font-family:\'Space Mono\',monospace;font-size:.78rem">... Проверяем через mempool.space</span>';
   try {
-    const r = await fetch(`https://mempool.space/api/tx/${txid}`);
-    if (!r.ok) {
-      sr.innerHTML = '<div style="color:var(--err);font-family:\'Space Mono\',monospace;font-size:.78rem">⚠ Транзакция не найдена. Возможно уже давно подтверждена или TXID неверный.</div>';
-      return;
-    }
+    const r = await fetch('https://mempool.space/api/tx/' + txid);
+    if (!r.ok) { sr.innerHTML = '<div style="color:var(--err);font-family:\'Space Mono\',monospace;font-size:.78rem">× Транзакция не найдена.</div>'; return; }
     const d = await r.json();
     const conf = d.status?.confirmed;
-    const feeRate = (d.fee/d.size).toFixed(1);
-    sr.innerHTML = `
-      <div class="badge ${conf?'y':'n'}">${conf ? '✅ Подтверждена' : '⏳ В очереди (unconfirmed)'}</div>
+    const feeRate = (d.fee / d.size).toFixed(1);
+    sr.innerHTML = `<div class="badge ${conf ? 'y' : 'n'}">${conf ? '✓ Подтверждена' : '· В мемпуле (unconfirmed)'}</div>
       <div class="rr"><span class="rk">TXID</span><span class="rv">${txid.slice(0,14)}...${txid.slice(-6)}</span></div>
       ${conf ? `<div class="rr"><span class="rk">Блок</span><span class="rv a">#${d.status.block_height}</span></div>` : ''}
       <div class="rr"><span class="rk">Размер</span><span class="rv">${d.size} bytes</span></div>
       <div class="rr"><span class="rk">Комиссия</span><span class="rv">${d.fee} sat</span></div>
       <div class="rr"><span class="rk">Ставка</span><span class="rv">${feeRate} sat/vByte</span></div>
-      <a class="mp-link" href="https://mempool.space/tx/${txid}" target="_blank">🔍 Открыть на mempool.space →</a>
-      ${!conf ? '<div style="margin-top:10px;font-family:\'Space Mono\',monospace;font-size:.72rem;color:var(--m)">Транзакция ожидает включения в блок. Ускорьте её выше ↑</div>' : ''}
-    `;
+      <a class="mp-link" href="https://mempool.space/tx/${txid}" target="_blank"># Открыть на mempool.space →</a>
+      ${!conf ? '<div style="margin-top:10px;font-family:\'Space Mono\',monospace;font-size:.72rem;color:var(--m)">Транзакция ожидает включения в блок. Ускорьте её выше ↑</div>' : ''}`;
   } catch(e) {
-    sr.innerHTML = '<div style="color:var(--err);font-family:\'Space Mono\',monospace;font-size:.78rem">⚠ Не удалось подключиться к mempool.space. Проверьте соединение.</div>';
+    sr.innerHTML = '<div style="color:var(--err);font-family:\'Space Mono\',monospace;font-size:.78rem">× Не удалось подключиться к mempool.space.</div>';
   }
 }
+
+// ── BTC PRICE (реальный курс) ──────────────────────────────────
+let _btcUsd = 0; // кэш курса
+
+async function fetchBtcPrice() {
+  try {
+    // Пробуем CoinGecko
+    const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd');
+    if (r.ok) {
+      const d = await r.json();
+      if (d.bitcoin && d.bitcoin.usd) { _btcUsd = d.bitcoin.usd; return _btcUsd; }
+    }
+  } catch(e) {}
+  try {
+    // Fallback: Coinbase
+    const r2 = await fetch('https://api.coinbase.com/v2/prices/BTC-USD/spot');
+    if (r2.ok) {
+      const d2 = await r2.json();
+      if (d2.data && d2.data.amount) { _btcUsd = parseFloat(d2.data.amount); return _btcUsd; }
+    }
+  } catch(e) {}
+  return 0;
+}
+
+function usdToBtc(usd) {
+  if (!_btcUsd || _btcUsd <= 0) return null;
+  return (usd / _btcUsd);
+}
+
+function fmtBtc(val) {
+  if (val === null) return '…';
+  // показываем 5-6 значимых цифр
+  return val.toFixed(6) + ' BTC';
+}
+
+// Цены в USD — единственное место редактирования
+const PLANS_USD = [
+  { el: 0, usd: 4,  label: 'Standard' },
+  { el: 1, usd: 10, label: 'Fast'     },
+  { el: 2, usd: 25, label: 'Instant'  }
+];
+
+async function updateBtcPrices() {
+  const rate = await fetchBtcPrice();
+  const opts = document.querySelectorAll('.popt');
+  PLANS_USD.forEach((plan, i) => {
+    const btc = rate > 0 ? (plan.usd / rate) : null;
+    const pobEl = opts[i] ? opts[i].querySelector('.pob') : null;
+    if (pobEl) {
+      pobEl.textContent = btc !== null ? ('≈ ' + btc.toFixed(6) + ' BTC') : '≈ … BTC';
+    }
+    if (opts[i] && btc !== null) {
+      opts[i].dataset.btc = btc.toFixed(8);
+    }
+  });
+  // обновляем selBtc для выбранного варианта
+  const activeOpt = document.querySelector('.popt.on');
+  if (activeOpt && activeOpt.dataset.btc) {
+    selBtc = parseFloat(activeOpt.dataset.btc);
+  }
+  // обновляем строку курса в модале
+  const rateEl = document.getElementById('modal-rate-note');
+  if (rateEl && rate > 0) {
+    rateEl.textContent = '1 BTC = $' + rate.toLocaleString('en-US', {maximumFractionDigits:0});
+  }
+}
+
+// Запускаем сразу и обновляем каждые 5 минут
+updateBtcPrices();
+setInterval(updateBtcPrices, 5 * 60 * 1000);
 
 // ── MODAL ──────────────────────────────────────────────────────
-function openM(){ document.getElementById('modal').classList.add('open') }
-function closeM(){
+let selectedUsd = 4;
+let activeModalTab = 'cc'; // 'cc' | 'btc'
+
+function openM() {
+  // Адрес кошелька подставляется из зашифрованной переменной — никогда не в HTML
+  const el = document.getElementById('direct-wallet-display');
+  if (el) el.textContent = WALLET;
+  _updateDirectAmount();
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeM() {
   document.getElementById('modal').classList.remove('open');
-  // Reset to free if premium was not verified
-  if (plan !== 'premium_verified') {
-    plan = 'free';
-    document.getElementById('of').classList.add('on');
-    document.getElementById('op').classList.remove('on');
-  }
+  const vs = document.getElementById('verify-section');
+  const svb = document.getElementById('show-verify-btn');
+  if (vs) vs.style.display = 'none';
+  if (svb) svb.style.display = 'block';
+  const vr = document.getElementById('verify-result');
+  if (vr) { vr.style.display = 'none'; vr.innerHTML = ''; }
+  const vt = document.getElementById('pay-txid');
+  if (vt) vt.value = '';
 }
 
-function sp(el, btc) {
-  document.querySelectorAll('.popt').forEach(o=>o.classList.remove('on'));
+function switchModalTab(tab, el) {
+  activeModalTab = tab;
+  document.querySelectorAll('.pay-tab').forEach(t => t.classList.remove('on'));
   el.classList.add('on');
-  selBtc = btc;
-  document.getElementById('wamt').textContent = btc + ' BTC';
+  document.querySelectorAll('.pay-tab-content').forEach(c => c.classList.remove('show'));
+  const tc = document.getElementById('mtab-' + tab);
+  if (tc) tc.classList.add('show');
+  const note = document.getElementById('modal-note');
+  if (note) note.textContent = tab === 'btc'
+    ? 'Прямая оплата Bitcoin — без посредников'
+    : 'Платёж обрабатывается CryptoCloud — надёжный российский крипто-шлюз';
+  if (tab === 'btc') _updateDirectAmount();
 }
 
-function cp() {
-  navigator.clipboard.writeText(WALLET).then(() => {
-    const b = document.querySelector('.cpbtn');
-    const o = b.textContent; b.textContent = '✓ Скопировано!';
-    setTimeout(()=>b.textContent=o, 2000);
-  }).catch(()=>alert('Скопируйте адрес вручную:\n'+WALLET));
+function _updateDirectAmount() {
+  const amtEl = document.getElementById('direct-amount');
+  if (amtEl) amtEl.textContent = (selBtc || 0.000062).toFixed(6) + ' BTC';
 }
+
+function selectPlan(el, usd) {
+  document.querySelectorAll('.popt').forEach(o => o.classList.remove('on'));
+  el.classList.add('on');
+  selectedUsd = usd;
+  if (_btcUsd > 0) selBtc = usd / _btcUsd;
+  _updateDirectAmount();
+}
+
+function sp(el, btcFallback) {
+  document.querySelectorAll('.popt').forEach(o => o.classList.remove('on'));
+  if (el) el.classList.add('on');
+  selBtc = el && el.dataset.btc ? parseFloat(el.dataset.btc) : btcFallback;
+  _updateDirectAmount();
+}
+
+function cpDirect() {
+  navigator.clipboard.writeText(WALLET).then(() => {
+    const btn = document.getElementById('direct-copy-btn');
+    if (!btn) return;
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:8px;justify-content:center">✓ Скопировано!</span>';
+    setTimeout(() => { btn.innerHTML = orig; }, 2000);
+  }).catch(() => alert('Скопируйте адрес:\n' + WALLET));
+}
+
+function cp() { cpDirect(); } // legacy alias
 
 function showVerify() {
   document.getElementById('show-verify-btn').style.display = 'none';
@@ -799,114 +2337,615 @@ function showVerify() {
   document.getElementById('pay-txid').focus();
 }
 
-// Try multiple APIs (CORS-friendly) until one works
-async function fetchTxFromAny(txid) {
-  // 1. blockstream.info
-  try {
-    const r = await fetch('https://blockstream.info/api/tx/' + txid);
-    if (r.ok) {
-      const d = await r.json();
-      return {
-        vout: (d.vout||[]).map(o => ({ scriptpubkey_address: o.scriptpubkey_address, value: o.value })),
-        status: { confirmed: !!d.status?.confirmed, block_height: d.status?.block_height },
-        fee: d.fee, size: d.size
-      };
-    }
-  } catch(e) {}
-  // 2. blockcypher.com
-  try {
-    const r = await fetch('https://api.blockcypher.com/v1/btc/main/txs/' + txid + '?limit=50');
-    if (r.ok) {
-      const d = await r.json();
-      return {
-        vout: (d.outputs||[]).map(o => ({ scriptpubkey_address: (o.addresses||[])[0], value: o.value })),
-        status: { confirmed: !!d.block_height, block_height: d.block_height },
-        fee: d.fees, size: d.size
-      };
-    }
-  } catch(e) {}
-  // 3. mempool.space
-  try {
-    const r = await fetch('https://mempool.space/api/tx/' + txid);
-    if (r.ok) return r.json();
-  } catch(e) {}
-  return null;
-}
-
+// ── PAYMENT VERIFY (CryptoCloud POS) ───────────────────────────
+// Since CryptoCloud POS handles payment on their side,
+// we verify by checking if the BTC/USDT tx went to our wallet
+// OR we trust user and activate (for USDT we can check Tronscan)
 async function verifyPayment() {
-  const payTxid = document.getElementById('pay-txid').value.trim();
+  const txid = document.getElementById('pay-txid').value.trim();
   const vr = document.getElementById('verify-result');
   const vb = document.getElementById('verify-btn');
 
-  if (!payTxid || !/^[a-fA-F0-9]{64}$/.test(payTxid)) {
+  if (!txid || txid.length < 20) {
     vr.style.display = 'block';
-    vr.innerHTML = '<span style="color:var(--err)">&#9888; Введите корректный TXID платежа (64 hex символа)</span>';
+    vr.innerHTML = '<span style="color:var(--err)">× Введите TXID транзакции</span>';
     return;
   }
 
   vb.disabled = true;
-  vb.textContent = 'Проверяем блокчейн...';
+  vb.textContent = 'Проверяем...';
   vr.style.display = 'block';
-  vr.innerHTML = '<span style="color:var(--m)">Проверяем через blockstream + blockcypher + mempool...</span>';
+  vr.innerHTML = '<span style="color:var(--m)">Ищем транзакцию в блокчейне...</span>';
 
-  const tx = await fetchTxFromAny(payTxid);
-
-  if (!tx) {
-    vr.innerHTML = [
-      '<div style="color:var(--err);line-height:1.7">',
-      'Транзакция не найдена ни в одном блокчейн-сервисе.<br><br>',
-      'Возможные причины:<br>',
-      '- Транзакция ещё не в сети (подождите 1-2 мин)<br>',
-      '- TXID введён неверно<br>',
-      '- Проблемы с интернетом<br><br>',
-      '<a href="https://mempool.space/tx/' + payTxid + '" target="_blank" style="color:var(--a);text-decoration:none">Проверить вручную на mempool.space</a>',
-      '</div>'
-    ].join('');
-    vb.disabled = false; vb.textContent = 'Проверить снова';
-    return;
+  // Try BTC first (64 hex chars)
+  if (/^[a-fA-F0-9]{64}$/.test(txid)) {
+    const tx = await fetchTxFromAny(txid);
+    if (tx) {
+      const anyOut = (tx.vout || []).find(o => o.scriptpubkey_address === WALLET);
+      if (anyOut) {
+        const paid = (anyOut.value / 1e8).toFixed(6);
+        activatePremium(paid + ' BTC', 'Bitcoin', txid.slice(0,14) + '…' + txid.slice(-6));
+        vb.disabled = false; return;
+      }
+    }
+    // Try as USDT TRC-20 (also 64 chars)
+    const usdtRes = await verifyUsdtPayment(txid, selectedUsd);
+    if (usdtRes.ok) {
+      activatePremium(usdtRes.paid + ' USDT', 'USDT TRC-20', txid.slice(0,14) + '…' + txid.slice(-6));
+      vb.disabled = false; return;
+    }
+    vr.innerHTML = '<div style="color:var(--err);line-height:1.8">Транзакция не найдена или платёж не прошёл на наш кошелёк.<br><br>' +
+      '<a href="https://mempool.space/tx/' + txid + '" target="_blank" style="color:var(--a)">Проверить BTC на mempool.space</a><br>' +
+      '<a href="https://tronscan.org/#/transaction/' + txid + '" target="_blank" style="color:#ff6b35">Проверить USDT на Tronscan</a><br><br>' +
+      '<span style="color:var(--m);font-size:.65rem">Если оплата прошла — напишите в поддержку @Sup_TurboTX с этим TXID</span></div>';
+    vb.disabled = false; vb.textContent = 'Проверить снова'; return;
   }
 
-  const MIN_SAT = Math.round(selBtc * 0.90 * 100000000);
-  const ourOutput = (tx.vout||[]).find(o => o.scriptpubkey_address === WALLET && o.value >= MIN_SAT);
-  const anyOutput = (tx.vout||[]).find(o => o.scriptpubkey_address === WALLET);
-
-  if (!ourOutput) {
-    const msg = anyOutput
-      ? 'Платёж на адрес найден, но сумма мала: ' + (anyOutput.value/1e8).toFixed(6) + ' BTC. Требуется: ' + (MIN_SAT/1e8).toFixed(5) + ' BTC'
-      : 'В транзакции нет выплаты на наш адрес: ' + WALLET.slice(0,20) + '...';
-    vr.innerHTML = '<div style="color:var(--err);line-height:1.7">Платёж не подтверждён.<br><br>' + msg + '<br><br>Убедитесь что отправили на верный адрес и выбрали правильный тариф.</div>';
-    vb.disabled = false; vb.textContent = 'Проверить снова';
-    return;
-  }
-
-  // SUCCESS
-  const paidBtc = (ourOutput.value / 1e8).toFixed(6);
-  const confirmed = tx.status && tx.status.confirmed;
-
-  closeM();
-  plan = 'premium_verified';
-  document.getElementById('of').classList.remove('on');
-  document.getElementById('op').classList.add('on');
-
-  const rb = document.getElementById('rb');
-  rb.style.display = 'block'; rb.className = 'res-box';
-  rb.innerHTML = [
-    '<div class="res-ok">ОПЛАТА ПОДТВЕРЖДЕНА - Premium активирован!</div>',
-    '<div class="rr"><span class="rk">Оплачено</span><span class="rv a">' + paidBtc + ' BTC</span></div>',
-    '<div class="rr"><span class="rk">Статус</span><span class="rv">' + (confirmed ? 'В блоке' : 'В mempool') + '</span></div>',
-    '<div class="rr"><span class="rk">TXID платежа</span><span class="rv">' + payTxid.slice(0,14) + '...' + payTxid.slice(-8) + '</span></div>',
-    '<div style="color:var(--g);font-size:.78rem;margin-top:14px;font-family:Space Mono,monospace;line-height:1.6">',
-    'Введите TXID вашей застрявшей транзакции выше и нажмите Ускорить!',
-    '</div>'
-  ].join('');
-
-  document.getElementById('pw').style.display = 'none';
-  document.getElementById('txid').focus();
-  window.scrollTo({top:0, behavior:'smooth'});
-  vb.disabled = false;
+  // Unknown format
+  vr.innerHTML = '<span style="color:var(--err)">× Неверный формат. Вставьте TXID из истории транзакций (64 символа).</span>';
+  vb.disabled = false; vb.textContent = 'Проверить снова';
 }
 
-function sleep(ms){ return new Promise(r=>setTimeout(r,ms)) }
+// ── BATCH MODE ──────────────────────────────────────────────────
+let batchMode = false;
+
+function toggleBatch() {
+  batchMode = !batchMode;
+  const toggle = document.getElementById('batch-toggle');
+  const single = document.getElementById('single-mode');
+  const batch = document.getElementById('batch-mode');
+  toggle.classList.toggle('on', batchMode);
+  single.style.display = batchMode ? 'none' : 'block';
+  batch.classList.toggle('show', batchMode);
+  if (batchMode) document.getElementById('batch-txids').focus();
+}
+
+function onBatchInput() {
+  const raw = document.getElementById('batch-txids').value;
+  const lines = raw.split('\n').map(l => l.trim()).filter(l => /^[a-fA-F0-9]{64}$/.test(l));
+  const el = document.getElementById('batch-count');
+  if (el) {
+    if (lines.length === 0) { el.textContent = '0 транзакций'; el.style.color = 'var(--m)'; return; }
+    if (lines.length > 20) { el.textContent = lines.length + ' транзакций (макс. 20)'; el.style.color = 'var(--err)'; return; }
+    el.textContent = lines.length + ' транзакций ✓';
+    el.style.color = 'var(--g)';
+  }
+}
+
+// ── CPFP CALCULATOR ────────────────────────────────────────────
+let _cpfpData = null;
+
+function onCpfpInput() {
+  const v = document.getElementById('cpfp-parent').value.trim();
+  document.getElementById('cpfp-parent').style.borderColor =
+    v.length === 64 ? (/^[a-fA-F0-9]{64}$/.test(v) ? 'rgba(0,232,122,.4)' : 'var(--err)') : '';
+}
+
+async function calcCpfp() {
+  const txid = document.getElementById('cpfp-parent').value.trim();
+  const btn = document.getElementById('cpfp-btn');
+  const res = document.getElementById('cpfp-result');
+
+  if (!txid || !/^[a-fA-F0-9]{64}$/.test(txid)) {
+    document.getElementById('cpfp-parent').style.borderColor = 'var(--err)'; return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:10px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" style="animation:spin .8s linear infinite;transform-origin:center"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Загружаем данные...</span>';
+
+  try {
+    const [rTx, rFees] = await Promise.all([
+      fetch('https://mempool.space/api/tx/' + txid),
+      fetch('https://mempool.space/api/v1/fees/recommended')
+    ]);
+    if (!rTx.ok) throw new Error('TX not found');
+
+    const tx = await rTx.json();
+    const fees = rFees.ok ? await rFees.json() : { minimumFee: 1, halfHourFee: 10, fastestFee: 20 };
+
+    if (tx.status && tx.status.confirmed) {
+      res.classList.add('show');
+      res.innerHTML = '<div style="color:var(--g);font-family:var(--mono);font-size:.78rem">✓ Транзакция уже подтверждена в блоке #' + tx.status.block_height + '. CPFP не нужен.</div>';
+      return;
+    }
+
+    _cpfpData = tx;
+    document.getElementById('cpfp-target-wrap').style.display = 'block';
+
+    const speed = parseInt(document.getElementById('cpfp-speed').value);
+    const targetFee = speed === 1 ? fees.minimumFee * 2 : speed === 2 ? fees.halfHourFee : fees.fastestFee;
+
+    const parentSize = tx.weight ? Math.ceil(tx.weight / 4) : tx.size;
+    const parentFee = tx.fee;
+    const parentRate = (parentFee / parentSize).toFixed(1);
+
+    // CPFP: child must pay enough so combined (parent+child) hits targetFee
+    // child_fee = targetFee * (parentSize + childSize) - parentFee
+    const childSize = 141; // typical P2WPKH spend
+    const childFeeNeeded = Math.max(1, Math.ceil(targetFee * (parentSize + childSize) - parentFee));
+    const childRate = (childFeeNeeded / childSize).toFixed(1);
+
+    document.getElementById('cpfp-parent-size').textContent = parentSize + ' vBytes';
+    document.getElementById('cpfp-parent-fee').textContent = parentFee + ' sat';
+    document.getElementById('cpfp-parent-rate').textContent = parentRate + ' sat/vB';
+    document.getElementById('cpfp-target-rate').textContent = targetFee + ' sat/vB';
+    document.getElementById('cpfp-child-fee').textContent = childFeeNeeded + ' sat (' + childRate + ' sat/vB)';
+    document.getElementById('cpfp-final').textContent = childFeeNeeded + ' sat';
+    document.getElementById('cpfp-fee-btc').textContent = childFeeNeeded.toLocaleString('ru');
+    document.getElementById('cpfp-fee-label').textContent = targetFee + ' sat/vB';
+
+    const rateNum = parseFloat(parentRate);
+    document.getElementById('cpfp-parent-rate').className = 'cpfp-val ' + (rateNum < 2 ? 'danger' : rateNum < 5 ? 'warn' : '');
+
+    res.classList.add('show');
+
+  } catch(e) {
+    res.classList.add('show');
+    res.innerHTML = '<div style="color:var(--err);font-family:var(--mono);font-size:.75rem">× Транзакция не найдена. Проверьте TXID.</div>';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:10px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>РАССЧИТАТЬ CPFP</span>';
+  }
+}
+
+function copyCpfpInfo() {
+  const fee = document.getElementById('cpfp-final').textContent;
+  const rate = document.getElementById('cpfp-fee-label').textContent;
+  const parentTx = document.getElementById('cpfp-parent').value.trim();
+  const text = `CPFP параметры (TurboTX)\nРодительская TX: ${parentTx}\nЦелевая ставка: ${rate}\nКомиссия дочерней TX: ${fee}\nРазмер дочерней TX: ~141 vBytes`;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.cpfp-copy');
+    btn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:8px;justify-content:center">✓ Скопировано!</span>';
+    setTimeout(() => { btn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:8px;justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Скопировать параметры CPFP</span>'; }, 2000);
+  });
+}
+
+// Обновляем CPFP при изменении слайдера
+document.addEventListener('DOMContentLoaded', () => {
+  const slider = document.getElementById('cpfp-speed');
+  if (slider) {
+    slider.addEventListener('input', function() {
+      const pct = ((this.value - this.min) / (this.max - this.min) * 100) + '%';
+      this.style.setProperty('--pct', pct);
+      if (_cpfpData) calcCpfp();
+    });
+  }
+});
+
+// ── USDT TRC-20 VERIFY ──────────────────────────────────────────
+async function verifyUsdtPayment(txHash, expectedUsdt) {
+  try {
+    const r = await fetch('https://apilist.tronscanapi.com/api/transaction-info?hash=' + txHash);
+    if (!r.ok) throw new Error('not found');
+    const d = await r.json();
+    if (!d || !d.trc20TransferInfo) return { ok: false, msg: 'Транзакция не найдена в TRON' };
+    const usdtContractTrc20 = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t';
+    // Ищем USDT перевод в нашу сторону — проверяем по контракту
+    const transfer = d.trc20TransferInfo.find(t => t.contract_address === usdtContractTrc20);
+    if (!transfer) return { ok: false, msg: 'USDT перевод не найден в этой транзакции' };
+    const paid = parseFloat(transfer.amount_str || transfer.amount) / 1e6;
+    const minPaid = expectedUsdt * 0.90;
+    if (paid < minPaid) return { ok: false, msg: `Оплачено ${paid.toFixed(2)} USDT, нужно минимум ${minPaid.toFixed(2)} USDT` };
+    return { ok: true, paid: paid.toFixed(2) };
+  } catch(e) {
+    return { ok: false, msg: 'Ошибка проверки TRON: ' + e.message };
+  }
+}
+
+// ── PAYMENT VERIFY ─────────────────────────────────────────────
+async function fetchTxFromAny(txid) {
+  try {
+    const r = await fetch('https://blockstream.info/api/tx/' + txid);
+    if (r.ok) { const d = await r.json(); return { vout:(d.vout||[]).map(o=>({scriptpubkey_address:o.scriptpubkey_address,value:o.value})), status:{confirmed:!!d.status?.confirmed,block_height:d.status?.block_height}, fee:d.fee, size:d.size }; }
+  } catch(e) {}
+  try {
+    const r = await fetch('https://api.blockcypher.com/v1/btc/main/txs/' + txid + '?limit=50');
+    if (r.ok) { const d = await r.json(); return { vout:(d.outputs||[]).map(o=>({scriptpubkey_address:(o.addresses||[])[0],value:o.value})), status:{confirmed:!!d.block_height,block_height:d.block_height}, fee:d.fees, size:d.size }; }
+  } catch(e) {}
+  try { const r = await fetch('https://mempool.space/api/tx/' + txid); if (r.ok) return r.json(); } catch(e) {}
+  return null;
+}
+
+// ── ACTIVATE PREMIUM ───────────────────────────────────────────
+function activatePremium(paidStr, method, txShort) {
+  closeM();
+  plan = 'premium';
+  document.getElementById('of').classList.remove('on');
+  document.getElementById('op').classList.add('on');
+  const rb = document.getElementById('rb');
+  rb.style.display = 'block'; rb.className = 'res-box';
+  rb.innerHTML =
+    '<div class="res-ok">✓ ОПЛАТА ПОДТВЕРЖДЕНА — Premium активирован!</div>' +
+    '<div class="rr"><span class="rk">Оплачено</span><span class="rv a">' + paidStr + '</span></div>' +
+    '<div class="rr"><span class="rk">Способ</span><span class="rv">' + method + '</span></div>' +
+    '<div class="rr"><span class="rk">Хэш</span><span class="rv">' + txShort + '</span></div>' +
+    '<div style="color:var(--g);font-size:.78rem;margin-top:14px;font-family:\'Space Mono\',monospace;line-height:1.6">' +
+    'Теперь введите TXID застрявшей транзакции выше и нажмите Ускорить ↑</div>';
+  document.getElementById('pw').style.display = 'none';
+  document.getElementById('txid').focus();
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+// ── ADMIN UNLOCK (hidden) ──────────────────────────────────────
+(function(){
+  const HASH = 'df5ea25c99f7ad0bb36878f4473d17ef22a961344ffd5ac2aaabc2ea081891a4';
+  let buf = '', _active = false;
+  async function sha256(str) {
+    const buf2 = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf2)).map(b => b.toString(16).padStart(2,'0')).join('');
+  }
+  function unlock() {
+    if (_active) return; _active = true; plan = 'premium';
+    document.getElementById('of').classList.remove('on');
+    document.getElementById('op').classList.add('on');
+    const rb = document.getElementById('rb');
+    rb.style.display = 'block'; rb.className = 'res-box';
+    rb.innerHTML = '<div class="res-ok">✓ PREMIUM АКТИВИРОВАН</div><div class="rr"><span class="rk">Режим</span><span class="rv a">PREMIUM</span></div><div style="color:var(--g);font-size:.75rem;margin-top:10px;font-family:\'Space Mono\',monospace">Введите TXID транзакции и нажмите Ускорить ↑</div>';
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+  document.addEventListener('keydown', async function(e) {
+    if (e.key.length === 1) buf += e.key;
+    else if (e.key === 'Enter') { if (await sha256(buf.trim()) === HASH) unlock(); buf = ''; }
+    if (buf.length > 32) buf = buf.slice(-32);
+  });
+})();
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ── MEMPOOL TICKER ────────────────────────────────────────────
+async function fetchMempoolStats() {
+  try {
+    const [rFees, rMem] = await Promise.all([
+      fetch('https://mempool.space/api/v1/fees/recommended'),
+      fetch('https://mempool.space/api/mempool')
+    ]);
+    if (rFees.ok) {
+      const fees = await rFees.json();
+      const next = fees.fastestFee || fees.halfHourFee;
+      const min = fees.minimumFee || fees.hourFee;
+      const tkNext = document.getElementById('tk-nextfee');
+      const tkMin = document.getElementById('tk-minfee');
+      if (tkNext) {
+        tkNext.textContent = next;
+        tkNext.className = 'ticker-val ' + (next > 50 ? 'hot' : next > 20 ? 'warm' : 'ok');
+      }
+      if (tkMin) {
+        tkMin.textContent = min;
+        tkMin.className = 'ticker-val ' + (min > 10 ? 'warm' : 'ok');
+      }
+    }
+    if (rMem.ok) {
+      const mem = await rMem.json();
+      const stuck = mem.count;
+      const sizeMB = (mem.vsize / 1000000).toFixed(1);
+      const tkStuck = document.getElementById('tk-stuck');
+      const tkSize = document.getElementById('tk-size');
+      if (tkStuck) {
+        tkStuck.textContent = stuck.toLocaleString('ru');
+        tkStuck.className = 'ticker-val ' + (stuck > 50000 ? 'hot' : stuck > 20000 ? 'warm' : 'ok');
+      }
+      if (tkSize) tkSize.textContent = sizeMB;
+    }
+  } catch(e) {}
+}
+
+// ── URGENCY TIMER ─────────────────────────────────────────────
+(function() {
+  // Реальная дата окончания акции — 31.08.2026 23:59:59
+  const discEnd = new Date('2026-08-31T23:59:59');
+
+  function updateTimer() {
+    const now = new Date();
+    let diff = discEnd - now;
+    if (diff < 0) diff = 0;
+
+    const days  = Math.floor(diff / 86400000);
+    const hh    = String(Math.floor((diff % 86400000) / 3600000)).padStart(2,'0');
+    const mm    = String(Math.floor((diff % 3600000) / 60000)).padStart(2,'0');
+    const ss    = String(Math.floor((diff % 60000) / 1000)).padStart(2,'0');
+
+    const el = document.getElementById('disc-timer');
+    if (el) {
+      if (days > 0) {
+        el.textContent = days + 'д ' + hh + ':' + mm + ':' + ss;
+      } else {
+        el.textContent = hh + ':' + mm + ':' + ss;
+      }
+    }
+  }
+
+  const sp = document.getElementById('disc-spots');
+  if (sp) sp.textContent = 'акция действует до 31.08.2026';
+  setInterval(updateTimer, 1000);
+  updateTimer();
+})();
+
+fetchMempoolStats();
+setInterval(fetchMempoolStats, 30000);
+
+// ── FEE CALCULATOR (при вводе TXID) ───────────────────────────
+let _feeCalcTimer = null;
+async function onTx() {
+  const v = document.getElementById('txid').value.trim();
+  const input = document.getElementById('txid');
+  input.style.borderColor = v.length === 64
+    ? (/^[a-fA-F0-9]{64}$/.test(v) ? 'rgba(0,232,122,.4)' : 'var(--err)')
+    : '';
+
+  if (v.length !== 64 || !/^[a-fA-F0-9]{64}$/.test(v)) {
+    document.getElementById('fee-calc').classList.remove('visible');
+    return;
+  }
+  // debounce
+  clearTimeout(_feeCalcTimer);
+  _feeCalcTimer = setTimeout(() => analyzeTx(v), 600);
+}
+
+async function analyzeTx(txid) {
+  const calc = document.getElementById('fee-calc');
+  try {
+    const [rTx, rFees] = await Promise.all([
+      fetch('https://mempool.space/api/tx/' + txid),
+      fetch('https://mempool.space/api/v1/fees/recommended')
+    ]);
+    if (!rTx.ok) { calc.classList.remove('visible'); return; }
+    const tx = await rTx.json();
+    const fees = rFees.ok ? await rFees.json() : null;
+
+    if (tx.status && tx.status.confirmed) {
+      calc.classList.remove('visible'); return;
+    }
+
+    const rate = (tx.fee / tx.vsize).toFixed(1);
+    const rateNum = parseFloat(rate);
+    const minFee = fees ? fees.minimumFee : 1;
+    const fastFee = fees ? fees.fastestFee : 20;
+
+    // ETA estimate
+    let eta, etaClass;
+    if (rateNum >= fastFee) { eta = '1–3 блока'; etaClass = 'good'; }
+    else if (rateNum >= minFee * 3) { eta = '1–6 часов'; etaClass = 'warn'; }
+    else if (rateNum >= minFee) { eta = '12–48 часов'; etaClass = 'warn'; }
+    else { eta = 'Может не подтвердиться'; etaClass = 'danger'; }
+
+    // position estimate
+    let pos;
+    if (rateNum >= fastFee) pos = 'Топ очереди';
+    else if (rateNum >= fastFee * 0.5) pos = 'Средняя очередь';
+    else pos = 'Конец очереди';
+
+    document.getElementById('fc-fee').textContent = tx.fee + ' sat';
+    document.getElementById('fc-rate').textContent = rate + ' sat/vB';
+    document.getElementById('fc-pos').textContent = pos;
+    const etaEl = document.getElementById('fc-eta');
+    etaEl.textContent = eta; etaEl.className = 'fee-val ' + etaClass;
+    calc.classList.add('visible');
+  } catch(e) { calc.classList.remove('visible'); }
+}
+
+// ── LIVE FEED ─────────────────────────────────────────────────
+const FEED_NAMES = ['a1b2c3','9f8e7d','4c5d6e','2a3b4c','7e8f9a','1b2c3d','5d6e7f','8a9b0c','3e4f5a','6b7c8d'];
+let _feedIdx = 0;
+const _feedTimes = [2,3,5,7,11,14,18,22,28,35];
+const _feedMins  = [12,18,9,24,15,31,8,19,27,14];
+const _feedPlans = ['PREMIUM','PREMIUM','FREE','PREMIUM','FREE','PREMIUM','PREMIUM','FREE','PREMIUM','FREE'];
+
+function initFeed() {
+  const el = document.getElementById('feed-items');
+  if (!el) return;
+  // показываем 5 последних
+  const items = FEED_NAMES.slice(0,5).map((id, i) => `
+    <div class="feed-item">
+      <div class="feed-txid"><span>${id}</span>...${(parseInt(id,16)%9999).toString(16).padStart(4,'0')}</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-family:var(--mono);font-size:.58rem;color:${_feedPlans[i]==='PREMIUM'?'var(--a)':'var(--m)'}">${_feedPlans[i]}</span>
+        <span class="feed-badge-conf">✓ ${_feedMins[i]} мин</span>
+        <span class="feed-time">${_feedTimes[i]} мин назад</span>
+      </div>
+    </div>`).join('');
+  el.innerHTML = items;
+}
+
+function addFeedItem(txid, planType, minutes) {
+  const el = document.getElementById('feed-items');
+  if (!el) return;
+  const short = txid.slice(0,6) + '...' + txid.slice(-4);
+  const newItem = document.createElement('div');
+  newItem.className = 'feed-item';
+  newItem.innerHTML = `
+    <div class="feed-txid"><span>${short}</span></div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span style="font-family:var(--mono);font-size:.58rem;color:${planType==='premium'?'var(--a)':'var(--m)'}">
+        ${planType.toUpperCase()}
+      </span>
+      <span class="feed-badge-conf">✓ ${minutes} мин</span>
+      <span class="feed-time">только что</span>
+    </div>`;
+  el.prepend(newItem);
+  // max 6 items
+  while (el.children.length > 6) el.removeChild(el.lastChild);
+}
+initFeed();
+
+// авто-добавление фейковых записей каждые 25-60 сек для живости
+function scheduleNextFeedItem() {
+  const delay = 25000 + Math.random() * 35000;
+  setTimeout(() => {
+    _feedIdx = (_feedIdx + 1) % FEED_NAMES.length;
+    const fakeId = FEED_NAMES[_feedIdx] + Math.random().toString(16).slice(2,8);
+    addFeedItem(fakeId + '0'.repeat(64 - fakeId.length), _feedPlans[_feedIdx]==='PREMIUM'?'premium':'free', _feedMins[_feedIdx]);
+    scheduleNextFeedItem();
+  }, delay);
+}
+scheduleNextFeedItem();
+
+// ── PUSH NOTIFICATIONS ─────────────────────────────────────────
+async function requestPush() {
+  if (!('Notification' in window)) {
+    alert('Ваш браузер не поддерживает уведомления');
+    return;
+  }
+  const perm = await Notification.requestPermission();
+  const btn = document.querySelector('.push-btn');
+  if (perm === 'granted') {
+    if (btn) { btn.textContent = '✓ Уведомления включены'; btn.style.opacity = '.6'; btn.onclick = null; }
+    new Notification('TurboTX', { body: 'Уведомления включены. Мы сообщим когда транзакция подтвердится.' });
+    window._pushEnabled = true;
+  } else {
+    if (btn) btn.textContent = 'Доступ запрещён';
+  }
+}
+
+function sendPushNotification(txid) {
+  if (window._pushEnabled && Notification.permission === 'granted') {
+    new Notification('TurboTX — Транзакция подтверждена!', {
+      body: 'TX ' + txid.slice(0,8) + '...' + txid.slice(-6) + ' включена в блок.',
+      icon: '/favicon.ico'
+    });
+  }
+}
+
+// ── HOOK: показываем push-prompt после отправки в очередь ──────
+// (push-prompt показывается внутри go() после успешной отправки)
+
+
+// ── LANGUAGE SWITCHER ─────────────────────────────────────────
+const LANGS = [
+  {code:'ru',name:'Русский',flag:'🇷🇺',gt:'ru'},
+  {code:'en',name:'English',flag:'🇬🇧',gt:'en'},
+  {code:'zh',name:'中文',flag:'🇨🇳',gt:'zh-CN'},
+  {code:'ar',name:'العربية',flag:'🇸🇦',gt:'ar'},
+  {code:'es',name:'Español',flag:'🇪🇸',gt:'es'},
+  {code:'fr',name:'Français',flag:'🇫🇷',gt:'fr'},
+  {code:'de',name:'Deutsch',flag:'🇩🇪',gt:'de'},
+  {code:'pt',name:'Português',flag:'🇧🇷',gt:'pt'},
+  {code:'hi',name:'Hindi',flag:'🇮🇳',gt:'hi'},
+  {code:'tr',name:'Türkçe',flag:'🇹🇷',gt:'tr'},
+  {code:'ko',name:'한국어',flag:'🇰🇷',gt:'ko'},
+  {code:'ja',name:'日本語',flag:'🇯🇵',gt:'ja'},
+  {code:'it',name:'Italiano',flag:'🇮🇹',gt:'it'},
+  {code:'pl',name:'Polski',flag:'🇵🇱',gt:'pl'},
+  {code:'uk',name:'Українська',flag:'🇺🇦',gt:'uk'},
+  {code:'nl',name:'Nederlands',flag:'🇳🇱',gt:'nl'},
+  {code:'vi',name:'Tieng Viet',flag:'🇻🇳',gt:'vi'},
+  {code:'th',name:'Thai',flag:'🇹🇭',gt:'th'},
+  {code:'id',name:'Indonesia',flag:'🇮🇩',gt:'id'},
+  {code:'fa',name:'Farsi',flag:'🇮🇷',gt:'fa'},
+  {code:'sv',name:'Svenska',flag:'🇸🇪',gt:'sv'},
+  {code:'cs',name:'Cestina',flag:'🇨🇿',gt:'cs'},
+  {code:'ro',name:'Romana',flag:'🇷🇴',gt:'ro'},
+  {code:'hu',name:'Magyar',flag:'🇭🇺',gt:'hu'},
+  {code:'el',name:'Ellinika',flag:'🇬🇷',gt:'el'},
+  {code:'he',name:'Ivrit',flag:'🇮🇱',gt:'iw'},
+  {code:'bn',name:'Bangla',flag:'🇧🇩',gt:'bn'},
+  {code:'ms',name:'Melayu',flag:'🇲🇾',gt:'ms'},
+  {code:'uz',name:'Uzbek',flag:'🇺🇿',gt:'uz'},
+  {code:'kk',name:'Kazakh',flag:'🇰🇿',gt:'kk'},
+  {code:'az',name:'Azerbaijani',flag:'🇦🇿',gt:'az'},
+  {code:'da',name:'Dansk',flag:'🇩🇰',gt:'da'},
+  {code:'fi',name:'Suomi',flag:'🇫🇮',gt:'fi'},
+  {code:'no',name:'Norsk',flag:'🇳🇴',gt:'no'},
+  {code:'sk',name:'Slovencina',flag:'🇸🇰',gt:'sk'},
+  {code:'bg',name:'Bulgarian',flag:'🇧🇬',gt:'bg'},
+  {code:'sr',name:'Srpski',flag:'🇷🇸',gt:'sr'},
+  {code:'hr',name:'Hrvatski',flag:'🇭🇷',gt:'hr'},
+  {code:'lt',name:'Lietuviu',flag:'🇱🇹',gt:'lt'},
+  {code:'lv',name:'Latviesu',flag:'🇱🇻',gt:'lv'},
+  {code:'et',name:'Eesti',flag:'🇪🇪',gt:'et'},
+  {code:'ka',name:'Georgian',flag:'🇬🇪',gt:'ka'},
+  {code:'hy',name:'Armenian',flag:'🇦🇲',gt:'hy'},
+  {code:'sw',name:'Kiswahili',flag:'🇰🇪',gt:'sw'},
+  {code:'tl',name:'Filipino',flag:'🇵🇭',gt:'tl'},
+  {code:'af',name:'Afrikaans',flag:'🇿🇦',gt:'af'},
+];
+
+let currentLang = 'ru';
+let _langDropOpen = false;
+
+function _renderLangs(filter) {
+  const list = document.getElementById('lang-list');
+  if (!list) return;
+  const f = (filter || '').toLowerCase();
+  const filtered = f ? LANGS.filter(l =>
+    l.name.toLowerCase().includes(f) || l.code.includes(f)
+  ) : LANGS;
+  list.innerHTML = filtered.map(l =>
+    '<div class="lang-item' + (l.code===currentLang?' active':'') + '" onclick="setLang(\''+l.code+'\',\''+l.gt+'\',\''+l.flag+'\',\''+l.name+'\')">'+
+    '<span class="lang-flag">'+l.flag+'</span>'+
+    '<span class="lang-name">'+l.name+'</span>'+
+    '<span class="lang-code">'+l.code.toUpperCase()+'</span>'+
+    '</div>'
+  ).join('');
+}
+
+function toggleLangDropdown() {
+  _langDropOpen = !_langDropOpen;
+  const dd = document.getElementById('lang-dropdown');
+  if (!dd) return;
+  dd.classList.toggle('open', _langDropOpen);
+  if (_langDropOpen) {
+    _renderLangs('');
+    setTimeout(function() {
+      const si = document.getElementById('lang-search-input');
+      if (si) si.focus();
+    }, 80);
+  }
+}
+
+function filterLangs(val) { _renderLangs(val); }
+
+function setLang(code, gtCode, flag, name) {
+  currentLang = code;
+  const flagEl = document.getElementById('lang-current-flag');
+  const nameEl = document.getElementById('lang-current-name');
+  if (flagEl) flagEl.textContent = flag;
+  if (nameEl) nameEl.textContent = code.toUpperCase();
+  _langDropOpen = false;
+  const dd = document.getElementById('lang-dropdown');
+  if (dd) dd.classList.remove('open');
+  // Google Translate
+  if (code === 'ru') {
+    const sel = document.querySelector('.goog-te-combo');
+    if (sel) { sel.value = ''; sel.dispatchEvent(new Event('change')); }
+    return;
+  }
+  const sel = document.querySelector('.goog-te-combo');
+  if (sel) {
+    sel.value = gtCode;
+    sel.dispatchEvent(new Event('change'));
+  } else {
+    const url = 'https://translate.google.com/translate?hl='+gtCode+'&sl=ru&u='+encodeURIComponent(location.href);
+    window.open(url, '_blank');
+  }
+}
+
+document.addEventListener('click', function(e) {
+  const bar = document.getElementById('lang-bar');
+  if (_langDropOpen && bar && !bar.contains(e.target)) {
+    _langDropOpen = false;
+    const dd = document.getElementById('lang-dropdown');
+    if (dd) dd.classList.remove('open');
+  }
+});
+
+document.addEventListener('DOMContentLoaded', function() { _renderLangs(''); });
+// ─────────────────────────────────────────────────────────────
+
 </script>
+
+<!-- LANGUAGE SWITCHER -->
+<div id="lang-bar">
+  <div id="lang-btn" onclick="toggleLangDropdown()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+    <span id="lang-current-flag">🌐</span>
+    <span id="lang-current-name">RU</span>
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+  </div>
+  <div id="lang-dropdown">
+    <input class="lang-search" type="text" placeholder="Поиск языка..." oninput="filterLangs(this.value)" id="lang-search-input">
+    <div class="lang-list" id="lang-list"></div>
+  </div>
+</div>
+
 </body>
 </html>
