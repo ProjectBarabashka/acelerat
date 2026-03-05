@@ -1903,10 +1903,23 @@ setInterval(fetchLiveStats, 3 * 60 * 1000);
 //   → Realtime Database → Создать базу → Правила: { "rules": { ".read": true, ".write": true } }
 //   → Скопируй URL вида https://YOUR_PROJECT-default-rtdb.firebaseio.com
 //   → Замени значение FIREBASE_DB ниже:
-const FIREBASE_DB = 'https://turbotx-default-rtdb.firebaseio.com'; // ← ЗАМЕНИ НА СВОЙ URL
+const FIREBASE_DB = 'https://turbotx-default-rtdb.firebaseio.com';
 const FL_MAX = 100;
-// Проверяем — если URL не настроен, тихо уходим в localStorage без ошибок
-const _fbReady = FIREBASE_DB && !FIREBASE_DB.includes('YOUR_PROJECT');
+// _fbReady станет true только после успешного тест-запроса к Firebase
+let _fbReady = false;
+
+// Тестируем Firebase — одна попытка записи/чтения
+async function _testFirebase() {
+  try {
+    const r = await fetch(`${FIREBASE_DB}/.json?shallow=true`, { cache: 'no-store' });
+    if (r.ok || r.status === 204) { _fbReady = true; return true; }
+    // 401/403 = база есть, но правила закрыты
+    if (r.status === 401 || r.status === 403) {
+      console.warn('[TurboTX] Firebase: база найдена, но правила доступа закрыты.\nОткройте в консоли Firebase: Realtime Database → Правила → { ".read": true, ".write": true }');
+    }
+  } catch(e) {}
+  return false;
+}
 
 // UTC-дата — одинакова для всех пользователей в мире
 function todayStr() { return new Date().toISOString().slice(0, 10); }
@@ -2005,7 +2018,11 @@ setInterval(() => updateFreeUI(), 30000); // синхронизация глоб
 // ── РЕНДЕР ФИДА (общая функция) ────────────────────────────────
 function renderFeedFromData(feed) {
   const el = document.getElementById('feed-items');
-  if (!el || !Array.isArray(feed) || !feed.length) return;
+  if (!el) return;
+  if (!Array.isArray(feed) || !feed.length) {
+    el.innerHTML = '<div class="feed-empty" style="font-family:var(--mono);font-size:.72rem;color:var(--m);text-align:center;padding:16px 0">Ещё нет ускорений — будьте первым</div>';
+    return;
+  }
   el.innerHTML = feed.slice(0, 6).map(item => {
     const ago = Math.round((Date.now() - item.ts) / 60000);
     const agoStr = ago < 1 ? 'только что' : ago < 60 ? ago + ' мин назад' : Math.floor(ago / 60) + ' ч назад';
@@ -2015,7 +2032,7 @@ function renderFeedFromData(feed) {
       <div style="display:flex;align-items:center;gap:8px">
         <span style="font-family:var(--mono);font-size:.58rem;color:${item.plan === 'premium' ? 'var(--a)' : 'var(--m)'}">${(item.plan || 'free').toUpperCase()}</span>
         <span class="feed-badge-conf">✓ ${item.mins} мин</span>
-        <span class="feed-time">${agoStr}</span>
+        <span class="feed-time" data-ts="${item.ts}">${agoStr}</span>
       </div>
     </div>`;
   }).join('');
@@ -2128,11 +2145,14 @@ async function syncCounterFromFirebase() {
   } catch(e) {}
 }
 
-// ── ПЕРВОНАЧАЛЬНАЯ СИНХРОНИЗАЦИЯ ───────────────────────────────
+// Первоначальная синхронизация — сначала проверяем Firebase
 async function initGlobalSync() {
+  await _testFirebase();
   await syncCounterFromFirebase();
   await syncGlobalQueue();
   await syncGlobalFeed();
+  // Запускаем SSE только после успешного теста
+  startRealtimeListeners();
 }
 initGlobalSync();
 
@@ -2142,7 +2162,7 @@ setInterval(syncGlobalFeed, 15000);
 setInterval(syncCounterFromFirebase, 30000);
 
 // ── FIREBASE SSE — мгновенные обновления для всех ──────────────
-(function startRealtimeListeners() {
+function startRealtimeListeners() {
   if (!_fbReady) return;
   const ns = FIREBASE_DB.split('//')[1].split('.')[0];
 
@@ -2192,7 +2212,7 @@ setInterval(syncCounterFromFirebase, 30000);
     });
     esL.onerror = () => esL.close();
   } catch(e) {}
-})();
+}
 
 // ── PLAN SELECT ────────────────────────────────────────────────
 function pick(p) {
@@ -3199,38 +3219,45 @@ function initFeed() {
   el.innerHTML = items;
 }
 
+
 function addFeedItem(txid, planType, minutes) {
   const el = document.getElementById('feed-items');
   if (!el) return;
   const short = txid.slice(0,6) + '...' + txid.slice(-4);
+  // Убираем заглушку если она есть
+  const empty = el.querySelector('.feed-empty');
+  if (empty) empty.remove();
   const newItem = document.createElement('div');
   newItem.className = 'feed-item';
+  newItem.dataset.ts = Date.now();
   newItem.innerHTML = `
     <div class="feed-txid"><span>${short}</span></div>
     <div style="display:flex;align-items:center;gap:8px">
-      <span style="font-family:var(--mono);font-size:.58rem;color:${planType==='premium'?'var(--a)':'var(--m)'}">
-        ${planType.toUpperCase()}
-      </span>
+      <span style="font-family:var(--mono);font-size:.58rem;color:${planType==='premium'?'var(--a)':'var(--m)'}">${planType.toUpperCase()}</span>
       <span class="feed-badge-conf">✓ ${minutes} мин</span>
-      <span class="feed-time">только что</span>
+      <span class="feed-time" data-ts="${Date.now()}">только что</span>
     </div>`;
   el.prepend(newItem);
-  // max 6 items
   while (el.children.length > 6) el.removeChild(el.lastChild);
 }
-initFeed();
 
-// авто-добавление фейковых записей каждые 25-60 сек для живости
-function scheduleNextFeedItem() {
-  const delay = 25000 + Math.random() * 35000;
-  setTimeout(() => {
-    _feedIdx = (_feedIdx + 1) % FEED_NAMES.length;
-    const fakeId = FEED_NAMES[_feedIdx] + Math.random().toString(16).slice(2,8);
-    addFeedItem(fakeId + '0'.repeat(64 - fakeId.length), _feedPlans[_feedIdx]==='PREMIUM'?'premium':'free', _feedMins[_feedIdx]);
-    scheduleNextFeedItem();
-  }, delay);
-}
-scheduleNextFeedItem();
+// Обновляем метки времени в фиде каждую минуту
+setInterval(function() {
+  document.querySelectorAll('.feed-time[data-ts]').forEach(el => {
+    const ago = Math.round((Date.now() - parseInt(el.dataset.ts)) / 60000);
+    if (ago < 1) el.textContent = 'только что';
+    else if (ago < 60) el.textContent = ago + ' мин назад';
+    else el.textContent = Math.floor(ago/60) + ' ч назад';
+  });
+}, 60000);
+
+// При загрузке — показываем реальный фид из Firebase или пустое состояние
+(function initFeed() {
+  const el = document.getElementById('feed-items');
+  if (!el) return;
+  el.innerHTML = '<div class="feed-empty" style="font-family:var(--mono);font-size:.72rem;color:var(--m);text-align:center;padding:16px 0">Ещё нет ускорений — будьте первым</div>';
+  // syncGlobalFeed() подтянет реальные данные после инициализации Firebase
+})();
 
 // ── PUSH NOTIFICATIONS ─────────────────────────────────────────
 async function requestPush() {
@@ -3347,6 +3374,15 @@ function toggleLangDropdown() {
 
 function filterLangs(val) { _renderLangs(val); }
 
+// Ждём появления Google Translate combo (грузится асинхронно)
+function _waitForGT(cb, tries) {
+  tries = tries || 0;
+  const sel = document.querySelector('.goog-te-combo');
+  if (sel) { cb(sel); return; }
+  if (tries > 30) return; // 3 секунды ждали — не появился
+  setTimeout(() => _waitForGT(cb, tries + 1), 100);
+}
+
 function setLang(code, gtCode, flag, name) {
   currentLang = code;
   const flagEl = document.getElementById('lang-current-flag');
@@ -3358,28 +3394,31 @@ function setLang(code, gtCode, flag, name) {
   if (dd) dd.classList.remove('open');
 
   if (code === 'ru') {
-    // Если находимся на translate.google.com — уходим обратно на оригинал
-    if (location.hostname.includes('translate.google') || location.hostname.includes('translate.googleusercontent')) {
-      const m = location.href.match(/[?&]u=([^&]+)/);
-      if (m) { window.location.href = decodeURIComponent(m[1]); return; }
-    }
-    // Если страница была переведена (GT inline widget) — пробуем сбросить
-    const sel = document.querySelector('.goog-te-combo');
-    if (sel) { sel.value = ''; sel.dispatchEvent(new Event('change')); return; }
-    // Универсальный fallback — перезагружаем страницу на чистый URL
-    const cleanUrl = location.origin + location.pathname;
-    if (location.href !== cleanUrl) { window.location.href = cleanUrl; }
+    // Сброс перевода — несколько способов
+    _waitForGT(function(sel) {
+      sel.value = '';
+      sel.dispatchEvent(new Event('change'));
+    });
+    // Если iframe переводчика уже открыт — пробуем через cookie
+    try {
+      document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=' + location.hostname;
+    } catch(e) {}
+    // Через 300мс проверяем — если перевод не сбросился, перезагружаем
+    setTimeout(function() {
+      const body = document.body;
+      if (body && (body.classList.contains('translated-ltr') || body.classList.contains('translated-rtl'))) {
+        window.location.href = location.origin + location.pathname;
+      }
+    }, 300);
     return;
   }
 
-  // Другие языки — Google Translate
-  const sel = document.querySelector('.goog-te-combo');
-  if (sel) {
+  // Другие языки
+  _waitForGT(function(sel) {
     sel.value = gtCode;
     sel.dispatchEvent(new Event('change'));
-  } else {
-    window.open('https://translate.google.com/translate?hl=' + gtCode + '&sl=ru&u=' + encodeURIComponent(location.href), '_blank');
-  }
+  }, 0);
 }
 
 document.addEventListener('click', function(e) {
