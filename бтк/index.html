@@ -16,6 +16,11 @@
 <meta name="geo.region" content="RU">
 <meta name="theme-color" content="#f7931a">
 
+<!-- FAVICON — inline SVG, стилизован под TurboTX -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23f7931a'/%3E%3Ctext x='16' y='23' font-family='Arial Black%2C sans-serif' font-size='20' font-weight='900' text-anchor='middle' fill='%23000'%3E%E2%9A%A1%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23f7931a'/%3E%3Ctext x='16' y='23' font-family='Arial Black%2C sans-serif' font-size='20' font-weight='900' text-anchor='middle' fill='%23000'%3E%E2%9A%A1%3C/text%3E%3C/svg%3E">
+<link rel="shortcut icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23f7931a'/%3E%3Ctext x='16' y='23' font-family='Arial Black%2C sans-serif' font-size='20' font-weight='900' text-anchor='middle' fill='%23000'%3E%E2%9A%A1%3C/text%3E%3C/svg%3E">
+
 <!-- OPEN GRAPH (соцсети, Telegram) -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://acelerat.vercel.app/">
@@ -114,8 +119,6 @@
    Fonts: IBM Plex Mono (terminal) + Outfit (display)
 ═══════════════════════════════════════════════════════════════ */
 
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Outfit:wght@300;400;600;800;900&display=swap');
-
 :root{
   --bg:#060608;
   --s:#0b0b10;
@@ -171,6 +174,7 @@ nav{
   backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
   border-bottom:1px solid rgba(255,255,255,.05);
   margin:0 -28px;
+  overflow:hidden;
 }
 .logo{
   font-family:var(--mono);font-size:.95rem;font-weight:700;
@@ -188,7 +192,7 @@ nav{
 .logo-turbo{color:var(--a)}
 .logo-tx{color:rgba(232,232,240,.45)}
 .logo-tag{
-  position:absolute;bottom:-10px;left:44px;
+  position:absolute;bottom:-10px;left:0;
   font-size:.42rem;letter-spacing:3px;color:rgba(74,74,104,.8);
   text-transform:uppercase;white-space:nowrap;font-family:var(--mono)
 }
@@ -284,7 +288,7 @@ h1 span{
 }
 .card::before{
   content:'';position:absolute;top:0;left:0;right:0;height:1px;
-  background:linear-gradient(90deg,transparent 0%,rgba(247,147,26,.25) 40%,rgba(247,147,26,.25) 60%,transparent 100%)
+  background:linear-gradient(90deg,transparent 0%,rgba(247,147,26,.2) 30%,rgba(247,147,26,.35) 50%,rgba(247,147,26,.2) 70%,transparent 100%)
 }
 .card-title{
   font-family:var(--display);font-size:1.15rem;font-weight:800;
@@ -313,7 +317,7 @@ input[type=text]:focus{
   box-shadow:0 0 0 4px rgba(247,147,26,.06)
 }
 input[type=text]:hover:not(:focus){border-color:rgba(255,255,255,.12)}
-input::placeholder{color:rgba(255,255,255,.08)}
+input::placeholder{color:rgba(255,255,255,.22)}
 
 /* ── PLAN OPTS ── */
 .plan-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -862,6 +866,7 @@ textarea.batch-input:focus{
   border-color:rgba(247,147,26,.45);
   box-shadow:0 0 0 4px rgba(247,147,26,.06)
 }
+textarea.batch-input::placeholder{color:rgba(255,255,255,.22)}
 .batch-count{font-family:var(--mono);font-size:.62rem;color:var(--m);margin-top:4px}
 .batch-result-row{
   display:flex;justify-content:space-between;align-items:center;
@@ -1110,15 +1115,15 @@ function googleTranslateElementInit() {
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
         <div style="color:var(--a);display:flex;align-items:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x='3' y='11' width='18' height='11' rx='2'/><path d='M7 11V7a5 5 0 0 1 10 0v4'/></svg></div>
         <div>
-          <div style="font-size:.78rem;color:var(--m);font-family:'Space Mono',monospace">Бесплатных ускорений сегодня осталось</div>
-          <div><span class="flb-count" id="free-left-num">100</span> <span style="font-family:'Space Mono',monospace;font-size:.72rem;color:var(--m)">/ 100</span></div>
+          <div style="font-size:.78rem;color:var(--m);font-family:var(--mono)">Бесплатных ускорений сегодня осталось</div>
+          <div><span class="flb-count" id="free-left-num">100</span> <span style="font-family:var(--mono);font-size:.72rem;color:var(--m)">/ 100</span></div>
         </div>
       </div>
       <div class="flb-bar-wrap"><div class="flb-bar-fill" id="free-bar-fill" style="width:100%"></div></div>
     </div>
-    <div id="reset-timer-wrap" style="display:none;font-family:'Space Mono',monospace;font-size:.72rem;color:var(--m);text-align:right;min-width:110px">Обновится через<br><span id="reset-countdown" style="color:var(--t);font-size:.82rem">—</span></div>
+    <div id="reset-timer-wrap" style="display:none;font-family:var(--mono);font-size:.72rem;color:var(--m);text-align:right;min-width:110px">Обновится через<br><span id="reset-countdown" style="color:var(--t);font-size:.82rem">—</span></div>
   </div>
-  <div id="limit-reached-msg" style="display:none;background:rgba(255,68,102,.07);border:1px solid rgba(255,68,102,.3);border-radius:10px;padding:12px 16px;margin-bottom:16px;font-family:'Space Mono',monospace;font-size:.78rem;color:#ff4466;line-height:1.6">
+  <div id="limit-reached-msg" style="display:none;background:rgba(255,68,102,.07);border:1px solid rgba(255,68,102,.3);border-radius:10px;padding:12px 16px;margin-bottom:16px;font-family:var(--mono);font-size:.78rem;color:#ff4466;line-height:1.6">
     × Дневной лимит 100 бесплатных ускорений исчерпан.<br>
     <span style="color:var(--m)">Обновятся завтра. Используйте Premium для немедленного ускорения.</span>
   </div>
@@ -1319,7 +1324,7 @@ function googleTranslateElementInit() {
   <div class="reviews-grid">
     <div class="review-card">
       <div class="review-stars">★★★★★</div>
-      <div class="review-text">«Транзакция висела 18 часов. Взял Premium — подтвердилась через 22 минуты. Сервис реально работает, не развод.»</div>
+      <div class="review-text">«висела транзакция почти сутки, уже думал всё, деньги пропали. взял премиум, через 22 минуты пришло. реально работает»</div>
       <div style="display:flex;justify-content:space-between;align-items:center">
         <div class="review-author">@crypto_kz</div>
         <div class="review-time">3 дня назад</div>
@@ -1327,7 +1332,7 @@ function googleTranslateElementInit() {
     </div>
     <div class="review-card">
       <div class="review-stars">★★★★★</div>
-      <div class="review-text">«Пробовал ViaBTC accelerator — не помогло. Здесь бесплатный план отправил в 5 пулов, за 2 часа подтвердилась. Спасибо.»</div>
+      <div class="review-text">«виабтс не помог, буст.коин тоже. тут бесплатный отправил в 5 пулов и за 2 часа норм. единственное что работает вообще»</div>
       <div style="display:flex;justify-content:space-between;align-items:center">
         <div class="review-author">@btc_hodler_ru</div>
         <div class="review-time">1 неделю назад</div>
@@ -1335,7 +1340,7 @@ function googleTranslateElementInit() {
     </div>
     <div class="review-card">
       <div class="review-stars">★★★★☆</div>
-      <div class="review-text">«Работает. Fee была 1.2 sat/vB, предупредили что может не сработать — честно. Взял Premium, 31 минута.»</div>
+      <div class="review-text">«ну работает. у меня комиссия была совсем низкая, предупредили что шансы невысокие. взял платный, 31 мин. 4 звезды тк цена могла бы быть ниже»</div>
       <div style="display:flex;justify-content:space-between;align-items:center">
         <div class="review-author">@satoshi_anon</div>
         <div class="review-time">5 дней назад</div>
@@ -1343,7 +1348,7 @@ function googleTranslateElementInit() {
     </div>
     <div class="review-card">
       <div class="review-stars">★★★★★</div>
-      <div class="review-text">«CPFP калькулятор — топ фича. Посчитал нужную комиссию дочерней TX, отправил вручную — всё подтвердилось за 1 блок.»</div>
+      <div class="review-text">«cpfp калькулятор огонь. посчитал комиссию для дочерней транзы, отправил сам через electrum. всё ок, 1 блок. спасибо что объяснили как это работает»</div>
       <div style="display:flex;justify-content:space-between;align-items:center">
         <div class="review-author">@electrum_user</div>
         <div class="review-time">2 дня назад</div>
@@ -1351,7 +1356,7 @@ function googleTranslateElementInit() {
     </div>
     <div class="review-card">
       <div class="review-stars">★★★★★</div>
-      <div class="review-text">«Пакетное ускорение — отличная штука. Ускорил 4 транзакции одним запросом, все подтвердились в течение часа.»</div>
+      <div class="review-text">«у меня было 4 транзы зависших сразу, пакетное ускорение очень выручило. все подтвердились в течение часа примерно. норм»</div>
       <div style="display:flex;justify-content:space-between;align-items:center">
         <div class="review-author">@whale_wallet</div>
         <div class="review-time">6 часов назад</div>
@@ -1359,7 +1364,7 @@ function googleTranslateElementInit() {
     </div>
     <div class="review-card">
       <div class="review-stars">★★★★★</div>
-      <div class="review-text">«Оплатил USDT — удобно. Не нужно возиться с конвертацией. Premium активировался автоматически после подтверждения.»</div>
+      <div class="review-text">«оплатил юsdт, удобно что не надо конвертить в btc специально. premium сам активировался когда транзакция прошла. всё чётко»</div>
       <div style="display:flex;justify-content:space-between;align-items:center">
         <div class="review-author">@tether_fan_98</div>
         <div class="review-time">4 дня назад</div>
@@ -1489,7 +1494,7 @@ function googleTranslateElementInit() {
       <div style="width:40px;height:40px;background:rgba(0,136,204,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d='M21.5 2.5L2 10.5l7 1.5 2 6 3-3 4 3 3.5-15.5z'/><line x1='9' y1='12' x2='14.5' y2='7.5'/></svg></div>
       <div>
         <div style="font-weight:700;font-size:.9rem;color:#e8e8f0;margin-bottom:3px">Telegram</div>
-        <div style="font-family:'Space Mono',monospace;font-size:.72rem;color:#0088cc">@Sup_TurboTX</div>
+        <div style="font-family:var(--mono);font-size:.72rem;color:#0088cc">@Sup_TurboTX</div>
         <div style="font-size:.7rem;color:var(--m);margin-top:3px">Ответ в течение 30 мин</div>
       </div>
     </a>
@@ -1497,7 +1502,7 @@ function googleTranslateElementInit() {
       <div style="width:40px;height:40px;background:rgba(247,147,26,.1);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d='M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z'/><polyline points='22,6 12,13 2,6'/></svg></div>
       <div>
         <div style="font-weight:700;font-size:.9rem;color:#e8e8f0;margin-bottom:3px">Email</div>
-        <div style="font-family:'Space Mono',monospace;font-size:.72rem;color:var(--a)"><span class="__cf_email__" data-cfemail="e5958a89899c9197849f898aa58288848c89cb868a88">[email&#160;protected]</span></div>
+        <div style="font-family:var(--mono);font-size:.72rem;color:var(--a)"><span class="__cf_email__" data-cfemail="e5958a89899c9197849f898aa58288848c89cb868a88">[email&#160;protected]</span></div>
         <div style="font-size:.7rem;color:var(--m);margin-top:3px">Ответ в течение 24 часов</div>
       </div>
     </a>
@@ -1521,25 +1526,25 @@ function googleTranslateElementInit() {
     Premium Ускорение
   </div>
 
-  <div style="text-align:center;font-family:'Space Mono',monospace;font-size:.68rem;color:#ff4466;margin-bottom:6px">
+  <div style="text-align:center;font-family:var(--mono);font-size:.68rem;color:#ff4466;margin-bottom:6px">
     ⚡ Скидка −73% до 31.08.2026
   </div>
-  <div style="text-align:center;font-family:'Space Mono',monospace;font-size:.65rem;color:var(--m);margin-bottom:14px">
+  <div style="text-align:center;font-family:var(--mono);font-size:.65rem;color:var(--m);margin-bottom:14px">
     Курс BTC: <span id="modal-rate-note" style="color:var(--a)">загружаем…</span>
   </div>
 
   <!-- ПЛАН -->
   <div class="price-row" style="margin-bottom:16px">
     <div class="popt on" id="plan-std" onclick="selectPlan(this,4)">
-      <div style="font-size:.6rem;color:var(--m);font-family:'Space Mono',monospace;text-decoration:line-through">$15</div>
+      <div style="font-size:.6rem;color:var(--m);font-family:var(--mono);text-decoration:line-through">$15</div>
       <div class="poa">$4</div><div class="pol">Standard</div><div class="pob" id="pob-std">≈ … BTC</div>
     </div>
     <div class="popt" id="plan-fast" onclick="selectPlan(this,10)">
-      <div style="font-size:.6rem;color:var(--m);font-family:'Space Mono',monospace;text-decoration:line-through">$30</div>
+      <div style="font-size:.6rem;color:var(--m);font-family:var(--mono);text-decoration:line-through">$30</div>
       <div class="poa">$10</div><div class="pol">Fast</div><div class="pob" id="pob-fast">≈ … BTC</div>
     </div>
     <div class="popt" id="plan-inst" onclick="selectPlan(this,25)">
-      <div style="font-size:.6rem;color:var(--m);font-family:'Space Mono',monospace;text-decoration:line-through">$60</div>
+      <div style="font-size:.6rem;color:var(--m);font-family:var(--mono);text-decoration:line-through">$60</div>
       <div class="poa">$25</div><div class="pol">Instant</div><div class="pob" id="pob-inst">≈ … BTC</div>
     </div>
   </div>
@@ -1570,7 +1575,7 @@ function googleTranslateElementInit() {
         Скопировать BTC адрес
       </span>
     </button>
-    <div style="background:rgba(247,147,26,.05);border:1px solid rgba(247,147,26,.18);border-radius:10px;padding:11px 14px;margin-top:10px;font-family:'Space Mono',monospace;font-size:.67rem;color:var(--m2);line-height:1.9">
+    <div style="background:rgba(247,147,26,.05);border:1px solid rgba(247,147,26,.18);border-radius:10px;padding:11px 14px;margin-top:10px;font-family:var(--mono);font-size:.67rem;color:var(--m2);line-height:1.9">
       <div style="color:var(--a);font-weight:700;margin-bottom:3px">Инструкция:</div>
       <div>① Скопируйте адрес выше</div>
       <div>② Отправьте точную сумму BTC со своего кошелька</div>
@@ -1595,7 +1600,7 @@ function googleTranslateElementInit() {
         Скопировать USDT адрес
       </span>
     </button>
-    <div style="background:rgba(0,180,120,.05);border:1px solid rgba(0,180,120,.18);border-radius:10px;padding:11px 14px;margin-top:10px;font-family:'Space Mono',monospace;font-size:.67rem;color:var(--m2);line-height:1.9">
+    <div style="background:rgba(0,180,120,.05);border:1px solid rgba(0,180,120,.18);border-radius:10px;padding:11px 14px;margin-top:10px;font-family:var(--mono);font-size:.67rem;color:var(--m2);line-height:1.9">
       <div style="color:var(--g);font-weight:700;margin-bottom:3px">Инструкция:</div>
       <div>① Скопируйте адрес выше</div>
       <div>② Сеть: <span style="color:var(--g);font-weight:700">TRON TRC-20</span> (не ERC-20!)</div>
@@ -1608,14 +1613,14 @@ function googleTranslateElementInit() {
   <div id="verify-section" style="display:none;border-top:1px solid var(--b);padding-top:14px;margin-top:12px">
     <div style="font-family:var(--mono);font-size:.62rem;color:var(--m);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Подтверждение оплаты</div>
     <input type="text" id="pay-txid" placeholder="TXID / хэш транзакции оплаты..." maxlength="100"
-      style="width:100%;background:var(--bg);border:1px solid var(--b);border-radius:8px;padding:11px 13px;color:var(--t);font-family:'Space Mono',monospace;font-size:.75rem;outline:none;margin-bottom:10px;transition:border-color .2s">
+      style="width:100%;background:var(--bg);border:1px solid var(--b);border-radius:8px;padding:11px 13px;color:var(--t);font-family:var(--mono);font-size:.75rem;outline:none;margin-bottom:10px;transition:border-color .2s">
     <button class="okbtn" onclick="verifyPayment()" id="verify-btn">
       <span style="display:inline-flex;align-items:center;gap:8px">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
         Активировать Premium
       </span>
     </button>
-    <div id="verify-result" style="margin-top:12px;font-family:'Space Mono',monospace;font-size:.75rem;display:none"></div>
+    <div id="verify-result" style="margin-top:12px;font-family:var(--mono);font-size:.75rem;display:none"></div>
   </div>
 
   <div id="show-verify-btn" style="margin-top:8px">
@@ -1729,7 +1734,6 @@ function googleTranslateElementInit() {
   </div>
 </section>
 
-<div class="w">
 <footer>
   <div style="margin-bottom:4px;letter-spacing:2px">TURBOTX</div><div style="font-size:.58rem;color:var(--m);opacity:.6">© 2025 — Сервис ускорения BTC-транзакций через reBroadcast в майнинг-пулы</div>
   <div class="fl2">
@@ -1740,7 +1744,6 @@ function googleTranslateElementInit() {
     <a href="/cdn-cgi/l/email-protection#afdfc0c3c3d6dbddced5c3c0efc8c2cec6c381ccc0c2"><span class="__cf_email__" data-cfemail="4737282b2b3e3335263d2b2807202a262e2b6924282a">[email&#160;protected]</span></a>
   </div>
 </footer>
-</div>
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ── PROTECTED CONFIG ─────────────────────────────────────────
@@ -1903,7 +1906,7 @@ setInterval(fetchLiveStats, 3 * 60 * 1000);
 //   → Realtime Database → Создать базу → Правила: { "rules": { ".read": true, ".write": true } }
 //   → Скопируй URL вида https://YOUR_PROJECT-default-rtdb.firebaseio.com
 //   → Замени значение FIREBASE_DB ниже:
-const FIREBASE_DB = 'https://turbotx-default-rtdb.firebaseio.com';
+const FIREBASE_DB = 'https://turbotx-ebbe4-default-rtdb.europe-west1.firebasedatabase.app';
 const FL_MAX = 100;
 // _fbReady станет true только после успешного тест-запроса к Firebase
 let _fbReady = false;
@@ -2530,10 +2533,10 @@ async function chk() {
   if (!txid || !/^[a-fA-F0-9]{64}$/.test(txid)) return alert('Введите корректный TXID (64 hex символа)');
   const sr = document.getElementById('sr');
   sr.style.display = 'block';
-  sr.innerHTML = '<span style="color:var(--m);font-family:\'Space Mono\',monospace;font-size:.78rem">... Проверяем через mempool.space</span>';
+  sr.innerHTML = '<span style="color:var(--m);font-family:var(--mono);font-size:.78rem">... Проверяем через mempool.space</span>';
   try {
     const r = await fetch('https://mempool.space/api/tx/' + txid);
-    if (!r.ok) { sr.innerHTML = '<div style="color:var(--err);font-family:\'Space Mono\',monospace;font-size:.78rem">× Транзакция не найдена.</div>'; return; }
+    if (!r.ok) { sr.innerHTML = '<div style="color:var(--err);font-family:var(--mono);font-size:.78rem">× Транзакция не найдена.</div>'; return; }
     const d = await r.json();
     const conf = d.status?.confirmed;
     const feeRate = (d.fee / d.size).toFixed(1);
@@ -2544,9 +2547,9 @@ async function chk() {
       <div class="rr"><span class="rk">Комиссия</span><span class="rv">${d.fee} sat</span></div>
       <div class="rr"><span class="rk">Ставка</span><span class="rv">${feeRate} sat/vByte</span></div>
       <a class="mp-link" href="https://mempool.space/tx/${txid}" target="_blank"># Открыть на mempool.space →</a>
-      ${!conf ? '<div style="margin-top:10px;font-family:\'Space Mono\',monospace;font-size:.72rem;color:var(--m)">Транзакция ожидает включения в блок. Ускорьте её выше ↑</div>' : ''}`;
+      ${!conf ? '<div style="margin-top:10px;font-family:var(--mono);font-size:.72rem;color:var(--m)">Транзакция ожидает включения в блок. Ускорьте её выше ↑</div>' : ''}`;
   } catch(e) {
-    sr.innerHTML = '<div style="color:var(--err);font-family:\'Space Mono\',monospace;font-size:.78rem">× Не удалось подключиться к mempool.space.</div>';
+    sr.innerHTML = '<div style="color:var(--err);font-family:var(--mono);font-size:.78rem">× Не удалось подключиться к mempool.space.</div>';
   }
 }
 
@@ -3030,7 +3033,7 @@ function activatePremium(paidStr, method, txShort) {
     '<div class="rr"><span class="rk">Оплачено</span><span class="rv a">' + paidStr + '</span></div>' +
     '<div class="rr"><span class="rk">Способ</span><span class="rv">' + method + '</span></div>' +
     '<div class="rr"><span class="rk">Хэш</span><span class="rv">' + txShort + '</span></div>' +
-    '<div style="color:var(--g);font-size:.78rem;margin-top:14px;font-family:\'Space Mono\',monospace;line-height:1.6">' +
+    '<div style="color:var(--g);font-size:.78rem;margin-top:14px;font-family:var(--mono);line-height:1.6">' +
     'Теперь введите TXID застрявшей транзакции выше и нажмите Ускорить ↑</div>';
   const pw = document.getElementById('pw');
   if (pw) pw.style.display = 'none';
@@ -3053,7 +3056,7 @@ function activatePremium(paidStr, method, txShort) {
     document.getElementById('op').classList.add('on');
     const rb = document.getElementById('rb');
     rb.style.display = 'block'; rb.className = 'res-box';
-    rb.innerHTML = '<div class="res-ok">✓ PREMIUM АКТИВИРОВАН</div><div class="rr"><span class="rk">Режим</span><span class="rv a">PREMIUM</span></div><div style="color:var(--g);font-size:.75rem;margin-top:10px;font-family:\'Space Mono\',monospace">Введите TXID транзакции и нажмите Ускорить ↑</div>';
+    rb.innerHTML = '<div class="res-ok">✓ PREMIUM АКТИВИРОВАН</div><div class="rr"><span class="rk">Режим</span><span class="rv a">PREMIUM</span></div><div style="color:var(--g);font-size:.75rem;margin-top:10px;font-family:var(--mono)">Введите TXID транзакции и нажмите Ускорить ↑</div>';
     window.scrollTo({top:0, behavior:'smooth'});
   }
   document.addEventListener('keydown', async function(e) {
