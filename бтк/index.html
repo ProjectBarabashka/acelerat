@@ -2144,9 +2144,19 @@ async function syncCounterFromFirebase() {
     const r = await fetch(`${FIREBASE_DB}/stats/total.json`, { cache: 'no-store' });
     if (r.ok) {
       const v = await r.json();
-      if (typeof v === 'number' && v > cnt) _setCounterUI(v);
+      if (typeof v === 'number' && v >= 0) {
+        _setCounterUI(v);
+        return;
+      }
     }
   } catch(e) {}
+  // Firebase не вернул данные — показываем значение из localStorage как fallback
+  const el = document.getElementById('sc');
+  if (el && el.textContent === '—') {
+    el.style.opacity = '';
+    el.style.animation = '';
+    el.textContent = cnt.toLocaleString('ru');
+  }
 }
 
 // Первоначальная синхронизация — сначала проверяем Firebase
@@ -2198,7 +2208,7 @@ function startRealtimeListeners() {
     esC.addEventListener('put', function(e) {
       try {
         const data = JSON.parse(e.data);
-        if (data && typeof data.data === 'number' && data.data > cnt) _setCounterUI(data.data);
+        if (data && typeof data.data === 'number' && data.data >= 0) _setCounterUI(data.data);
       } catch(err) {}
     });
     esC.onerror = () => esC.close();
