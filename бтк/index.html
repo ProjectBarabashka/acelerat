@@ -187,6 +187,7 @@ nav{
   position:sticky;top:0;z-index:100;
   display:flex;align-items:center;justify-content:space-between;
   padding:0 28px;height:60px;
+  overflow:hidden;
   background:rgba(6,6,8,.6);
   backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
   border-bottom:1px solid rgba(255,255,255,.05);
@@ -213,7 +214,7 @@ nav{
   font-size:.42rem;letter-spacing:3px;color:rgba(74,74,104,.8);
   text-transform:uppercase;white-space:nowrap;font-family:var(--mono)
 }
-.nav-right{display:flex;align-items:center;gap:2px}
+.nav-right{display:flex;align-items:center;gap:2px;flex-wrap:nowrap;overflow:hidden}
 .nav-link{
   font-size:.7rem;color:var(--m2);text-decoration:none;
   padding:6px 12px;border-radius:6px;
@@ -1208,6 +1209,147 @@ details summary svg { transition: transform .2s; }
   animation: fadeInUp .35s ease both;
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   MOBILE — полная адаптация для телефонов
+═══════════════════════════════════════════════════════════════ */
+
+/* ── до 480px (маленькие телефоны) ── */
+@media(max-width:480px){
+  nav{padding:0 14px;height:54px}
+  .nav-link{display:none}
+  .nav-link[href*="t.me"]{display:inline-flex;padding:5px 9px;font-size:.62rem}
+  .logo-tag{display:none}
+  .logo{font-size:.8rem;letter-spacing:2px}
+  .logo-icon{width:28px;height:28px;font-size:13px}
+  .live-badge{font-size:.52rem;padding:4px 8px;margin-left:4px}
+  .w{padding:0 14px}
+  .hero{padding:44px 0 32px}
+  h1{font-size:clamp(1.9rem,10vw,2.8rem);letter-spacing:-1px}
+  .hero p{font-size:.85rem;margin-bottom:28px}
+  .hero-label{font-size:.52rem;padding:5px 12px}
+  .hero-cta{font-size:.58rem;padding:8px 14px}
+  .mempool-ticker{gap:10px;padding:8px 14px;font-size:.56rem}
+  .ticker-sep{display:none}
+  .stats{grid-template-columns:1fr 1fr}
+  .stat-card::after{display:none!important}
+  .stat-num{font-size:1.3rem}
+  .feed-item{padding:8px 14px;gap:8px}
+  .feed-time{display:none}
+  .card{padding:18px 14px;border-radius:12px}
+  .card-title{font-size:.95rem}
+  .card-sub{font-size:.68rem;margin-bottom:16px}
+  .free-limit-bar{flex-direction:column;align-items:flex-start;gap:10px}
+  .plan-row{grid-template-columns:1fr;gap:8px}
+  .acc-btn{padding:15px;font-size:.68rem;letter-spacing:2px}
+  .step{font-size:.62rem}
+  .rr{flex-wrap:wrap;gap:4px}
+  .rv{max-width:100%;text-align:left;font-size:.65rem}
+  .plans{grid-template-columns:1fr;gap:12px}
+  .plan-card{padding:22px 18px}
+  .plan-price{font-size:1.8rem}
+  .fl li{font-size:.68rem}
+  .plan-card.prem::after{font-size:.4rem;width:140px;top:22px;right:-32px}
+  .pools-grid{grid-template-columns:repeat(2,1fr);gap:5px}
+  .pi{padding:9px 10px}
+  .pn{font-size:.68rem}
+  .pp{font-size:.52rem}
+  .reviews-grid{grid-template-columns:1fr}
+  .rating-summary{flex-wrap:wrap;gap:10px}
+  .guarantee-block{padding:16px;gap:12px}
+  .guarantee-text{font-size:.72rem}
+  .modal{padding:22px 18px;width:96%}
+  .price-row{grid-template-columns:1fr;gap:6px}
+  .urgency-bar{flex-direction:column;align-items:flex-start;gap:6px}
+  .batch-toggle{width:100%;justify-content:center}
+  .push-prompt{flex-direction:column;align-items:flex-start;gap:10px}
+  .push-btn{width:100%;text-align:center}
+  footer{padding:20px 14px!important;text-align:center}
+  .fl2{flex-wrap:wrap;justify-content:center;gap:8px 14px}
+  #lang-bar{bottom:14px;right:14px}
+  #lang-dropdown{right:0;left:auto;width:220px}
+}
+
+/* ── 481–768px (большие телефоны, маленькие планшеты) ── */
+@media(min-width:481px) and (max-width:768px){
+  nav{padding:0 18px}
+  .logo-tag{display:none}
+  .nav-link:not([href*="t.me"]):nth-child(n+5){display:none}
+  .w{padding:0 18px}
+  h1{font-size:clamp(2.2rem,8vw,3.2rem)}
+  .hero{padding:56px 0 36px}
+  .stat-num{font-size:1.4rem}
+  .pools-grid{grid-template-columns:repeat(3,1fr)}
+  .reviews-grid{grid-template-columns:1fr 1fr}
+  .modal{width:94%;padding:26px 22px}
+}
+
+/* ── общее для всех мобильных ── */
+@media(max-width:768px){
+  .plan-card:hover{transform:none}
+  .acc-btn:hover:not(:disabled){transform:none}
+  .urgency-bar{flex-direction:column;align-items:flex-start;gap:6px}
+  .push-prompt{flex-direction:column;align-items:flex-start}
+  .push-btn{width:100%;text-align:center}
+  .chk-row{flex-wrap:wrap}
+  .chk-btn{flex:1;min-width:100px}
+}
+
+/* ── LAYOUT IMPROVEMENTS ── */
+
+/* Убираем избыточные section-divider */
+.section-divider { display: none; }
+
+/* Форма — живой фид внутри выглядит компактнее */
+#live-feed-wrap { border-radius: 10px; margin-bottom: 0; }
+#live-feed-wrap .live-feed-header { padding: 10px 14px; }
+#live-feed-wrap .feed-item { padding: 8px 14px; }
+
+/* Инструменты — заголовок секции */
+.sh { margin-top: 4px; margin-bottom: 14px; }
+
+/* Планы — меньше отступ сверху */
+.plans { margin-top: 0; }
+
+/* Отзывы — компактнее */
+.reviews-grid { gap: 8px; }
+.review-card { padding: 14px; gap: 8px; }
+.review-text { font-size: .72rem; }
+.rating-summary { padding: 12px 16px; margin-bottom: 16px; }
+
+/* Таблица сравнения — компактнее */
+.comp-table td, .comp-table th { padding: 9px 12px; }
+
+/* Пулы — чуть компактнее */
+.pools-grid { margin-bottom: 24px; gap: 5px; }
+.pi { padding: 10px 12px; }
+
+/* Гарантия — убираем лишний отступ */
+.guarantee-block { margin-bottom: 20px; }
+
+/* Поддержка — компактнее */
+#support { padding: 22px 24px; margin-bottom: 24px; }
+
+/* About — убираем лишнюю секцию if any */
+.section-about { margin-bottom: 20px; }
+
+/* Hero — чуть меньше нижний отступ */
+.hero { padding-bottom: 36px; }
+
+/* Stats — плавный переход */
+.stats { margin-bottom: 20px; }
+
+/* Card spacing */
+.card { margin-bottom: 16px; }
+
+/* Plans spacing */
+#plans-wrap { margin-bottom: 24px; }
+
+/* FAQ section — если есть, делаем компактнее */
+.faq-item { margin-bottom: 8px; }
+
+/* Comp wrap — убираем лишний отступ */
+.comp-wrap { margin-bottom: 24px; }
+
 </style>
 
 
@@ -1286,15 +1428,6 @@ details summary svg { transition: transform .2s; }
   </a>
 </div>
 
-<!-- LIVE FEED -->
-<div class="live-feed" id="live-feed-wrap">
-  <div class="live-feed-header">
-    <div class="live-feed-title"><div class="live-feed-dot"></div>Последние ускорения</div>
-    <span style="font-family:var(--mono);font-size:.58rem;color:var(--m)">обновляется в реальном времени</span>
-  </div>
-  <div class="feed-items" id="feed-items"></div>
-</div>
-
 <!-- ACCELERATE FORM -->
 <div class="card">
   <div class="card-title"><span style="display:inline-flex;align-items:center;gap:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Ускорить транзакцию</span></div>
@@ -1369,13 +1502,24 @@ details summary svg { transition: transform .2s; }
   </div>
 
   <div class="res-box" id="rb"></div>
+
+  <!-- LIVE FEED — соцдоказательство рядом с формой -->
+  <div class="live-feed" id="live-feed-wrap" style="margin-top:20px">
+    <div class="live-feed-header">
+      <div class="live-feed-title"><div class="live-feed-dot"></div>Последние ускорения</div>
+      <span style="font-family:var(--mono);font-size:.58rem;color:var(--m)">live</span>
+    </div>
+    <div class="feed-items" id="feed-items"></div>
+  </div>
+
   <div class="push-prompt" id="push-prompt">
     <span style="color:var(--m2)">Получить уведомление когда транзакция подтвердится?</span>
     <button class="push-btn" onclick="requestPush()">Включить уведомления</button>
   </div>
 </div>
 
-<!-- STATUS CHECKER -->
+<!-- STATUS + TOOLS -->
+<div class="sh" style="margin-top:8px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg> Инструменты</div>
 <div class="card" id="status">
   <div class="card-title"><span style="display:inline-flex;align-items:center;gap:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Проверить статус TX</span></div>
   <div class="card-sub">Проверка подтверждений в реальном времени через mempool.space</div>
@@ -1536,7 +1680,6 @@ details summary svg { transition: transform .2s; }
 </section>
 
 
-<div class="section-divider"></div>
 <!-- PLANS -->
 <div style="margin-bottom:28px">
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
@@ -1585,35 +1728,10 @@ details summary svg { transition: transform .2s; }
 
 </div><!-- /plans-wrapper -->
 
-<!-- TRUST BADGES -->
-<div class="trust-row">
-  <div class="trust-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>Гарантия возврата 6ч</div>
-  <span class="trust-sep">·</span>
-  <div class="trust-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Без приватных ключей</div>
-  <span class="trust-sep">·</span>
-  <div class="trust-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>15+ майнинг-пулов</div>
-  <span class="trust-sep">·</span>
-  <div class="trust-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Оплата BTC · USDT</div>
-  <span class="trust-sep">·</span>
-  <div class="trust-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Живой мемпул 24/7</div>
-</div>
-
 <!-- REVIEWS -->
 <div style="margin-bottom:36px">
   <div class="sh">Отзывы пользователей</div>
-  <div class="rating-summary">
-    <div>
-      <div class="rating-big">4.8</div>
-      <div class="rating-stars-big">★★★★★</div>
-      <div class="rating-count">847 отзывов · Trustpilot</div>
-    </div>
-    <div style="flex:1;display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center;max-width:220px">
-      <div style="height:4px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden"><div style="width:81%;height:100%;background:var(--a);border-radius:4px"></div></div><div style="font-family:var(--mono);font-size:.58rem;color:var(--m)">5★ 81%</div>
-      <div style="height:4px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden"><div style="width:12%;height:100%;background:var(--a);border-radius:4px;opacity:.6"></div></div><div style="font-family:var(--mono);font-size:.58rem;color:var(--m)">4★ 12%</div>
-      <div style="height:4px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden"><div style="width:5%;height:100%;background:var(--a);border-radius:4px;opacity:.3"></div></div><div style="font-family:var(--mono);font-size:.58rem;color:var(--m)">3★ 5%</div>
-      <div style="height:4px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden"><div style="width:2%;height:100%;background:var(--err);border-radius:4px;opacity:.5"></div></div><div style="font-family:var(--mono);font-size:.58rem;color:var(--m)">≤2★ 2%</div>
-    </div>
-  </div>
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px"><span style="font-family:var(--mono);font-size:1.4rem;font-weight:900;color:var(--a)">4.8</span><span style="color:var(--a);font-size:.85rem;letter-spacing:2px">★★★★★</span><span style="font-family:var(--mono);font-size:.62rem;color:var(--m)">847 отзывов</span></div>
   <div class="reviews-grid">
     <div class="review-card">
       <div class="review-stars">★★★★★</div>
@@ -1666,9 +1784,8 @@ details summary svg { transition: transform .2s; }
   </div>
 </div>
 
-<div class="section-divider"></div>
 <!-- COMPETITOR COMPARISON -->
-<div class="comp-wrap">
+<div class="comp-wrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch">
   <div class="sh">TurboTX vs конкуренты</div>
   <div style="background:var(--s);border:1px solid var(--b);border-radius:12px;overflow:hidden">
     <table class="comp-table">
@@ -1757,26 +1874,13 @@ details summary svg { transition: transform .2s; }
   </div>
 </div>
 
-<!-- QUEUE SECTION -->
-<div id="queue-section" style="margin-bottom:24px">
-  <div class="sh"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg> Очередь ускоряемых транзакций</div>
-  <div style="background:var(--s);border:1px solid var(--b);border-radius:16px;padding:20px 24px">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-      <span style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:.68rem;color:var(--m)">
-        <span style="width:7px;height:7px;border-radius:50%;background:var(--g);display:inline-block;animation:blink 1.6s infinite"></span>
-        В обработке:
-      </span>
-      <span id="queue-count" style="background:rgba(247,147,26,.15);color:var(--a);font-family:var(--mono);font-size:.68rem;padding:2px 10px;border-radius:20px;font-weight:700">0</span>
-      <span style="margin-left:auto;font-family:var(--mono);font-size:.6rem;color:var(--m);display:flex;align-items:center;gap:5px"><span style="width:5px;height:5px;border-radius:50%;background:var(--g);display:inline-block;animation:livepulse 2s infinite"></span>live</span>
-    </div>
-    <div id="queue-list" style="display:flex;flex-direction:column;gap:7px">
-      <div style="font-family:var(--mono);font-size:.75rem;color:var(--m);text-align:center;padding:20px 0">Очередь пуста — ускорьте транзакцию чтобы она появилась здесь</div>
-    </div>
-  </div>
+<!-- POOLS -->
+<div id="pools" style="margin-bottom:36px">
+  <div class="sh"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> Подключённые майнинг-пулы</div>
+  <div class="pools-grid" id="pg"></div>
 </div>
 
 <!-- GUARANTEE -->
-<div class="section-divider"></div>
 <div class="guarantee-block">
   <div class="guarantee-icon">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--g)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
@@ -1800,7 +1904,7 @@ details summary svg { transition: transform .2s; }
     </div>
     <div style="font-family:var(--mono);font-size:.68rem;color:rgba(0,136,204,.7);white-space:nowrap">Подписаться →</div>
   </a>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px">
     <a href="https://t.me/Sup_TurboTX" target="_blank" style="display:flex;align-items:center;gap:14px;background:rgba(0,136,204,.08);border:1px solid rgba(0,136,204,.25);border-radius:14px;padding:18px 20px;text-decoration:none;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(0,136,204,.5)'" onmouseout="this.style.borderColor='rgba(0,136,204,.25)'">
       <div style="width:40px;height:40px;background:rgba(0,136,204,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d='M21.5 2.5L2 10.5l7 1.5 2 6 3-3 4 3 3.5-15.5z'/><line x1='9' y1='12' x2='14.5' y2='7.5'/></svg></div>
       <div>
@@ -1820,12 +1924,6 @@ details summary svg { transition: transform .2s; }
   </div>
 </section>
 
-
-<!-- POOLS -->
-<div id="pools">
-  <div class="sh"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> Подключённые майнинг-пулы</div>
-  <div class="pools-grid" id="pg"></div>
-</div>
 
 </div><!-- /w -->
 
@@ -2023,28 +2121,7 @@ details summary svg { transition: transform .2s; }
 </section>
 
 <!-- SEO ТЕКСТ -->
-<section style="background:var(--s);border:1px solid var(--b);border-radius:20px;padding:36px;margin-bottom:40px">
-  <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:16px">О сервисе TurboTX</h2>
-  <div style="color:var(--m);font-size:.85rem;line-height:1.8;display:grid;gap:14px">
-    <p>
-      <strong style="color:var(--t)">TurboTX</strong> — это бесплатный ускоритель Bitcoin транзакций (Bitcoin transaction accelerator),
-      который помогает подтвердить застрявшие BTC транзакции быстрее. Сервис работает методом
-      <strong style="color:var(--t)">rebroadcast</strong> — повторной отправки транзакции напрямую в крупнейшие майнинг-пулы мира.
-    </p>
-    <p>
-      Если ваша Bitcoin транзакция не подтверждается несколько часов — скопируйте <strong style="color:var(--t)">TXID</strong>
-      из вашего кошелька (Exodus, Trust Wallet, Electrum, Binance и др.) и введите его в форму выше.
-      Мы немедленно отправим транзакцию в пулы <strong style="color:var(--t)">Foundry USA, AntPool, ViaBTC, F2Pool, MARA Pool, Binance Pool</strong>
-      и другие, контролирующие более 80% хешрейта сети.
-    </p>
-    <p>
-      Сервис работает по аналогии с официальными акселераторами:
-      <strong style="color:var(--t)">ViaBTC Transaction Accelerator, BTC.com Accelerator, Braiins Accelerator</strong>,
-      но объединяет все их возможности в одном месте. Бесплатный режим доступен всем,
-      Premium обеспечивает приоритетную обработку.
-    </p>
-  </div>
-</section>
+
 
 <footer>
   <div style="margin-bottom:4px;letter-spacing:2px">TURBOTX</div><div style="font-size:.58rem;color:var(--m);opacity:.6">© 2026 — Сервис ускорения BTC-транзакций через rebroadcast в майнинг-пулы</div>
