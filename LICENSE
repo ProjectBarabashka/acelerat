@@ -1,18 +1,21 @@
-TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
-Copyright (c) 2024-2026 ProjectBarabashka (T_U_R_B_O_T_X)
+---
 
-RUS:
-Данный программный код предоставлен исключительно для ознакомления. 
-Владелец (ProjectBarabashka) ЗАПРЕЩАЕТ:
-1. Использование кода или интерфейса (acelerat.vercel.app) в коммерческих целях.
-2. Создание зеркал (клонов) сайта или сервиса.
-3. Распространение модифицированных версий кода без письменного согласия.
+## ⚖️ License & Intellectual Property / Лицензия и Авторское право
 
-ENG:
-This source code is provided for educational/viewing purposes only. 
-The owner (ProjectBarabashka) STRICTLY PROHIBITS:
-1. Any commercial use of the code or the website interface (acelerat.vercel.app).
-2. Creating mirrors or clones of the service.
-3. Distribution of modified versions of this software without express written permission.
+<p align="center">
+  <img src="https://img.shields.io" alt="Proprietary License">
+  <img src="https://img.shields.io©_2024--2026-ProjectBarabashka-blue?style=for-the-badge" alt="Copyright">
+</p>
 
-ALL RIGHTS RESERVED.
+> [!CAUTION]
+> ### 🚨 PROPRIETARY SOFTWARE / ВСЕ ПРАВА ЗАЩИЩЕНЫ
+> 
+> **ENG:** This source code is provided for **educational and viewing purposes only**. Any commercial use, creation of mirrors (clones), or distribution of modified versions of the interface and logic of the **BTC Accelerator** (acelerat.vercel.app) is **STRICTLY PROHIBITED** without the express written permission of the owner.
+> 
+> **RUS:** Данный исходный код предоставлен исключительно для **ознакомительных целей**. Любое коммерческое использование, создание зеркал (клонов) или распространение измененных версий интерфейса и логики **BTC Accelerator** (acelerat.vercel.app) **СТРОГО ЗАПРЕЩЕНО** без прямого письменного согласия владельца.
+
+---
+<p align="center">
+  <b>Developed by ProjectBarabashka</b><br>
+  <i>Ensuring your Bitcoin transactions never get stuck.</i>
+</p>
