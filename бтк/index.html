@@ -2034,7 +2034,7 @@ details summary svg { transition: transform .2s; }
     <p>
       Если ваша Bitcoin транзакция не подтверждается несколько часов — скопируйте <strong style="color:var(--t)">TXID</strong>
       из вашего кошелька (Exodus, Trust Wallet, Electrum, Binance и др.) и введите его в форму выше.
-      Мы немедленно отправим транзакцию в пулы <strong style="color:var(--t)">ViaBTC, AntPool, F2Pool, BTC.com, Rawpool, SlushPool</strong>
+      Мы немедленно отправим транзакцию в пулы <strong style="color:var(--t)">Foundry USA, AntPool, ViaBTC, F2Pool, MARA Pool, Binance Pool</strong>
       и другие, контролирующие более 80% хешрейта сети.
     </p>
     <p>
@@ -2327,14 +2327,14 @@ let plan = 'free', selBtc = 0.000062;
 
 // ── POOLS ──────────────────────────────────────────────────────
 const POOLS = [
-  {n:'ViaBTC',p:'18ms',c:'g'},{n:'AntPool',p:'22ms',c:'g'},
-  {n:'F2Pool',p:'19ms',c:'g'},{n:'BTC.com',p:'31ms',c:'g'},
-  {n:'SlushPool',p:'44ms',c:'g'},{n:'BinancePool',p:'20ms',c:'g'},
-  {n:'Luxor',p:'52ms',c:'g'},{n:'FoundryUSA',p:'60ms',c:'g'},
-  {n:'MARA Pool',p:'38ms',c:'g'},{n:'Braiins',p:'45ms',c:'g'},
-  {n:'SpiderPool',p:'35ms',c:'g'},{n:'Ocean.xyz',p:'41ms',c:'g'},
-  {n:'Rawpool',p:'47ms',c:'g'},{n:'SecPool',p:'53ms',c:'g'},
-  {n:'Titan',p:'49ms',c:'g'}
+  {n:'Foundry USA',p:'60ms',c:'g'},{n:'AntPool',p:'22ms',c:'g'},
+  {n:'ViaBTC',p:'18ms',c:'g'},{n:'F2Pool',p:'19ms',c:'g'},
+  {n:'MARA Pool',p:'38ms',c:'g'},{n:'Binance Pool',p:'20ms',c:'g'},
+  {n:'Braiins',p:'45ms',c:'g'},{n:'SpiderPool',p:'35ms',c:'g'},
+  {n:'BTC.com',p:'31ms',c:'g'},{n:'Luxor',p:'52ms',c:'g'},
+  {n:'Ocean',p:'41ms',c:'g'},{n:'SecPool',p:'53ms',c:'g'},
+  {n:'Rawpool',p:'47ms',c:'g'},{n:'SBI Crypto',p:'55ms',c:'g'},
+  {n:'WhitePool',p:'58ms',c:'g'}
 ];
 const pg = document.getElementById('pg');
 POOLS.forEach(p => {
@@ -2855,7 +2855,7 @@ function pick(p) {
 }
 // ── STEPS ──────────────────────────────────────────────────────
 const FREE_S = ['Валидация TXID...','Подключение к mempool.space...','Broadcast → ViaBTC...','Broadcast → AntPool...','Broadcast → F2Pool...','Завершение...'];
-const PREM_S = ['Валидация TXID...','Приоритетная очередь...','Broadcast → mempool.space...','Broadcast → ViaBTC...','Broadcast → AntPool...','Broadcast → F2Pool, BTC.com...','Broadcast → Rawpool, SlushPool...','Broadcast → BinancePool, Luxor...','Broadcast → FoundryUSA, MARA...','Broadcast → Braiins, SpiderPool...','Финализация...'];
+const PREM_S = ['Валидация TXID...','Приоритетная очередь...','Broadcast → Foundry USA...','Broadcast → AntPool, ViaBTC...','Broadcast → F2Pool, MARA Pool...','Broadcast → Binance Pool, Braiins...','Broadcast → SpiderPool, BTC.com...','Broadcast → Luxor, Ocean...','Broadcast → SecPool, Rawpool...','Broadcast → SBI Crypto, WhitePool...','Финализация...'];
 
 // ── QUEUE ──────────────────────────────────────────────────────
 const Q_KEY = 'turbotx_queue';
