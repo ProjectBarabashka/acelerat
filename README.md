@@ -60,3 +60,17 @@ A professional tool for monitoring and accelerating "stuck" Bitcoin transactions
 ## Tech Stack / Технологии
 - **Frontend:** React / Vite
 - **Network Data:** Real-time Mempool & Blockstream API integration
+---
+
+## ⚖️ License & Copyright / Лицензия и Авторское право
+
+> [!CAUTION]
+> **PROPRIETARY SOFTWARE / ВСЕ ПРАВА ЗАЩИЩЕНЫ**
+> 
+> **ENG:** Viewing the code does not grant the right to use it for commercial purposes or to create clones. All rights to the interface and logic of the **BTC Accelerator** (acelerat.vercel.app) belong to the author.
+> 
+> **RUS:** Просмотр кода не дает права на его коммерческое использование или создание клонов. Все права на интерфейс и логику **BTC Accelerator** (acelerat.vercel.app) принадлежат автору.
+
+© 2024-2026 **ProjectBarabashka**. All rights reserved.
+
+
