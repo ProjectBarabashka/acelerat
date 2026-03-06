@@ -7,8 +7,8 @@
 
 <!-- PRIMARY SEO -->
 <title>Bitcoin Transaction Accelerator — Ускоритель BTC Транзакций | TurboTX</title>
-<meta name="description" content="Ускорьте застрявшую Bitcoin транзакцию бесплатно. Rebroadcast в 15+ майнинг-пулов — ViaBTC, AntPool, F2Pool. Бесплатно 1–3 ч, Premium 15–30 мин. BTC transaction accelerator.">
-<meta name="keywords" content="ускоритель транзакций биткоин, bitcoin transaction accelerator, btc accelerator, ускорить биткоин транзакцию, застрявшая транзакция btc, btc stuck transaction, mempool accelerator, ускорить транзакцию бесплатно, bitcoin accelerate, btc unconfirmed transaction">
+<meta name="description" content="Ускорьте застрявшую Bitcoin транзакцию бесплатно. Rebroadcast в 15+ майнинг-пулов — ViaBTC, AntPool, F2Pool. Бесплатно 1–3 ч, Premium 15–30 мин. BTC transaction accelerator. Telegram-канал @TurboTXAcel.">
+<meta name="keywords" content="ускоритель транзакций биткоин, bitcoin transaction accelerator, btc accelerator, ускорить биткоин транзакцию, застрявшая транзакция btc, btc stuck transaction, mempool accelerator, ускорить транзакцию бесплатно, bitcoin accelerate, btc unconfirmed transaction, TurboTX телеграм, TurboTXAcel, turbotx telegram канал, биткоин телеграм канал">
 <meta name="robots" content="index, follow">
 <meta name="author" content="TurboTX">
 <link rel="canonical" href="https://acelerat.vercel.app/">
@@ -63,7 +63,11 @@
     "@type": "AggregateRating",
     "ratingValue": "4.8",
     "ratingCount": "847"
-  }
+  },
+  "sameAs": [
+    "https://t.me/TurboTXAcel",
+    "https://t.me/Sup_TurboTX"
+  ]
 }
 </script>
 
@@ -106,6 +110,26 @@
       }
     }
   ]
+}
+</script>
+
+<!-- TELEGRAM CHANNEL SCHEMA (помогает Яндексу и Google найти канал) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "TurboTX",
+  "url": "https://acelerat.vercel.app/",
+  "description": "Сервис ускорения Bitcoin транзакций TurboTX. Telegram-канал с советами, новостями и обновлениями сервиса.",
+  "sameAs": [
+    "https://t.me/TurboTXAcel",
+    "https://t.me/Sup_TurboTX"
+  ],
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "contactType": "customer support",
+    "url": "https://t.me/Sup_TurboTX"
+  }
 }
 </script>
 
@@ -1213,6 +1237,7 @@ details summary svg { transition: transform .2s; }
     <a href="javascript:void(0)" class="nav-link" onclick="document.getElementById('rbf').scrollIntoView({behavior:'smooth'});return false;">RBF</a>
     <a href="javascript:void(0)" class="nav-link" onclick="document.getElementById('pools').scrollIntoView({behavior:'smooth'});return false;">Пулы</a>
     <a href="javascript:void(0)" class="nav-link" onclick="document.getElementById('support').scrollIntoView({behavior:'smooth'});return false;">Поддержка</a>
+    <a href="https://t.me/TurboTXAcel" target="_blank" class="nav-link" style="display:inline-flex;align-items:center;gap:5px;color:rgba(0,136,204,.8);border:1px solid rgba(0,136,204,.2);border-radius:6px;padding:5px 11px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d='M21.5 2.5L2 10.5l7 1.5 2 6 3-3 4 3 3.5-15.5z'/><line x1='9' y1='12' x2='14.5' y2='7.5'/></svg>Канал</a>
     <div class="live-badge"><div class="live-dot"></div>LIVE</div>
   </div>
 </nav>
@@ -1773,6 +1798,16 @@ details summary svg { transition: transform .2s; }
 <section id="support" style="background:var(--s);border:1px solid var(--b);border-radius:16px;padding:26px 28px;margin-bottom:28px">
   <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:20px;display:flex;align-items:center;gap:12px">Поддержка<span style="flex:1;height:1px;background:var(--b);display:block"></span></h2>
   <p style="color:var(--m);font-size:.85rem;margin-bottom:22px;line-height:1.7">Возникли вопросы или проблема с ускорением? Напишите нам — отвечаем быстро.</p>
+  <!-- TG Channel banner -->
+  <a href="https://t.me/TurboTXAcel" target="_blank" style="display:flex;align-items:center;gap:14px;background:linear-gradient(110deg,rgba(0,136,204,.1) 0%,rgba(0,136,204,.04) 100%);border:1px solid rgba(0,136,204,.3);border-radius:14px;padding:16px 20px;text-decoration:none;margin-bottom:16px;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(0,136,204,.6)'" onmouseout="this.style.borderColor='rgba(0,136,204,.3)'">
+    <div style="width:44px;height:44px;background:rgba(0,136,204,.2);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.4rem">📢</div>
+    <div style="flex:1">
+      <div style="font-weight:700;font-size:.95rem;color:#e8e8f0;margin-bottom:3px">Telegram-канал TurboTX</div>
+      <div style="font-family:var(--mono);font-size:.72rem;color:#0088cc;margin-bottom:3px">@TurboTXAcel</div>
+      <div style="font-size:.7rem;color:var(--m)">Новости сервиса · Советы по BTC · Обновления · Акции</div>
+    </div>
+    <div style="font-family:var(--mono);font-size:.68rem;color:rgba(0,136,204,.7);white-space:nowrap">Подписаться →</div>
+  </a>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
     <a href="https://t.me/Sup_TurboTX" target="_blank" style="display:flex;align-items:center;gap:14px;background:rgba(0,136,204,.08);border:1px solid rgba(0,136,204,.25);border-radius:14px;padding:18px 20px;text-decoration:none;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(0,136,204,.5)'" onmouseout="this.style.borderColor='rgba(0,136,204,.25)'">
       <div style="width:40px;height:40px;background:rgba(0,136,204,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d='M21.5 2.5L2 10.5l7 1.5 2 6 3-3 4 3 3.5-15.5z'/><line x1='9' y1='12' x2='14.5' y2='7.5'/></svg></div>
@@ -1782,11 +1817,11 @@ details summary svg { transition: transform .2s; }
         <div style="font-size:.7rem;color:var(--m);margin-top:3px">Ответ в течение 30 мин</div>
       </div>
     </a>
-    <a href="/cdn-cgi/l/email-protection#d6a6b9babaafa2a4b7acbab996b1bbb7bfbaf8b5b9bb" style="display:flex;align-items:center;gap:14px;background:rgba(247,147,26,.06);border:1px solid rgba(247,147,26,.2);border-radius:14px;padding:18px 20px;text-decoration:none;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(247,147,26,.4)'" onmouseout="this.style.borderColor='rgba(247,147,26,.2)'">
+    <a href="mailto:pollytrazlo@gmail.com" style="display:flex;align-items:center;gap:14px;background:rgba(247,147,26,.06);border:1px solid rgba(247,147,26,.2);border-radius:14px;padding:18px 20px;text-decoration:none;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(247,147,26,.4)'" onmouseout="this.style.borderColor='rgba(247,147,26,.2)'">
       <div style="width:40px;height:40px;background:rgba(247,147,26,.1);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d='M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z'/><polyline points='22,6 12,13 2,6'/></svg></div>
       <div>
         <div style="font-weight:700;font-size:.9rem;color:#e8e8f0;margin-bottom:3px">Email</div>
-        <div style="font-family:var(--mono);font-size:.72rem;color:var(--a)"><span class="__cf_email__" data-cfemail="74041b18180d0006150e181b341319151d185a171b19">[email&#160;protected]</span></div>
+        <div style="font-family:var(--mono);font-size:.72rem;color:var(--a)">pollytrazlo@gmail.com</div>
         <div style="font-size:.7rem;color:var(--m);margin-top:3px">Ответ в течение 24 часов</div>
       </div>
     </a>
@@ -2025,12 +2060,13 @@ details summary svg { transition: transform .2s; }
     <a href="https://mempool.space" target="_blank">mempool.space</a>
     <a href="https://viaBTC.com" target="_blank">ViaBTC</a>
     <a href="https://btc.com" target="_blank">BTC.com</a>
-    <a href="https://t.me/Sup_TurboTX" target="_blank">TG / @Sup_TurboTX</a>
-    <a href="/cdn-cgi/l/email-protection#b3c3dcdfdfcac7c1d2c9dfdcf3d4ded2dadf9dd0dcde"><span class="__cf_email__" data-cfemail="05756a69697c7177647f696a456268646c692b666a68">[email&#160;protected]</span></a>
+    <a href="https://t.me/TurboTXAcel" target="_blank">TG Канал / @TurboTXAcel</a>
+    <a href="https://t.me/Sup_TurboTX" target="_blank">TG Поддержка / @Sup_TurboTX</a>
+    <a href="mailto:pollytrazlo@gmail.com">pollytrazlo@gmail.com</a>
   </div>
 </footer>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
 
 // ═══════════════════════════════════════════════════════════════
 // RBF CALCULATOR — Replace-By-Fee
@@ -2305,7 +2341,7 @@ const POOLS = [
   {n:'SlushPool',p:'44ms',c:'g'},{n:'BinancePool',p:'20ms',c:'g'},
   {n:'Luxor',p:'52ms',c:'g'},{n:'FoundryUSA',p:'60ms',c:'g'},
   {n:'MARA Pool',p:'38ms',c:'y'},{n:'Braiins',p:'45ms',c:'g'},
-  {n:'SpiderPool',p:'35ms',c:'y'},{n:'SBICrypto',p:'55ms',c:'g'},
+  {n:'SpiderPool',p:'35ms',c:'g'},{n:'Ocean.xyz',p:'41ms',c:'g'},
   {n:'Blockchair',p:'28ms',c:'g'}
 ];
 const pg = document.getElementById('pg');
