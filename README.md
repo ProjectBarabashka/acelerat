@@ -7,6 +7,8 @@
 
 ---
 
+<div id="english-version"></div>
+
 ## 🇺🇸 English Version
 
 > **Status: ⚠️ BETA STAGE (2026)**  
@@ -35,6 +37,8 @@ A professional tool for monitoring and accelerating "stuck" Bitcoin transactions
 👉 **[Open Web App (Beta)](https://acelerat.vercel.app)**
 
 ---
+
+<div id="russian-version"></div>
 
 ## 🇷🇺 Русская Версия
 
@@ -69,7 +73,7 @@ A professional tool for monitoring and accelerating "stuck" Bitcoin transactions
 
 <p align="center">
   <img src="https://img.shields.io" alt="Proprietary License">
-  <img src="https://img.shields.io©_2026-ProjectBarabashka-blue?style=for-the-badge" alt="Copyright">
+  <img src="https://img.shields.io" alt="Copyright">
 </p>
 
 > [!CAUTION]
@@ -83,5 +87,6 @@ A professional tool for monitoring and accelerating "stuck" Bitcoin transactions
   <b>Developed by ProjectBarabashka</b><br>
   <i>Ensuring your Bitcoin transactions never get stuck.</i>
 </p>
+
 
 
