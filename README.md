@@ -72,8 +72,7 @@ A professional tool for monitoring and accelerating "stuck" Bitcoin transactions
 ## ⚖️ License & Intellectual Property / Лицензия и Авторское право
 
 <p align="center">
-  <img src="https://img.shields.io" alt="Proprietary License">
-  <img src="https://img.shields.io" alt="Copyright">
+  <code><strong>LICENSE: PROPRIETARY</strong></code> &nbsp;&nbsp; | &nbsp;&nbsp; <code><strong>© 2026 ProjectBarabashka</strong></code>
 </p>
 
 > [!CAUTION]
@@ -87,6 +86,3 @@ A professional tool for monitoring and accelerating "stuck" Bitcoin transactions
   <b>Developed by ProjectBarabashka</b><br>
   <i>Ensuring your Bitcoin transactions never get stuck.</i>
 </p>
-
-
-
