@@ -913,6 +913,14 @@ footer a:hover{color:var(--a)}
 .feed-txid{font-family:var(--mono);font-size:.68rem;color:var(--m2)}
 .feed-txid span{color:var(--t)}
 .feed-time{font-family:var(--mono);font-size:.6rem;color:var(--m);white-space:nowrap}
+/* ── CONF DOTS ── */
+.conf-dot-wait{animation:conf-wait 1.8s ease-in-out infinite}
+.conf-dot-active{animation:conf-active .4s ease forwards}
+.conf-dot-done{animation:none}
+@keyframes conf-wait{0%,100%{opacity:.25}50%{opacity:.55}}
+@keyframes conf-active{from{transform:scale(0.6);opacity:.4}to{transform:scale(1);opacity:1}}
+@keyframes conf-glow{0%,100%{box-shadow:0 0 0 0 rgba(0,232,122,0)}50%{box-shadow:0 0 6px 2px rgba(0,232,122,.35)}}
+
 .feed-badge-conf{
   font-family:var(--mono);font-size:.58rem;padding:3px 9px;
   border-radius:4px;white-space:nowrap;letter-spacing:.5px;
@@ -3534,11 +3542,19 @@ async function go() {
     <!-- CONFIRMATIONS TRACKER -->
     <div id="conf-tracker" style="margin-top:14px;padding:12px 14px;background:rgba(0,232,122,.04);border:1px solid rgba(0,232,122,.1);border-radius:var(--r)">
       <div style="font-family:var(--mono);font-size:.6rem;color:var(--m);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Подтверждения</div>
-      <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px">
-        <div class="conf-dot" id="conf-0" style="width:10px;height:10px;border-radius:50%;background:var(--b2);transition:background .5s"></div>
-        <div class="conf-dot" id="conf-1" style="width:10px;height:10px;border-radius:50%;background:var(--b2);transition:background .5s"></div>
-        <div class="conf-dot" id="conf-2" style="width:10px;height:10px;border-radius:50%;background:var(--b2);transition:background .5s"></div>
-        <span id="conf-text" style="font-family:var(--mono);font-size:.68rem;color:var(--m2);margin-left:4px">Ожидание включения в блок...</span>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+        <div class="conf-dot conf-dot-wait" id="conf-0"
+          style="width:11px;height:11px;border-radius:50%;background:var(--b2);
+                 transition:background .4s,box-shadow .4s,transform .2s;animation-delay:0s"></div>
+        <div class="conf-dot conf-dot-wait" id="conf-1"
+          style="width:11px;height:11px;border-radius:50%;background:var(--b2);
+                 transition:background .4s,box-shadow .4s,transform .2s;animation-delay:.3s"></div>
+        <div class="conf-dot conf-dot-wait" id="conf-2"
+          style="width:11px;height:11px;border-radius:50%;background:var(--b2);
+                 transition:background .4s,box-shadow .4s,transform .2s;animation-delay:.6s"></div>
+        <span id="conf-text" style="font-family:var(--mono);font-size:.68rem;color:var(--m2);margin-left:6px">
+          Ожидание включения в блок…
+        </span>
       </div>
       <div style="font-size:.6rem;color:var(--m);font-family:var(--mono)">1 подтверждение = 1 блок (~10 мин) · 3 = безопасно для большинства платежей</div>
     </div>
@@ -3573,44 +3589,146 @@ async function go() {
 
 // ── CONFIRMATIONS TRACKER ──────────────────────────────────
 let _confInterval = null;
+let _cachedHeight = 0;
+let _heightTs = 0;
+
+// Кэшируем высоту блока — запрашиваем не чаще раза в 60 сек
+async function getCurrentHeight() {
+  if (_cachedHeight > 0 && Date.now() - _heightTs < 60000) return _cachedHeight;
+  try {
+    const r = await fetch('https://mempool.space/api/blocks/tip/height', { cache: 'no-store' });
+    if (r.ok) {
+      const h = parseInt(await r.text());
+      if (h > 0) { _cachedHeight = h; _heightTs = Date.now(); return h; }
+    }
+  } catch(e) {}
+  return _cachedHeight || 0; // вернуть кэш если есть, иначе 0
+}
+
+// Устанавливает визуальный стейт точки
+function setDot(dot, state) {
+  // state: 'wait' | 'active' | 'done'
+  if (!dot) return;
+  // Убираем все классы трекера
+  dot.classList.remove('conf-dot-wait', 'conf-dot-active', 'conf-dot-done');
+  if (state === 'wait') {
+    dot.style.background = 'var(--b2)';
+    dot.style.boxShadow = 'none';
+    dot.classList.add('conf-dot-wait');
+  } else if (state === 'active') {
+    dot.style.background = 'var(--a)';
+    dot.style.boxShadow = '0 0 6px 2px rgba(247,147,26,.35)';
+    dot.classList.add('conf-dot-active');
+  } else if (state === 'done') {
+    dot.style.background = 'var(--g)';
+    dot.style.boxShadow = '0 0 8px 2px rgba(0,232,122,.4)';
+    dot.classList.add('conf-dot-done');
+    // Добавим анимацию свечения
+    dot.style.animation = 'conf-glow 2s ease-in-out infinite';
+  }
+}
+
 async function startConfTracker(txid) {
   if (_confInterval) clearInterval(_confInterval);
+
+  // Ждём пока DOM обновится после рендера результата
+  await new Promise(r => setTimeout(r, 200));
+
   const tracker = document.getElementById('conf-tracker');
   if (!tracker) return;
   tracker.style.display = 'block';
 
+  // Сразу показываем пульсирующие точки ожидания
+  const dots = ['conf-0','conf-1','conf-2'].map(id => document.getElementById(id));
+  dots.forEach((d, i) => {
+    if (d) {
+      d.classList.remove('conf-dot-active','conf-dot-done');
+      d.classList.add('conf-dot-wait');
+      d.style.animationDelay = (i * 0.3) + 's';
+      d.style.background = 'var(--b2)';
+      d.style.boxShadow = 'none';
+    }
+  });
+
+  let _retries = 0;
+  const MAX_RETRIES = 3;
+
   async function checkConf() {
     try {
-      const r = await fetch('https://mempool.space/api/tx/' + txid + '/status');
-      if (!r.ok) return;
-      const s = await r.json();
-      const confs = s.confirmed ? (s.block_height ? Math.max(0, await getCurrentHeight() - s.block_height + 1) : 1) : 0;
-      const dots = [document.getElementById('conf-0'), document.getElementById('conf-1'), document.getElementById('conf-2')];
-      const txt = document.getElementById('conf-text');
-      dots.forEach((d, i) => {
-        if (!d) return;
-        if (i < confs) d.style.background = confs >= 3 ? 'var(--g)' : 'var(--a)';
-        else d.style.background = 'var(--b2)';
-      });
-      if (txt) {
-        if (confs === 0) txt.textContent = 'Ожидание включения в блок...';
-        else if (confs === 1) { txt.innerHTML = '<span style="color:var(--a)">1 подтверждение</span> — включена в блок ✓'; }
-        else if (confs === 2) { txt.innerHTML = '<span style="color:var(--a)">2 подтверждения</span> — почти безопасно'; }
-        else { txt.innerHTML = '<span style="color:var(--g)">✓ ' + confs + ' подтверждения</span> — транзакция завершена'; clearInterval(_confInterval); }
+      const r = await fetch('https://mempool.space/api/tx/' + txid + '/status', { cache: 'no-store' });
+
+      if (!r.ok) {
+        _retries++;
+        if (_retries >= MAX_RETRIES) {
+          const txt = document.getElementById('conf-text');
+          if (txt) txt.innerHTML = '<span style="color:var(--m)">Нет ответа от сети — повтор через 30 сек</span>';
+        }
+        return;
       }
-    } catch(e) {}
+      _retries = 0;
+
+      const s = await r.json();
+
+      let confs = 0;
+      if (s.confirmed) {
+        if (s.block_height) {
+          const tipHeight = await getCurrentHeight();
+          if (tipHeight > 0) {
+            confs = Math.max(1, tipHeight - s.block_height + 1);
+          } else {
+            // Высота недоступна — но транзакция подтверждена, ставим минимум 1
+            confs = 1;
+          }
+        } else {
+          confs = 1;
+        }
+      }
+
+      const freshDots = ['conf-0','conf-1','conf-2'].map(id => document.getElementById(id));
+      const txt = document.getElementById('conf-text');
+
+      // Обновляем каждую точку
+      freshDots.forEach((d, i) => {
+        if (!d) return;
+        if (confs === 0) {
+          // Ждём — пульсируем
+          setDot(d, 'wait');
+          d.style.animationDelay = (i * 0.3) + 's';
+        } else if (i < confs) {
+          // Эта точка загорается
+          const allDone = confs >= 3;
+          setDot(d, allDone ? 'done' : 'active');
+          d.style.animationDelay = '0s';
+        } else {
+          // Ещё не набрали достаточно подтверждений
+          setDot(d, 'wait');
+          d.style.animationDelay = (i * 0.3) + 's';
+        }
+      });
+
+      // Обновляем текст
+      if (txt) {
+        if (confs === 0) {
+          txt.innerHTML = '<span style="color:var(--m)">Ожидание включения в блок…</span>';
+        } else if (confs === 1) {
+          txt.innerHTML = '<span style="color:var(--a);font-weight:600">1 / 3 подтверждение</span> — включена в блок ✓';
+        } else if (confs === 2) {
+          txt.innerHTML = '<span style="color:var(--a);font-weight:600">2 / 3 подтверждения</span> — почти безопасно';
+        } else {
+          txt.innerHTML = '<span style="color:var(--g);font-weight:600">✓ ' + confs + ' подтверждения</span> — транзакция завершена';
+          clearInterval(_confInterval);
+          _confInterval = null;
+        }
+      }
+    } catch(e) {
+      // Молча игнорируем — попробуем при следующем интервале
+    }
   }
 
+  // Первая проверка сразу
   await checkConf();
+  // Повторяем каждые 30 секунд
   _confInterval = setInterval(checkConf, 30000);
-}
-
-async function getCurrentHeight() {
-  try {
-    const r = await fetch('https://mempool.space/api/blocks/tip/height');
-    if (r.ok) return parseInt(await r.text());
-  } catch(e) {}
-  return 0;
 }
 
 function err(msg) {
