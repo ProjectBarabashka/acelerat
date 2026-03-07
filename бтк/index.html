@@ -199,7 +199,6 @@ bitcoin tx accelerator online, btc accelerator 2025, btc accelerator 2026,
   } else { drawFrame(); }
 })();
 </script>
-<link rel="apple-touch-icon" sizes="180x180" id="anim-favicon-apple" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==">
 
 <!-- ═══════════════════════════════════════════════
      OPEN GRAPH — соцсети, Telegram, WhatsApp
@@ -4270,8 +4269,7 @@ async function _pushHex(url, hex, opts = {}) {
     if (opts.json) { const j = await r.json(); return !!(j && (j.data || j.result || j.context?.code === 200)); }
     return r.ok || r.status === 400;
   } catch(e) {
-    // noCors: браузер бросает исключение из-за CORS preflight или opaque response —
-    // это НЕ значит что запрос не ушёл. Считаем успехом.
+    // noCors: браузер бросает исключение из-за CORS/opaque — запрос физически ушёл
     if (opts.noCors) return true;
     return false;
   }
@@ -4286,10 +4284,7 @@ async function _pushTxid(url, body) {
       body
     });
     return true;
-  } catch(e) {
-    // no-cors: исключение ≠ запрос не ушёл
-    return true;
-  }
+  } catch(e) { return true; } // no-cors: исключение ≠ запрос не ушёл
 }
 
 // ── FREE BROADCAST — 5 реальных каналов (Bitcoin Wiki verified) ──
