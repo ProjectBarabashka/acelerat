@@ -98,7 +98,7 @@ bitcoin tx accelerator online, btc accelerator 2025, btc accelerator 2026,
 <link rel="dns-prefetch" href="https://blockchain.info">
 <link rel="dns-prefetch" href="https://fonts.googleapis.com">
 
-<!-- FAVICON — анимированная молния через canvas -->
+<!-- FAVICON — летящий лепесток сакуры -->
 <link rel="icon" id="anim-favicon" type="image/png" href="">
 <link rel="shortcut icon" id="anim-favicon2" type="image/png" href="">
 <script>
@@ -107,95 +107,123 @@ bitcoin tx accelerator online, btc accelerator 2025, btc accelerator 2026,
   canvas.width = 32; canvas.height = 32;
   var ctx = canvas.getContext('2d');
   var frame = 0;
-  var CYCLE = 120; // кадров на полный цикл (~2.8s @ 44fps)
+  var CYCLE = 140; // ~3.2s @ 44fps
 
-  // Точки молнии (нормализованы под 32x32)
-  var boltPts = [
-    [19,1],[10,15],[15.5,15],[12,31],[22,13],[16,13],[19,1]
-  ];
+  function drawPetal(cx, cy, angle, alpha, scale) {
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.translate(cx, cy);
+    ctx.rotate(angle);
+    ctx.scale(scale, scale);
+
+    // 5 лепестков цветка
+    for (var p = 0; p < 5; p++) {
+      ctx.save();
+      ctx.rotate((p / 5) * Math.PI * 2);
+      var grd = ctx.createRadialGradient(0, -5, 1, 0, -5, 7);
+      grd.addColorStop(0,   'rgba(253,242,248,1)');
+      grd.addColorStop(0.5, 'rgba(251,207,232,1)');
+      grd.addColorStop(1,   'rgba(249,168,212,0.7)');
+      ctx.beginPath();
+      ctx.ellipse(0, -5, 3, 6, 0, 0, Math.PI * 2);
+      ctx.fillStyle = grd;
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // Центр
+    ctx.beginPath();
+    ctx.arc(0, 0, 2.8, 0, Math.PI * 2);
+    ctx.fillStyle = '#fce7f3';
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(0, 0, 1.4, 0, Math.PI * 2);
+    ctx.fillStyle = '#fbcfe8';
+    ctx.fill();
+
+    // Тычинки
+    for (var d = 0; d < 5; d++) {
+      var a = (d / 5) * Math.PI * 2;
+      ctx.beginPath();
+      ctx.arc(Math.cos(a)*2, Math.sin(a)*2 - 1, 0.5, 0, Math.PI*2);
+      ctx.fillStyle = '#f472b6';
+      ctx.fill();
+    }
+
+    ctx.restore();
+  }
+
+  function drawWindLine(y, progress, alpha, width) {
+    // progress 0..1 — линия едет слева направо
+    var x0 = -2 + progress * 38;
+    var len = 14;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+    ctx.lineWidth = width;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(x0, y);
+    ctx.quadraticCurveTo(x0 + len*0.5, y - 1, x0 + len, y);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function ease(t) { return t < 0.5 ? 2*t*t : -1+(4-2*t)*t; }
 
   function drawFrame() {
     ctx.clearRect(0, 0, 32, 32);
 
-    var t = (frame % CYCLE) / CYCLE; // 0..1
-
-    // Фон — тёмный круг
+    // Тёмный фон
     ctx.beginPath();
-    ctx.arc(16,16,15,0,Math.PI*2);
-    ctx.fillStyle = '#140a00';
+    ctx.arc(16, 16, 15.5, 0, Math.PI*2);
+    ctx.fillStyle = '#0d0d14';
     ctx.fill();
 
-    // Яркость молнии — острый всплеск и затухание
-    var boltAlpha, glowR;
+    var t = (frame % CYCLE) / CYCLE; // 0..1
+
+    // Ветер — 3 линии с задержками
+    var winds = [
+      { y: 11, delay: 0,    speed: 1.4, w: 1.2 },
+      { y: 16, delay: 0.15, speed: 1.3, w: 0.9 },
+      { y: 21, delay: 0.30, speed: 1.2, w: 0.7 },
+    ];
+    winds.forEach(function(w) {
+      var wt = (t - w.delay + 1) % 1;
+      var progress = wt * w.speed;
+      if (progress < 1.3) {
+        var alpha = progress < 0.15 ? progress/0.15 : progress > 1.0 ? (1.3-progress)/0.3 : 1;
+        drawWindLine(w.y, Math.min(progress, 1.1), alpha * 0.65, w.w);
+      }
+    });
+
+    // Лепесток летит по дуге
+    // Начало: правый нижний угол, конец: левый верхний
+    var tx, ty, angle, alpha, scale;
     if (t < 0.08) {
-      boltAlpha = t / 0.08;
-      glowR = boltAlpha * 10;
-    } else if (t < 0.20) {
-      boltAlpha = 1;
-      glowR = 10 - (t - 0.08) / 0.12 * 4;
-    } else if (t < 0.45) {
-      boltAlpha = 1 - (t - 0.20) / 0.25 * 0.6;
-      glowR = 6;
-    } else if (t < 0.58) {
-      boltAlpha = 0.4 - (t - 0.45) / 0.13 * 0.4;
-      glowR = 0;
+      // появляется
+      var p = t / 0.08;
+      tx = 26 - p * 6; ty = 24 - p * 4;
+      angle = 0.8 - p * 0.3;
+      alpha = p; scale = 0.7 + p * 0.2;
+    } else if (t < 0.55) {
+      // летит
+      var p = (t - 0.08) / 0.47;
+      var ep = ease(p);
+      tx = 20 - ep * 14; ty = 20 - ep * 8;
+      angle = 0.5 - ep * 0.8;
+      alpha = 1; scale = 0.9 + Math.sin(p * Math.PI) * 0.15;
+    } else if (t < 0.75) {
+      // улетает
+      var p = (t - 0.55) / 0.20;
+      tx = 6 - p * 10; ty = 12 + p * 8;
+      angle = -0.3 - p * 0.6;
+      alpha = 1 - p; scale = 0.9 - p * 0.3;
     } else {
-      boltAlpha = 0; glowR = 0;
+      alpha = 0; tx = -20; ty = 16; angle = 0; scale = 0.6;
     }
 
-    if (boltAlpha > 0.01) {
-      // Свечение вокруг молнии
-      if (glowR > 0.5) {
-        var grd = ctx.createRadialGradient(16,22,0, 16,22,glowR+4);
-        grd.addColorStop(0, 'rgba(255,255,180,' + (boltAlpha * 0.9) + ')');
-        grd.addColorStop(0.4, 'rgba(247,147,26,' + (boltAlpha * 0.6) + ')');
-        grd.addColorStop(1, 'rgba(247,100,0,0)');
-        ctx.beginPath();
-        ctx.arc(16, 25, glowR + 6, 0, Math.PI*2);
-        ctx.fillStyle = grd;
-        ctx.fill();
-      }
-
-      // Сам болт — градиент сверху вниз
-      var bGrd = ctx.createLinearGradient(16,1,16,31);
-      bGrd.addColorStop(0,   'rgba(255,255,220,' + boltAlpha + ')');
-      bGrd.addColorStop(0.4, 'rgba(255,180,50,' + boltAlpha + ')');
-      bGrd.addColorStop(1,   'rgba(247,147,26,' + boltAlpha + ')');
-
-      ctx.beginPath();
-      ctx.moveTo(boltPts[0][0], boltPts[0][1]);
-      for (var i=1; i<boltPts.length; i++) ctx.lineTo(boltPts[i][0], boltPts[i][1]);
-      ctx.closePath();
-      ctx.fillStyle = bGrd;
-      ctx.fill();
-
-      // Вспышка удара об землю
-      if (t > 0.06 && t < 0.25) {
-        var fa = (t < 0.12) ? (t-0.06)/0.06 : 1 - (t-0.12)/0.13;
-        fa = Math.max(0, fa) * boltAlpha;
-        var fg = ctx.createRadialGradient(16,29,0,16,29,7);
-        fg.addColorStop(0, 'rgba(255,255,255,' + fa + ')');
-        fg.addColorStop(0.5, 'rgba(255,200,80,' + (fa*0.5) + ')');
-        fg.addColorStop(1, 'rgba(255,100,0,0)');
-        ctx.beginPath();
-        ctx.arc(16,29,8,0,Math.PI*2);
-        ctx.fillStyle = fg;
-        ctx.fill();
-      }
-
-      // Искры
-      if (t > 0.08 && t < 0.22) {
-        var sp = (t-0.08)/0.14;
-        ctx.strokeStyle = 'rgba(255,230,80,' + (1-sp) + ')';
-        ctx.lineWidth = 1.2;
-        ctx.lineCap = 'round';
-        ctx.beginPath(); ctx.moveTo(12,28); ctx.lineTo(12 - sp*6, 28 - sp*5); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(20,28); ctx.lineTo(20 + sp*6, 28 - sp*6); ctx.stroke();
-        ctx.strokeStyle = 'rgba(255,255,255,' + (1-sp)*0.8 + ')';
-        ctx.lineWidth = 0.8;
-        ctx.beginPath(); ctx.moveTo(16,27); ctx.lineTo(17, 27 - sp*8); ctx.stroke();
-      }
-    }
+    if (alpha > 0.01) drawPetal(tx, ty, angle, alpha, scale);
 
     var dataURL = canvas.toDataURL('image/png');
     var f1 = document.getElementById('anim-favicon');
@@ -204,7 +232,7 @@ bitcoin tx accelerator online, btc accelerator 2025, btc accelerator 2026,
     if (f2) f2.href = dataURL;
 
     frame++;
-    setTimeout(drawFrame, 22); // ~44fps
+    setTimeout(drawFrame, 22);
   }
 
   if (document.readyState === 'loading') {
