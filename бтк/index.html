@@ -2772,23 +2772,24 @@ function _setCounterUI(val) {
 }
 
 async function bumpCounter() {
-  if (_fbReady) {
-    const url = `${FIREBASE_DB}/stats/total.json`;
-    for (let attempt = 0; attempt < 4; attempt++) {
-      try {
-        const r1 = await fetch(url, { headers:{'X-Firebase-ETag':'true'}, cache:'no-store' });
-        if (!r1.ok) break;
-        const etag = r1.headers.get('ETag');
-        const cur = await r1.json();
-        const nv = (typeof cur === 'number' ? cur : cnt) + 1;
-        const h = {'Content-Type':'application/json'};
-        if (etag) h['If-Match'] = etag;
-        const r2 = await fetch(url, { method:'PUT', headers:h, body:JSON.stringify(nv) });
-        if (r2.ok) { _setCounterUI(nv); _animateCounter(); return; }
-        if (r2.status !== 412) break;
-      } catch(e) { break; }
-    }
+  const url = `${FIREBASE_DB}/stats/total.json`;
+  // Правило: newData.val() == data.val() + 1 || newData.val() == 0 || !data.exists()
+  for (let attempt = 0; attempt < 4; attempt++) {
+    try {
+      const r1 = await fetch(url, { headers:{'X-Firebase-ETag':'true'}, cache:'no-store' });
+      if (!r1.ok) break;
+      const etag = r1.headers.get('ETag');
+      const cur = await r1.json();
+      const nv = (typeof cur === 'number' ? cur : 0) + 1;
+      const h = {'Content-Type':'application/json'};
+      if (etag) h['If-Match'] = etag;
+      const r2 = await fetch(url, { method:'PUT', headers:h, body:JSON.stringify(nv) });
+      if (r2.ok) { _setCounterUI(nv); _animateCounter(); return; }
+      if (r2.status === 412) continue; // CAS conflict — retry
+      break;
+    } catch(e) { break; }
   }
+  // Fallback: локальный инкремент если сеть недоступна
   _setCounterUI(cnt + 1); _animateCounter();
 }
 
@@ -2932,30 +2933,37 @@ async function getGlobalUsed() {
 
 // Атомарный инкремент через Firebase (ETag + retry 412)
 async function incrementGlobalUsed() {
-  // Прямой fetch — не зависит от _fbReady
-  {
-    const url = `${FIREBASE_DB}/daily/${todayStr()}/used.json`;
-    for (let attempt = 0; attempt < 4; attempt++) {
-      try {
-        const r1 = await fetch(url, { headers: {'X-Firebase-ETag':'true'}, cache:'no-store' });
-        if (!r1.ok) break;
-        const etag = r1.headers.get('ETag');
-        const cur = await r1.json();
-        const nv = (typeof cur === 'number' ? cur : 0) + 1;
-        const h = {'Content-Type':'application/json'};
-        if (etag) h['If-Match'] = etag;
-        const r2 = await fetch(url, { method:'PUT', headers:h, body:JSON.stringify(nv) });
-        if (r2.ok) {
-          _lastKnownUsed = nv;
-          return nv;
-        }
-        if (r2.status !== 412) break;
-      } catch(e) { break; }
-    }
+  const url = `${FIREBASE_DB}/daily/${todayStr()}/used.json`;
+  for (let attempt = 0; attempt < 4; attempt++) {
+    try {
+      const r1 = await fetch(url, { headers: {'X-Firebase-ETag':'true'}, cache:'no-store' });
+      if (!r1.ok) break;
+      const etag = r1.headers.get('ETag');
+      const cur = await r1.json();
+      const curNum = (typeof cur === 'number' && cur >= 0) ? cur : 0;
+      // Правило Firebase: validate newData.val() <= 100
+      // Не пишем если уже на лимите
+      if (curNum >= FL_MAX) {
+        _lastKnownUsed = curNum;
+        return curNum; // лимит исчерпан — возвращаем текущее, не инкрементируем
+      }
+      const nv = curNum + 1;
+      const h = {'Content-Type':'application/json'};
+      if (etag) h['If-Match'] = etag;
+      const r2 = await fetch(url, { method:'PUT', headers:h, body:JSON.stringify(nv) });
+      if (r2.ok) { _lastKnownUsed = nv; return nv; }
+      if (r2.status === 412) continue; // CAS conflict — повторяем
+      if (r2.status === 403) {
+        // Firebase отклонил запись (лимит или правило) — читаем актуальное значение
+        const rv = await getGlobalUsed();
+        _lastKnownUsed = rv;
+        return rv;
+      }
+      break;
+    } catch(e) { break; }
   }
-  // Firebase недоступен — инкрементируем _lastKnownUsed локально как временный fallback
-  const used = (_lastKnownUsed || 0) + 1;
-  return used;
+  // Сеть недоступна
+  return _lastKnownUsed;
 }
 
 // Кэш последнего известного значения (для UI без задержки)
@@ -3051,13 +3059,14 @@ function renderFeedFromData(feed) {
 
 // ── ГЛОБАЛЬНАЯ ОЧЕРЕДЬ (Firebase) ──────────────────────────────
 async function fbQueueAdd(txid, planType) {
-  if (!_fbReady) return;
+  // queue — запись всегда разрешена (write: true)
   try {
     await fetch(`${FIREBASE_DB}/queue/${txid}.json`, {
       method: 'PUT', headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ txid, plan: planType, ts: Date.now(), status: 'processing' })
     });
   } catch(e) {}
+  // transactions — только первая запись (!data.exists()), 403 при повторе = нормально
   try {
     await fetch(`${FIREBASE_DB}/transactions/${txid}.json`, {
       method: 'PUT', headers: {'Content-Type':'application/json'},
@@ -3067,7 +3076,6 @@ async function fbQueueAdd(txid, planType) {
 }
 
 async function fbQueueRemove(txid) {
-  if (!_fbReady) return;
   try { await fetch(`${FIREBASE_DB}/queue/${txid}.json`, { method: 'DELETE' }); } catch(e) {}
 }
 
@@ -3131,27 +3139,21 @@ async function syncGlobalQueue() {
 async function fbFeedAdd(txid, planType, mins) {
   const short = txid.slice(0,6) + '...' + txid.slice(-4);
   const item = { txid, short, plan: planType, mins, ts: Date.now() };
-  // Всегда сохраняем локально — работает даже если Firebase rules блокируют /feed
+  // Локальный кэш
   try {
     let lf = JSON.parse(localStorage.getItem('turbotx_feed') || '[]');
     lf = lf.filter(i => i.txid !== txid);
     lf.unshift(item);
     localStorage.setItem('turbotx_feed', JSON.stringify(lf.slice(0, 8)));
   } catch(e) {}
-  // Пробуем Firebase
-  if (_fbReady) {
-    try {
-      const r = await fetch(`${FIREBASE_DB}/feed.json`, { cache: 'no-store' });
-      let feed = [];
-      if (r.ok) { const d = await r.json(); if (Array.isArray(d)) feed = d; }
-      feed = feed.filter(i => i.txid !== txid);
-      feed.unshift(item);
-      await fetch(`${FIREBASE_DB}/feed.json`, {
-        method: 'PUT', headers: {'Content-Type':'application/json'},
-        body: JSON.stringify(feed.slice(0,8))
-      });
-    } catch(e) {}
-  }
+  // Firebase: пишем по ключу txid — нет race condition, каждый пишет независимо
+  // Правило: "feed".write: true
+  try {
+    await fetch(`${FIREBASE_DB}/feed/${txid}.json`, {
+      method: 'PUT', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(item)
+    });
+  } catch(e) {}
 }
 
 async function syncGlobalFeed() {
@@ -3160,14 +3162,24 @@ async function syncGlobalFeed() {
     const lf = JSON.parse(localStorage.getItem('turbotx_feed') || '[]');
     if (lf.length) renderFeedFromData(lf);
   } catch(e) {}
-  // Тянем из Firebase и мержим
+  // Тянем из Firebase — /feed теперь объект {txid: item}
   try {
     const r = await fetch(`${FIREBASE_DB}/feed.json`, { cache: 'no-store' });
     if (!r.ok) return;
-    const feed = await r.json();
-    if (!Array.isArray(feed) || !feed.length) return;
+    const raw = await r.json();
+    if (!raw) return;
+    // Поддерживаем оба формата: объект {txid:item} и старый массив
+    const feed = Array.isArray(raw)
+      ? raw
+      : Object.values(raw).filter(i => i && i.txid);
+    if (!feed.length) return;
+    feed.sort((a, b) => (b.ts || 0) - (a.ts || 0));
+    const top8 = feed.slice(0, 8);
+    // Обновляем локальный кэш
+    try { localStorage.setItem('turbotx_feed', JSON.stringify(top8)); } catch(e) {}
+    renderFeedFromData(top8);
     try {
-      const lf = JSON.parse(localStorage.getItem('turbotx_feed') || '[]');
+      const lf = top8;
       const fbIds = new Set(feed.map(i => i.txid));
       const extra = lf.filter(i => !fbIds.has(i.txid));
       const merged = [...feed, ...extra].sort((a,b) => b.ts - a.ts).slice(0,8);
@@ -3282,12 +3294,8 @@ function startRealtimeListeners() {
   _makeSSE(`${FIREBASE_DB}/queue.json?ns=${ns}`, () => syncGlobalQueue(), () => syncGlobalQueue());
   _makeSSE(`${FIREBASE_DB}/feed.json?ns=${ns}`, d => {
     if (!d) return;
-    if (d.__patch) { syncGlobalFeed(); return; }
-    const feed = d.data;
-    if (Array.isArray(feed)) renderFeedFromData(feed);
-    else if (feed === null) {}
-    else syncGlobalFeed();
-  });
+    syncGlobalFeed(); // при любом изменении — перечитываем и рендерим
+  }, () => syncGlobalFeed());
   _makeSSE(`${FIREBASE_DB}/stats/total.json?ns=${ns}`, d => {
     if (d && typeof d.data==='number' && d.data>=0) _setCounterUI(d.data);
   });
