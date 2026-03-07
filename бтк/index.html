@@ -2917,24 +2917,23 @@ function todayStr() {
 
 // Получить текущий глобальный счётчик из Firebase
 async function getGlobalUsed() {
-  // Источник правды — только Firebase
-  if (_fbReady) {
-    try {
-      const r = await fetch(`${FIREBASE_DB}/daily/${todayStr()}/used.json`, { cache: 'no-store' });
-      if (r.ok) {
-        const val = await r.json();
-        if (typeof val === 'number' && val >= 0) return val;
-        if (val === null) return 0; // ещё никто не использовал сегодня
-      }
-    } catch(e) {}
-  }
-  // Firebase недоступен — возвращаем последнее известное значение (уже синхронизированное)
+  // Прямой fetch — не зависит от _fbReady (URL известен заранее)
+  try {
+    const r = await fetch(`${FIREBASE_DB}/daily/${todayStr()}/used.json`, { cache: 'no-store' });
+    if (r.ok) {
+      const val = await r.json();
+      if (typeof val === 'number' && val >= 0) return val;
+      if (val === null) return 0; // новый день — ещё никто не тратил
+    }
+  } catch(e) {}
+  // Сеть недоступна — последнее известное значение
   return _lastKnownUsed;
 }
 
 // Атомарный инкремент через Firebase (ETag + retry 412)
 async function incrementGlobalUsed() {
-  if (_fbReady) {
+  // Прямой fetch — не зависит от _fbReady
+  {
     const url = `${FIREBASE_DB}/daily/${todayStr()}/used.json`;
     for (let attempt = 0; attempt < 4; attempt++) {
       try {
@@ -2967,7 +2966,7 @@ function getFreeLeft(used) { return Math.max(0, FL_MAX - (typeof used === 'numbe
 // Единственная функция отрисовки счётчика — принимает только число
 // Источник правды: Firebase /daily/${todayStr()}/used
 function _applyFreeUI(used) {
-  if (typeof used !== 'number' || used < 0) return;
+  if (typeof used !== 'number' || isNaN(used) || used < 0) return;
   _lastKnownUsed = used;
   const left = Math.max(0, FL_MAX - used);
   const el = document.getElementById('free-left-num');
@@ -3215,12 +3214,13 @@ async function initGlobalSync() {
   ]);
 
   if (fbOk) {
-    // Firebase доступен — обновляем всё актуальными данными
+    // Сначала счётчик лимита — он самый важный для UX
+    await updateFreeUI();
+    // Потом остальное параллельно
     await Promise.all([
       syncCounterFromFirebase(),
       syncGlobalQueue(),
       syncGlobalFeed(),
-      updateFreeUI(),
     ]);
     startRealtimeListeners();
   } else {
@@ -3291,8 +3291,13 @@ function startRealtimeListeners() {
 function _startDailySSE(ns) {
   _currentDayKey = todayStr();
   _makeSSE(`${FIREBASE_DB}/daily/${_currentDayKey}/used.json?ns=${ns}`, d => {
-    if (d && typeof d.data==='number' && d.data>=0) _applyFreeUI(d.data);
-    if (d && d.data === null) _applyFreeUI(0); // новый день — счётчик сброшен
+    // d.data === null означает что узел не существует в Firebase (новый день, ещё никто не тратил)
+    // Это НЕ значит "0 использовано" — нужно явно получить актуальное значение
+    if (!d) return;
+    if (typeof d.data === 'number' && d.data >= 0) {
+      _applyFreeUI(d.data); // реальное число из Firebase
+    }
+    // null игнорируем — updateFreeUI() уже вернул 0 для нового дня при initGlobalSync
   });
 }
 
