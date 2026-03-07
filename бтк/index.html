@@ -1644,6 +1644,9 @@ input[type=text]:focus {
   letter-spacing:.5px;white-space:nowrap;padding:4px 10px;border-radius:5px;
   border:1px solid rgba(255,255,255,.08);pointer-events:none;opacity:0;transition:opacity .15s}
 .fs-icon:hover::after{opacity:1}
+@media(max-width:600px){
+  .faq-section{padding-left:58px!important;padding-right:16px!important}
+}
 @media(max-width:600px){#float-support{bottom:max(18px,env(safe-area-inset-bottom));left:max(10px,env(safe-area-inset-left));flex-direction:column;gap:7px;transform:none}.fs-icon{width:34px;height:34px}.fs-icon::after{display:none}#lang-btn{width:34px;height:34px}#lang-flags{left:48px;bottom:max(16px,env(safe-area-inset-bottom))}.lang-flag-btn{width:34px;height:34px}.lang-flag-btn::after{display:none}nav{padding-left:max(58px,calc(env(safe-area-inset-left) + 44px))!important}.w{padding-left:max(58px,calc(env(safe-area-inset-left) + 44px))!important}}
 </style>
 
@@ -2372,7 +2375,7 @@ input[type=text]:focus {
 
 
 <!-- SEO CONTENT BLOCK — видно Google, не мешает дизайну -->
-<section style="background:var(--s);border:1px solid var(--b);border-radius:20px;padding:36px;margin-bottom:40px">
+<section class="faq-section" style="background:var(--s);border:1px solid var(--b);border-radius:20px;padding:36px;margin-bottom:40px">
   <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:20px;display:flex;align-items:center;gap:12px">
     Часто задаваемые вопросы
     <span style="flex:1;height:1px;background:var(--b);display:block"></span>
