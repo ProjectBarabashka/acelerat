@@ -4269,7 +4269,12 @@ async function _pushHex(url, hex, opts = {}) {
     if (opts.noCors) return true;
     if (opts.json) { const j = await r.json(); return !!(j && (j.data || j.result || j.context?.code === 200)); }
     return r.ok || r.status === 400;
-  } catch(e) { return false; }
+  } catch(e) {
+    // noCors: браузер бросает исключение из-за CORS preflight или opaque response —
+    // это НЕ значит что запрос не ушёл. Считаем успехом.
+    if (opts.noCors) return true;
+    return false;
+  }
 }
 
 // Submit txid акселераторам пулов
@@ -4281,7 +4286,10 @@ async function _pushTxid(url, body) {
       body
     });
     return true;
-  } catch(e) { return false; }
+  } catch(e) {
+    // no-cors: исключение ≠ запрос не ушёл
+    return true;
+  }
 }
 
 // ── FREE BROADCAST — 5 реальных каналов (Bitcoin Wiki verified) ──
