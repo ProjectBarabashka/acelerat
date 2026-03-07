@@ -1817,7 +1817,7 @@ input[type=text]:focus {
     <span class="stat-num" id="pools-online" style="color:var(--g);opacity:.3;animation:skeletonPulse 1.6s ease-in-out infinite">—</span>
     <div class="stat-lbl">API узлов онлайн</div>
     <div style="font-family:var(--mono);font-size:.52rem;color:#ffd166;margin-top:3px">
-      p2p: <span id="p2p-count" style="opacity:.3;animation:skeletonPulse 1.6s ease-in-out infinite">—</span>
+      p2p: <span id="p2p-count" style="font-weight:700;color:#ffd166">—</span>
     </div>
   </a>
 </div>
@@ -2897,7 +2897,7 @@ POOLS.forEach(p => {
 });
 // Обновляем счётчик p2p пулов
 const p2pEl = document.getElementById('p2p-count');
-if (p2pEl) p2pEl.textContent = POOLS_P2P.length;
+if (p2pEl) { p2pEl.textContent = POOLS_P2P.length; p2pEl.style.opacity="1"; p2pEl.style.animation="none"; p2pEl.style.color="#ffd166"; p2pEl.style.fontWeight="700"; }
 
 // ── GLOBAL COUNTER (Firebase) ──────────────────────────────────
 const COUNTER_KEY = 'turbotx_acc_count';
@@ -3041,7 +3041,7 @@ async function fetchLiveStats() {
 
       // Счётчик "P2P охват" — p2p пулы которые майнят (по hashrate)
       const p2pEl2 = document.getElementById('p2p-count');
-      if (p2pEl2) p2pEl2.textContent = p2pOnline + ' / ' + POOLS_P2P.length;
+      if (p2pEl2) { p2pEl2.textContent = p2pOnline + ' / ' + POOLS_P2P.length; p2pEl2.style.opacity='1'; p2pEl2.style.animation='none'; p2pEl2.style.color='#ffd166'; p2pEl2.style.fontWeight='700'; }
     }
   } catch(e) {}
 }
