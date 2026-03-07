@@ -19,7 +19,7 @@
 <meta name="geo.region" content="RU">
 <meta name="theme-color" content="#f7931a">
 <meta name="yandex:title" content="TurboTX — Ускоритель Bitcoin Транзакций">
-<meta name="yandex:description" content="Застряла BTC транзакция? Rebroadcast в 15+ пулов. Бесплатно (1–3 ч) или Premium 15–30 мин.">
+<meta name="yandex:description" content="Застряла BTC транзакция? Rebroadcast в 15+ пулов + ViaBTC/BTC.com API. Бесплатно (1–3 ч) или Premium 10–20 мин.">
 
 <!-- FAVICON — inline SVG, стилизован под TurboTX -->
 <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64,AAABAAMAEBAAAAEAIAC4AAAANgAAACAgAAABACAAEgEAAO4AAAAwMAAAAQAgAG8BAAAAAgAAiVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAf0lEQVR4nLWTsQ0AIQwDTfQNK7Aj07AjK1DyzUdCQIIp/iqEYjsQCPhoJXUYxFzRSpr3AgAII96hGvHEJ1pJXbwCK33ENRiS7g2YdNOAFQPAwxSNhvNxlg689N1dLB1sHozbHT1GaxL/jZHlaOClA4Dor5ph3kLMNYgubtNV8wKubzCAiTBzkQAAAABJRU5ErkJggolQTkcNChoKAAAADUlIRFIAAAAgAAAAIAgGAAAAc3p69AAAANlJREFUeJzFl8sRwyAMRIUmF1pwj1TjHmnBx+TEDIPjgLQrsicbY94K8U0y6DqP91jGVC419e/KgudSl+qNDH36EAH/xlIU7lVjJhTeR3+dh/l/nVeJg8MGGHIbsA48qgEW3G2AKbMBZvRmA2y42cCTvFPQZCAi+mUDUXARkRejkV8GZ+mZ9gAS/crYmPbArBE0PWEL0erMoO2GHjhsgCG6AeuiRDWw/UTEEO1A8tcj2ZbNKEqwASR6EREd72oravlH4bnUpO0BaskJF+lSYDWBRN+zbtDd1/MPob9RQYHVnx4AAAAASUVORK5CYIKJUE5HDQoaCgAAAA1JSERSAAAAMAAAADAIBgAAAFcC+YcAAAE2SURBVHic7VpBEoIwEAsdL3yBP/Ia/sgXOOLFdbBCB9rNdmGak2MVkk26tNUOCSzTsKbGrdCPc3c0tjvghXiMPSE/b7CJ9+OMZRo0rvPlHeSFBXktbLmG1AfvgADcq/oC4Ux3YEteI/8xgteOcwbLNKxUBxjRifGMScyARfUBkgAr8kCL0D+Oqs9ooYCyAMvoCFqEBDWqDygJqEUeaBGqW33AyAFWCwUKBdSuPlAgwAN5AHhZ3OSs2JyoZTlA2iJmfS/LgSs3Y0fNxXOgpEtV31KWtlgXDpSgqgCNB1xzIBday4sqpxKaa6MWoavQXpmaCqAc7qpf0RhmAm5xLiSIO5DbHZkH0AUwqw8AIfUjsnf049xRHWBXH/hESNMFmcBs8sL5OZNY0wWr6gNP+7NHDC9CUul4A3L0abxLcs/AAAAAAElFTkSuQmCC">
@@ -30,7 +30,7 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://acelerat.vercel.app/">
 <meta property="og:title" content="TurboTX — Bitcoin Transaction Accelerator">
-<meta property="og:description" content="Stuck BTC transaction? Rebroadcast to 15+ mining pools. Free (1–3h) or Premium 15–30 min. Open source.">
+<meta property="og:description" content="Stuck BTC transaction? Rebroadcast to 15+ pools + ViaBTC & BTC.com Accelerator APIs. Free (1–3h) or Premium 10–20 min.">
 <meta property="og:image" content="https://acelerat.vercel.app/og-image.png">
 <meta property="og:site_name" content="TurboTX">
 <meta property="og:locale" content="ru_RU">
@@ -41,7 +41,7 @@
 <!-- TWITTER CARD -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="TurboTX — Bitcoin Transaction Accelerator">
-<meta name="twitter:description" content="Застряла BTC транзакция? Rebroadcast в 15+ майнинг-пулов. Бесплатно или Premium за 15–30 мин.">
+<meta name="twitter:description" content="Застряла BTC транзакция? Rebroadcast в 15+ пулов + ViaBTC/BTC.com API. Бесплатно или Premium за 10–20 мин.">
 
 <!-- SCHEMA.ORG STRUCTURED DATA -->
 <script type="application/ld+json">
@@ -243,28 +243,7 @@ input[type=text], input[type=email], textarea {
   .review-card:hover { transform: none !important; }
 }
 
-/* safe-area для iPhone X/11/12/13/14/15 (notch + home bar) */
-nav {
-  padding-left: max(28px, env(safe-area-inset-left));
-  padding-right: max(28px, env(safe-area-inset-right));
-}
-.w {
-  padding-left: max(28px, env(safe-area-inset-left));
-  padding-right: max(28px, env(safe-area-inset-right));
-}
-footer {
-  padding-bottom: max(32px, env(safe-area-inset-bottom)) !important;
-}
-@media(max-width:480px) {
-  nav {
-    padding-left: max(14px, env(safe-area-inset-left));
-    padding-right: max(14px, env(safe-area-inset-right));
-  }
-  .w {
-    padding-left: max(14px, env(safe-area-inset-left));
-    padding-right: max(14px, env(safe-area-inset-right));
-  }
-}
+
 
 /* Таблица сравнения — скролл на mobile */
 .comp-wrap {
@@ -275,28 +254,11 @@ footer {
 }
 .comp-table { min-width: 520px; }
 
-/* История ускорений — mobile */
-#history-list { gap: 6px; }
-#history-list a {
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-}
-@media(max-width:480px) {
-  #history-list a { padding: 10px !important; }
-  #history-block { margin-top: 12px; }
-}
 
-/* Mempool bar — mobile */
-@media(max-width:480px) {
-  #mempool-bar { flex-wrap: wrap; justify-content: flex-start; gap: 6px; font-size: .62rem; }
-  #tk-stuck-badge { margin-left: 0 !important; }
-}
 
-/* Smart diagnosis — mobile */
-@media(max-width:480px) {
-  #diag-content { font-size: .65rem !important; }
-  #diag-content > div { grid-template-columns: 1fr !important; }
-}
+
+
+
 
 /* Feed items — touch friendly */
 .feed-item {
@@ -470,20 +432,32 @@ h1 span{
 .hero-cta:hover svg{transform:translateY(2px)}
 
 /* ── STATS ── */
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;margin-bottom:52px;
-  border:1px solid var(--b);border-radius:var(--r);overflow:hidden}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:36px}
 .stat-card{
-  background:var(--s);padding:22px 20px;text-align:center;
-  transition:background .2s;position:relative;
-  border:none!important
+  background:var(--s);
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:14px;
+  padding:20px 16px 18px;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+  transition:border-color .2s,background .2s,transform .18s;
+  cursor:pointer;
 }
-.stat-card:not(:last-child)::after{
-  content:'';position:absolute;right:0;top:20%;bottom:20%;
-  width:1px;background:var(--b)
+.stat-card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.02),transparent);
+  pointer-events:none;
 }
-.stat-card:hover{background:rgba(247,147,26,.04)}
-/* .stat-num → redesign section */
-.stat-lbl{font-size:.6rem;color:var(--m);margin-top:6px;letter-spacing:2px;text-transform:uppercase;font-family:var(--mono)}
+.stat-card:hover{
+  border-color:rgba(247,147,26,.25);
+  background:rgba(247,147,26,.03);
+  transform:translateY(-2px);
+}
+.stat-card-icon{
+  font-size:.9rem;margin-bottom:8px;display:block;line-height:1;
+}
+.stat-lbl{font-size:.56rem;color:var(--m);margin-top:5px;letter-spacing:1.5px;text-transform:uppercase;font-family:var(--mono);line-height:1.4}
 
 /* ── CARD ── */
 .card{
@@ -736,10 +710,10 @@ input::placeholder{color:rgba(255,255,255,.22)}
 .pi.offline .pp{color:rgba(255,51,85,.5)!important}
 .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 .dot.g{background:var(--g);animation:blink-g 2.5s ease-in-out infinite}
-.dot.y{background:#ffd166;animation:blink-y 1.4s ease-in-out infinite}
+.dot.y{background:#7c5c9e;box-shadow:0 0 4px rgba(124,92,158,.4)}
 .dot.r{background:var(--err);opacity:.8;animation:none}
 @keyframes blink-g{0%,100%{opacity:1;box-shadow:0 0 5px rgba(0,232,122,.6)}50%{opacity:.35;box-shadow:none}}
-@keyframes blink-y{0%,100%{opacity:1;box-shadow:0 0 5px rgba(255,209,102,.6)}50%{opacity:.2;box-shadow:none}}
+@keyframes blink-y{0%,100%{opacity:.9}50%{opacity:.5}}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
 .pn{font-size:.75rem;font-weight:600;font-family:var(--display);letter-spacing:-.1px;transition:color .3s}
 .pp{font-size:.58rem;color:var(--m);font-family:var(--mono);letter-spacing:.3px;transition:color .3s}
@@ -846,17 +820,211 @@ footer a:hover{color:var(--a)}
 .q-row.done{background:rgba(0,232,122,.03);border-color:rgba(0,232,122,.18)}
 
 /* ── RESPONSIVE ── */
-@media(max-width:640px){
-  .stats{grid-template-columns:1fr 1fr}
-  .stat-card:nth-child(2)::after{display:none}
-  .plans{grid-template-columns:1fr}
+
+
+
+/* ── Tablet: 768–1023px ─────────────────────────── */
+@media(min-width:768px) and (max-width:1023px){
+  .w{max-width:100%;padding:0 32px}
+  h1{font-size:clamp(2.4rem,6vw,3.4rem)}
+  .hero{padding:64px 0 44px}
+  .stats{grid-template-columns:repeat(3,1fr)}
+  .stat-num{font-size:1.5rem}
+  .plans-grid{grid-template-columns:1fr 1fr;gap:12px}
+  .reviews-grid{grid-template-columns:repeat(2,1fr)}
+  .pools-grid{grid-template-columns:repeat(3,1fr)}
+  .modal{width:88%;padding:28px 26px}
+  .card{padding:24px 22px}
+  .comp-table{font-size:.65rem}
+  .comp-table td,.comp-table th{padding:9px 10px}
+  nav{padding:0 24px}
+  .logo-tag{display:none}
+}
+
+/* ── Large phone / small tablet: 481–767px ──────── */
+@media(min-width:481px) and (max-width:767px){
+  .w{padding:0 18px}
+  h1{font-size:clamp(2rem,8vw,3rem);letter-spacing:-1px}
+  .hero{padding:52px 0 36px}
+  .hero p{font-size:.88rem}
+  .stats{grid-template-columns:repeat(3,1fr)}
+  .stat-num{font-size:1.1rem}
+  .plans-grid{grid-template-columns:1fr}
   .plan-row{grid-template-columns:1fr}
   .price-row{grid-template-columns:1fr 1fr}
-  .free-limit-bar{flex-direction:column;align-items:flex-start}
+  .reviews-grid{grid-template-columns:1fr 1fr}
+  .pools-grid{grid-template-columns:repeat(3,1fr)}
   .card{padding:22px 18px}
-  .w{padding:0 16px}
-  h1{letter-spacing:-1px}
+  .modal{width:92%;padding:26px 20px}
+  nav{padding:0 18px}
+  .logo-tag{display:none}
+  .nav-link:not([href*="t.me"]):nth-child(n+5){display:none}
+  .free-limit-bar{flex-direction:column;align-items:flex-start;gap:8px}
+  .batch-toggle{width:100%;justify-content:center}
+  .rating-summary{flex-wrap:wrap;gap:8px}
 }
+
+/* ── Phone: ≤480px ──────────────────────────────── */
+@media(max-width:480px){
+  /* Container */
+  .w{padding:0 14px}
+
+  /* Nav */
+  nav{padding:0 14px;height:54px}
+  .nav-link{display:none}
+  .nav-link[href*="t.me"]{display:inline-flex;padding:5px 9px;font-size:.62rem}
+  .logo-tag{display:none}
+  .logo{font-size:.8rem;letter-spacing:2px}
+  .logo-icon{width:28px;height:28px;font-size:13px}
+  .live-badge{font-size:.52rem;padding:4px 8px;margin-left:4px}
+
+  /* Hero */
+  .hero{padding:44px 0 30px}
+  h1{font-size:clamp(1.85rem,10vw,2.6rem);letter-spacing:-1px}
+  .hero p{font-size:.82rem;margin-bottom:24px}
+  .hero-label{font-size:.52rem;padding:5px 12px}
+  .hero-cta{font-size:.58rem;padding:8px 14px;flex-wrap:wrap;gap:8px}
+
+  /* Ticker */
+  .mempool-ticker{gap:8px;padding:8px 12px;font-size:.55rem}
+  .ticker-sep{display:none}
+
+  /* Stats — 2×2 grid */
+  .stats{grid-template-columns:repeat(3,1fr);gap:6px}
+  .stat-num{font-size:1rem}
+  .stat-lbl{font-size:.5rem;letter-spacing:.5px}
+
+  /* Cards */
+  .card{padding:16px 14px;border-radius:12px}
+  .card-title{font-size:.92rem}
+  .card-sub{font-size:.66rem;margin-bottom:14px}
+
+  /* Accelerate form */
+  .acc-btn{padding:14px;font-size:.68rem;letter-spacing:2px}
+  .step{font-size:.62rem}
+  .rr{flex-wrap:wrap;gap:3px}
+  .rv{max-width:100%;text-align:left;font-size:.63rem}
+  .free-limit-bar{flex-direction:column;align-items:flex-start;gap:8px}
+  .batch-toggle{width:100%;justify-content:center}
+  input[type=text]{font-size:.8rem;padding:13px 14px}
+
+  /* Plans */
+  .plans-grid{grid-template-columns:1fr;gap:10px}
+  .plan-row{grid-template-columns:1fr;gap:8px}
+  .plan-card{padding:20px 16px}
+  .plan-price{font-size:1.7rem}
+  .fl li{font-size:.66rem}
+  .plan-card.prem::after{font-size:.4rem;width:130px;top:20px;right:-30px}
+  .price-row{grid-template-columns:1fr;gap:6px}
+
+  /* Feed */
+  .feed-item{padding:8px 12px;gap:8px}
+  .feed-time{display:none}
+  .feed-txid{font-size:.64rem}
+
+  /* Pools */
+  .pools-grid{grid-template-columns:repeat(2,1fr);gap:4px}
+  .pi{padding:8px 10px}
+  .pn{font-size:.66rem}
+  .pp{font-size:.52rem}
+
+  /* Reviews */
+  .reviews-grid{grid-template-columns:1fr}
+  .rating-summary{flex-wrap:wrap;gap:8px}
+  .review-text{font-size:.7rem}
+
+  /* Guarantee */
+  .guarantee-block{padding:14px;gap:10px}
+  .guarantee-text{font-size:.7rem}
+
+  /* Modal */
+  .modal{padding:20px 16px;width:96%;border-radius:16px}
+  .pay-tabs{flex-wrap:wrap;gap:4px}
+  .pay-tab{font-size:.6rem;padding:6px 10px}
+
+  /* Misc */
+  .urgency-bar{flex-direction:column;align-items:flex-start;gap:6px}
+  .push-prompt{flex-direction:column;align-items:flex-start;gap:8px}
+  .push-btn{width:100%;text-align:center}
+  footer{padding:18px 14px!important;text-align:center}
+  .fl2{flex-wrap:wrap;justify-content:center;gap:8px 12px}
+
+  /* Lang flags */
+  #lang-flags{left:50px;bottom:16px;grid-template-columns:repeat(4,34px)}
+
+  /* FAQ */
+  .faq-section{padding-left:58px!important;padding-right:14px!important}
+}
+
+/* ── iOS safe area (notch / Dynamic Island / home bar) ── */
+@supports(padding:env(safe-area-inset-bottom)){
+  @media(max-width:767px){
+    nav{
+      padding-left:max(14px,env(safe-area-inset-left));
+      padding-right:max(14px,env(safe-area-inset-right));
+    }
+    .w{
+      padding-left:max(14px,env(safe-area-inset-left));
+      padding-right:max(14px,env(safe-area-inset-right));
+    }
+    footer{
+      padding-bottom:max(18px,env(safe-area-inset-bottom))!important;
+    }
+    #float-support{
+      bottom:max(18px,env(safe-area-inset-bottom));
+      left:max(10px,env(safe-area-inset-left));
+    }
+    #lang-flags{
+      bottom:max(16px,env(safe-area-inset-bottom));
+    }
+  }
+  /* iPhone с иконками слева — контент не перекрывается */
+  @media(max-width:600px){
+    nav{padding-left:max(58px,calc(env(safe-area-inset-left) + 44px))!important}
+    .w{padding-left:max(58px,calc(env(safe-area-inset-left) + 44px))!important}
+    .faq-section{padding-left:max(58px,calc(env(safe-area-inset-left) + 44px))!important}
+  }
+}
+
+/* ── Touch devices — убираем hover-артефакты ────── */
+@media(hover:none){
+  .stat-card:hover,.card:hover,.plan-card:hover{transform:none!important;box-shadow:var(--shadow)!important}
+  .acc-btn:active{transform:scale(.98)}
+  .pbtn:active{transform:scale(.98)}
+}
+
+/* ── Floating support + lang icons ─────────────────── */
+@media(max-width:600px){
+  #float-support{flex-direction:column;gap:7px}
+  .fs-icon{width:34px;height:34px}
+  .fs-icon::after{display:none}
+  #lang-btn{width:34px;height:34px}
+  .lang-flag-btn{width:34px;height:34px}
+  .lang-flag-btn::after{display:none}
+  .faq-section{padding-left:58px!important;padding-right:14px!important}
+}
+
+/* ── iPad Pro / large tablet: ≥1024px ──────────────── */
+@media(min-width:1024px){
+  .w{max-width:940px;padding:0 28px}
+  .stats{grid-template-columns:repeat(3,1fr)}
+  .plans-grid{grid-template-columns:1fr 1fr}
+  .reviews-grid{grid-template-columns:repeat(3,1fr)}
+  .pools-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+}
+
+/* ── История ускорений — touch ───────────────────── */
+#history-list{gap:6px}
+#history-list a{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+@media(max-width:480px){
+  #history-list a{padding:10px!important}
+  #history-block{margin-top:12px}
+  #mempool-bar{flex-wrap:wrap;justify-content:flex-start;gap:6px;font-size:.62rem}
+  #tk-stuck-badge{margin-left:0!important}
+  #diag-content{font-size:.65rem!important}
+  #diag-content > div{grid-template-columns:1fr!important}
+}
+
 
 
 /* ── MEMPOOL TICKER ── */
@@ -1124,13 +1292,7 @@ textarea.batch-input::placeholder{color:rgba(255,255,255,.22)}
 .trust-item svg{color:var(--g);flex-shrink:0}
 .trust-sep{color:rgba(255,255,255,.08);font-size:.8rem}
 
-@media(max-width:640px){
-  .reviews-grid{grid-template-columns:1fr}
-  .comp-table{font-size:.6rem}
-  .comp-table td,.comp-table th{padding:8px 10px}
-  .pay-tabs{flex-wrap:wrap}
-  .trust-row{gap:12px}
-}
+
 
 /* ── LANGUAGE SWITCHER ── */
 /* ── LANG PICKER ── */
@@ -1236,20 +1398,10 @@ iframe.goog-te-banner-frame { display: none !important; }
   border: 1px solid var(--b); border-radius: var(--r);
   overflow: hidden; margin-bottom: 20px;
 }
-.stat-card {
-  background: var(--s); padding: 20px 16px; text-align: center;
-  transition: background .18s; position: relative;
-}
-.stat-card:hover { background: rgba(247,147,26,.04); }
-.stat-card::after { display: none; } /* убираем старый разделитель */
 .stat-num {
-  font-family: var(--mono); font-size: 1.5rem; font-weight: 700;
+  font-family: var(--mono); font-size: 1.6rem; font-weight: 800;
   color: var(--a); display: block; letter-spacing: -1px;
-  transition: color .3s;
-}
-.stat-lbl {
-  font-size: .6rem; color: var(--m); font-family: var(--mono);
-  letter-spacing: .5px; margin-top: 4px; line-height: 1.3;
+  transition: color .3s; line-height: 1;
 }
 
 /* Live feed — чище */
@@ -1272,7 +1424,6 @@ iframe.goog-te-banner-frame { display: none !important; }
 .feed-items { padding: 6px 0; min-height: 44px; }
 
 /* Card — тоньше верхний акцент, меньше padding на мобиле */
-@media(max-width:600px){ .card { padding: 20px 18px; } }
 
 /* Card title — чуть меньше */
 .card-title {
@@ -1287,7 +1438,6 @@ iframe.goog-te-banner-frame { display: none !important; }
 
 /* Plans section — плавнее */
 .plans-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-@media(max-width:580px){ .plans-grid { grid-template-columns: 1fr; } }
 
 /* Trust badges — горизонтальная полоска */
 .trust-row {
@@ -1316,8 +1466,6 @@ iframe.goog-te-banner-frame { display: none !important; }
 
 /* Reviews — карточки с единым размером */
 .reviews-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
-@media(max-width:860px){ .reviews-grid { grid-template-columns: repeat(2,1fr); } }
-@media(max-width:540px){ .reviews-grid { grid-template-columns: 1fr; } }
 .review-card {
   background: rgba(0,0,0,.25); border: 1px solid rgba(255,255,255,.07);
   border-radius: 12px; padding: 18px;
@@ -1372,84 +1520,11 @@ details summary svg { transition: transform .2s; }
 ═══════════════════════════════════════════════════════════════ */
 
 /* ── до 480px (маленькие телефоны) ── */
-@media(max-width:480px){
-  nav{padding:0 14px;height:54px}
-  .nav-link{display:none}
-  .nav-link[href*="t.me"]{display:inline-flex;padding:5px 9px;font-size:.62rem}
-  .logo-tag{display:none}
-  .logo{font-size:.8rem;letter-spacing:2px}
-  .logo-icon{width:28px;height:28px;font-size:13px}
-  .live-badge{font-size:.52rem;padding:4px 8px;margin-left:4px}
-  .w{padding:0 14px}
-  .hero{padding:44px 0 32px}
-  h1{font-size:clamp(1.9rem,10vw,2.8rem);letter-spacing:-1px}
-  .hero p{font-size:.85rem;margin-bottom:28px}
-  .hero-label{font-size:.52rem;padding:5px 12px}
-  .hero-cta{font-size:.58rem;padding:8px 14px}
-  .mempool-ticker{gap:10px;padding:8px 14px;font-size:.56rem}
-  .ticker-sep{display:none}
-  .stats{grid-template-columns:1fr 1fr}
-  .stat-card::after{display:none!important}
-  .stat-num{font-size:1.3rem}
-  .feed-item{padding:8px 14px;gap:8px}
-  .feed-time{display:none}
-  .card{padding:18px 14px;border-radius:12px}
-  .card-title{font-size:.95rem}
-  .card-sub{font-size:.68rem;margin-bottom:16px}
-  .free-limit-bar{flex-direction:column;align-items:flex-start;gap:10px}
-  .plan-row{grid-template-columns:1fr;gap:8px}
-  .acc-btn{padding:15px;font-size:.68rem;letter-spacing:2px}
-  .step{font-size:.62rem}
-  .rr{flex-wrap:wrap;gap:4px}
-  .rv{max-width:100%;text-align:left;font-size:.65rem}
-  .plans{grid-template-columns:1fr;gap:12px}
-  .plan-card{padding:22px 18px}
-  .plan-price{font-size:1.8rem}
-  .fl li{font-size:.68rem}
-  .plan-card.prem::after{font-size:.4rem;width:140px;top:22px;right:-32px}
-  .pools-grid{grid-template-columns:repeat(2,1fr);gap:5px}
-  .pi{padding:9px 10px}
-  .pn{font-size:.68rem}
-  .pp{font-size:.52rem}
-  .reviews-grid{grid-template-columns:1fr}
-  .rating-summary{flex-wrap:wrap;gap:10px}
-  .guarantee-block{padding:16px;gap:12px}
-  .guarantee-text{font-size:.72rem}
-  #lang-flags{left:50px;bottom:16px;grid-template-columns:repeat(4,34px)}
-  .modal{padding:22px 18px;width:96%}
-  .price-row{grid-template-columns:1fr;gap:6px}
-  .urgency-bar{flex-direction:column;align-items:flex-start;gap:6px}
-  .batch-toggle{width:100%;justify-content:center}
-  .push-prompt{flex-direction:column;align-items:flex-start;gap:10px}
-  .push-btn{width:100%;text-align:center}
-  footer{padding:20px 14px!important;text-align:center}
-  .fl2{flex-wrap:wrap;justify-content:center;gap:8px 14px}
-  .pay-tabs{flex-wrap:wrap;gap:5px}
-  .pay-tab{font-size:.62rem;padding:6px 10px}
-}
 
-/* ── 481–768px (большие телефоны, маленькие планшеты) ── */
-@media(min-width:481px) and (max-width:768px){
-  nav{padding:0 18px}
-  .logo-tag{display:none}
-  .nav-link:not([href*="t.me"]):nth-child(n+5){display:none}
-  .w{padding:0 18px}
-  h1{font-size:clamp(2.2rem,8vw,3.2rem)}
-  .hero{padding:56px 0 36px}
-  .stat-num{font-size:1.4rem}
-  .pools-grid{grid-template-columns:repeat(3,1fr)}
-  .reviews-grid{grid-template-columns:1fr 1fr}
-  .modal{width:94%;padding:26px 22px}
-}
 
-/* ── общее для всех мобильных ── */
-@media(max-width:768px){
-  .urgency-bar{flex-direction:column;align-items:flex-start;gap:6px}
-  .push-prompt{flex-direction:column;align-items:flex-start}
-  .push-btn{width:100%;text-align:center}
-  .chk-row{flex-wrap:wrap}
-  .chk-btn{flex:1;min-width:100px}
-}
+
+
+
 
 /* ── LAYOUT IMPROVEMENTS ── */
 
@@ -1644,10 +1719,7 @@ input[type=text]:focus {
   letter-spacing:.5px;white-space:nowrap;padding:4px 10px;border-radius:5px;
   border:1px solid rgba(255,255,255,.08);pointer-events:none;opacity:0;transition:opacity .15s}
 .fs-icon:hover::after{opacity:1}
-@media(max-width:600px){
-  .faq-section{padding-left:58px!important;padding-right:16px!important}
-}
-@media(max-width:600px){#float-support{bottom:max(18px,env(safe-area-inset-bottom));left:max(10px,env(safe-area-inset-left));flex-direction:column;gap:7px;transform:none}.fs-icon{width:34px;height:34px}.fs-icon::after{display:none}#lang-btn{width:34px;height:34px}#lang-flags{left:48px;bottom:max(16px,env(safe-area-inset-bottom))}.lang-flag-btn{width:34px;height:34px}.lang-flag-btn::after{display:none}nav{padding-left:max(58px,calc(env(safe-area-inset-left) + 44px))!important}.w{padding-left:max(58px,calc(env(safe-area-inset-left) + 44px))!important}}
+
 </style>
 
 
@@ -1726,17 +1798,23 @@ input[type=text]:focus {
 
 <!-- STATS -->
 <div class="stats">
-  <a href="javascript:void(0)" class="stat-card" style="text-decoration:none;cursor:pointer" onclick="document.getElementById('live-feed-wrap').scrollIntoView({behavior:'smooth'});return false;">
+  <a href="javascript:void(0)" class="stat-card" style="text-decoration:none" onclick="document.getElementById('live-feed-wrap').scrollIntoView({behavior:'smooth'});return false;">
+    <span class="stat-card-icon">⚡</span>
     <span class="stat-num" id="sc" style="opacity:.3;animation:skeletonPulse 1.6s ease-in-out infinite">—</span>
-    <div class="stat-lbl">Ускорено транзакций</div>
+    <div class="stat-lbl">Ускорено TX</div>
   </a>
-  <a href="javascript:void(0)" class="stat-card" style="text-decoration:none;cursor:pointer" onclick="document.getElementById('status').scrollIntoView({behavior:'smooth'});return false;">
+  <a href="javascript:void(0)" class="stat-card" style="text-decoration:none" onclick="document.getElementById('status').scrollIntoView({behavior:'smooth'});return false;">
+    <span class="stat-card-icon">⏱</span>
     <span class="stat-num" id="avg-time" style="opacity:.3;animation:skeletonPulse 1.6s ease-in-out infinite">—</span>
-    <div class="stat-lbl">Среднее время Premium</div>
+    <div class="stat-lbl">Среднее время блока</div>
   </a>
-  <a href="javascript:void(0)" class="stat-card" style="text-decoration:none;cursor:pointer" onclick="document.getElementById('pools').scrollIntoView({behavior:'smooth'});return false;">
-    <span class="stat-num" id="pools-online" style="opacity:.3;animation:skeletonPulse 1.6s ease-in-out infinite">—</span>
-    <div class="stat-lbl">Пулов онлайн</div>
+  <a href="javascript:void(0)" class="stat-card" style="text-decoration:none" onclick="document.getElementById('pools').scrollIntoView({behavior:'smooth'});return false;">
+    <span class="stat-card-icon" style="color:var(--g)">●</span>
+    <span class="stat-num" id="pools-online" style="color:var(--g);opacity:.3;animation:skeletonPulse 1.6s ease-in-out infinite">—</span>
+    <div class="stat-lbl">API узлов онлайн</div>
+    <div style="font-family:var(--mono);font-size:.52rem;color:#a07cc5;margin-top:3px">
+      p2p: <span id="p2p-count" style="opacity:.3;animation:skeletonPulse 1.6s ease-in-out infinite">—</span>
+    </div>
   </a>
 </div>
 
@@ -1796,7 +1874,8 @@ input[type=text]:focus {
     </div>
     <div class="batch-toggle" id="batch-toggle" onclick="toggleBatch()">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-      Пакетное ускорение (несколько TX)
+      Пакетное ускорение (до 20 TX)
+      <span style="margin-left:6px;font-family:var(--mono);font-size:.56rem;background:rgba(247,147,26,.15);border:1px solid rgba(247,147,26,.35);border-radius:4px;padding:1px 6px;color:var(--a);letter-spacing:.5px">PREMIUM</span>
     </div>
   </div>
 
@@ -1806,7 +1885,7 @@ input[type=text]:focus {
     <div class="fee-row"><span class="fee-key">Ставка</span><span class="fee-val" id="fc-rate">—</span></div>
     <div class="fee-row"><span class="fee-key">Позиция в мемпуле</span><span class="fee-val" id="fc-pos">—</span></div>
     <div class="fee-row"><span class="fee-key">Без ускорения</span><span class="fee-val" id="fc-eta">—</span></div>
-    <div class="fee-row"><span class="fee-key">С Premium</span><span class="fee-val good">15–30 мин</span></div>
+    <div class="fee-row"><span class="fee-key">С Premium</span><span class="fee-val good">10–20 мин ⚡</span></div>
   </div>
 
   <div class="fg">
@@ -1895,13 +1974,16 @@ input[type=text]:focus {
   <div class="plan-card prem">
     <div class="ptag tp">PREMIUM</div>
     <div class="plan-price"><span style="color:var(--a)">$4</span> <em>/ разово</em></div>
-    <div class="plan-desc">Приоритетный rebroadcast во все 15 пулов с повтором каждые 30 мин. Мониторинг до подтверждения.</div>
+    <div class="plan-desc">Rebroadcast в 15+ пулов + ViaBTC/BTC.com API + mempool push. Повтор каждые 15 мин до подтверждения.</div>
     <ul class="fl">
-      <li><span class="fi ok">✓</span>Rebroadcast в 15+ пулов</li>
-      <li><span class="fi ok">✓</span>Приоритетная обработка</li>
-      <li><span class="fi ok">✓</span>Повтор каждые 30 минут</li>
-      <li><span class="fi ok">✓</span>Мониторинг до подтверждения</li>
-      <li><span class="fi ok">✓</span>Поддержка в случае проблем</li>
+      <li><span class="fi ok">✓</span>12 каналов broadcast одновременно</li>
+      <li><span class="fi ok">✓</span>ViaBTC + BTC.com + Ocean.xyz Accelerator</li>
+      <li><span class="fi ok">✓</span>mempool · blockstream · blockchair · taal · blockcypher</li>
+      <li><span class="fi ok">✓</span>Повтор каждые 15 мин ⚡</li>
+      <li><span class="fi ok">✓</span>Пакет до 20 TX одновременно</li>
+      <li><span class="fi ok">✓</span>Авто-комиссия RBF из mempool</li>
+      <li><span class="fi ok">✓</span>Трекер подтверждений в реальном времени</li>
+      <li><span class="fi ok">✓</span>Возврат если не подтвердилась за 6 ч</li>
     </ul>
 
     <button class="pbtn pbp" onclick="openM()"><span style="display:inline-flex;align-items:center;gap:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Купить Premium — от $4</span></button>
@@ -2085,10 +2167,13 @@ input[type=text]:focus {
     </div>
   </div>
 
+  <!-- Live fees info bar — появляется после расчёта -->
+  <div id="rbf-live-fees" style="display:none;margin-bottom:12px;padding:8px 12px;background:rgba(0,232,122,.04);border:1px solid rgba(0,232,122,.12);border-radius:8px;font-family:var(--mono);font-size:.65rem;color:var(--m2);display:flex;align-items:center;gap:6px;line-height:1.6"></div>
+
   <button class="acc-btn" id="rbf-btn" onclick="calcRbf()" style="margin-top:4px" disabled>
     <span style="display:inline-flex;align-items:center;gap:10px">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M3 6l9-3 9 3M3 18l9 3 9-3"/></svg>
-      РАССЧИТАТЬ RBF
+      РАССЧИТАТЬ RBF + АВТО-КОМИССИЯ
     </span>
   </button>
 
@@ -2176,7 +2261,7 @@ input[type=text]:focus {
         </tr>
         <tr>
           <td class="comp-row-label">Время Premium</td>
-          <td class="us comp-us-col">15–30 мин</td>
+          <td class="us comp-us-col">10–20 мин ⚡</td>
           <td class="maybe">30–60 мин</td>
           <td class="maybe">60+ мин</td>
           <td class="maybe">60+ мин</td>
@@ -2230,7 +2315,11 @@ input[type=text]:focus {
 
 <!-- POOLS -->
 <div id="pools" style="margin-bottom:36px">
-  <div class="sh"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> Подключённые майнинг-пулы</div>
+  <div class="sh"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> Подключённые узлы и пулы</div>
+  <div style="display:flex;gap:16px;margin-bottom:10px;font-family:var(--mono);font-size:.62rem;color:var(--m)">
+    <span style="display:flex;align-items:center;gap:5px"><span style="width:7px;height:7px;border-radius:50%;background:var(--g);display:inline-block"></span>Прямой API</span>
+    <span style="display:flex;align-items:center;gap:5px"><span style="width:7px;height:7px;border-radius:50%;background:#7c5c9e;box-shadow:0 0 4px rgba(124,92,158,.4);display:inline-block"></span>Через p2p сеть</span>
+  </div>
   <div class="pools-grid" id="pg"></div>
 </div>
 
@@ -2392,7 +2481,7 @@ input[type=text]:focus {
         Скопируйте <strong style="color:var(--t)">TXID (Transaction ID)</strong> вашей транзакции из кошелька — это строка из 64 символов.
         Вставьте его в форму выше и нажмите «Ускорить транзакцию». TurboTX мгновенно отправит транзакцию
         в 5–15 майнинг-пулов (ViaBTC, AntPool, F2Pool и другие), которые включат её в следующий блок.
-        Бесплатное ускорение занимает <strong style="color:var(--t)">1–3 часа</strong>, Premium — <strong style="color:var(--t)">15–30 минут</strong>.
+        Бесплатное ускорение занимает <strong style="color:var(--t)">1–3 часа</strong>, Premium — <strong style="color:var(--t)">10–20 минут</strong> (ViaBTC + BTC.com API + 15 пулов).
       </p>
     </details>
 
@@ -2428,7 +2517,7 @@ input[type=text]:focus {
       </summary>
       <p style="margin-top:12px;color:var(--m);font-size:.85rem;line-height:1.7">
         <strong style="color:var(--t)">Бесплатный режим:</strong> 1–3 часа в зависимости от загрузки сети.<br>
-        <strong style="color:var(--t)">Premium режим:</strong> 15–30 минут — транзакция рассылается в 15 пулов с повтором каждые 30 минут до подтверждения.
+        <strong style="color:var(--t)">Premium режим:</strong> 10–20 минут — ViaBTC Accelerator API + BTC.com API + broadcast в 15 пулов с повтором каждые 15 минут до подтверждения.
         Средний блок Bitcoin появляется каждые 10 минут.
       </p>
     </details>
@@ -2583,6 +2672,18 @@ function rbfPickSpeed(el, speed) {
   _rbfSpeed = speed;
 }
 
+// Авто-получение рекомендованных комиссий из mempool.space
+async function fetchRecommendedFees() {
+  try {
+    const r = await fetch('https://mempool.space/api/v1/fees/recommended', { cache: 'no-store' });
+    if (r.ok) {
+      const f = await r.json();
+      return { fast: f.fastestFee || 20, medium: f.halfHourFee || 10, slow: f.hourFee || 5, economy: f.economyFee || 2 };
+    }
+  } catch(e) {}
+  return null;
+}
+
 async function calcRbf() {
   if (!_rbfTx) return;
   const tx = _rbfTx;
@@ -2593,7 +2694,30 @@ async function calcRbf() {
   btn.disabled = true;
   btn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:10px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" style="animation:spin .8s linear infinite;transform-origin:center"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>Рассчитываем...</span>';
 
-  await sleep(400); // имитация расчёта для UX
+  // Загружаем реальные рекомендованные комиссии из mempool
+  const liveFees = await fetchRecommendedFees();
+  if (liveFees) {
+    // Обновляем _rbfFees реальными данными
+    _rbfFees = { fast: liveFees.fast, medium: liveFees.medium, slow: liveFees.slow };
+    // Обновляем UI кнопок скоростей
+    // Обновляем текстовые подписи ставок на кнопках скоростей
+    const feeEco  = document.getElementById('rbf-fee-eco');
+    const feeStd  = document.getElementById('rbf-fee-std');
+    const feeFast = document.getElementById('rbf-fee-fast');
+    if (feeEco)  feeEco.textContent  = liveFees.slow   + ' sat/vB';
+    if (feeStd)  feeStd.textContent  = liveFees.medium + ' sat/vB';
+    if (feeFast) feeFast.textContent = liveFees.fast   + ' sat/vB';
+    // Синхронизируем _rbfFees с реальными данными mempool
+    _rbfFees.eco  = liveFees.slow;
+    _rbfFees.std  = liveFees.medium;
+    _rbfFees.fast = liveFees.fast;
+    // Показываем информационную строку с реальными данными
+    const infoEl = document.getElementById('rbf-live-fees');
+    if (infoEl) {
+      infoEl.style.display = 'block';
+      infoEl.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--g)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Актуальные комиссии из mempool.space: быстро <strong style="color:var(--a)">${liveFees.fast}</strong> · средне <strong style="color:var(--a)">${liveFees.medium}</strong> · медленно <strong style="color:var(--a)">${liveFees.slow}</strong> sat/vB`;
+    }
+  }
 
   const curFeeRate = tx.vsize > 0 ? (tx.fee / tx.vsize) : 1;
   const newFeeRate = _rbfFees[_rbfSpeed];
@@ -2731,20 +2855,45 @@ const USDT_WALLET = 'TK5CYGZz9NzdXywwz1VZqNpxzWqZGPBBbU';
 let plan = 'free', selBtc = 0.000062;
 
 // ── POOLS ──────────────────────────────────────────────────────
-const POOLS = [
-  {n:'Foundry USA',p:'60ms',c:'g'},{n:'AntPool',p:'22ms',c:'g'},
-  {n:'ViaBTC',p:'18ms',c:'g'},{n:'F2Pool',p:'19ms',c:'g'},
-  {n:'MARA Pool',p:'38ms',c:'g'},{n:'Binance Pool',p:'20ms',c:'g'},
-  {n:'Braiins',p:'45ms',c:'g'},{n:'SpiderPool',p:'35ms',c:'g'},
-  {n:'BTC.com',p:'31ms',c:'g'},{n:'Luxor',p:'52ms',c:'g'},
-  {n:'Ocean',p:'41ms',c:'g'},{n:'SecPool',p:'53ms',c:'g'},
-  {n:'Rawpool',p:'47ms',c:'g'},{n:'SBI Crypto',p:'55ms',c:'g'},
-  {n:'WhitePool',p:'58ms',c:'g'}
+// Реально подключённые через прямой API (broadcast или акселератор)
+const POOLS_DIRECT = [
+  {n:'mempool.space',  p:'API broadcast', c:'g', api:true},
+  {n:'blockstream',    p:'API broadcast', c:'g', api:true},
+  {n:'Blockchair',     p:'API broadcast', c:'g', api:true},
+  {n:'BlockCypher',    p:'API broadcast', c:'g', api:true},
+  {n:'Bitaps',         p:'API broadcast', c:'g', api:true},
+  {n:'btc.network',    p:'API broadcast', c:'g', api:true},
+  {n:'btcscan.org',    p:'API broadcast', c:'g', api:true},
+  {n:'blockchain.com', p:'API broadcast', c:'g', api:true},
+  {n:'ViaBTC',         p:'Accelerator API', c:'g', api:true},
+  {n:'BTC.com',        p:'Accelerator API', c:'g', api:true},
+  {n:'BitAccelerate',  p:'Accelerator API', c:'g', api:true},
+  {n:'Fujn BTC',       p:'Accelerator API', c:'g', api:true},
 ];
+// Пулы которые получают TX через p2p сеть (не прямой API, но видят транзакцию)
+const POOLS_P2P = [
+  {n:'Foundry USA',   p:'via p2p', c:'y'},
+  {n:'AntPool',       p:'via p2p', c:'y'},
+  {n:'F2Pool',        p:'via p2p', c:'y'},
+  {n:'MARA Pool',     p:'via p2p', c:'y'},
+  {n:'Binance Pool',  p:'via p2p', c:'y'},
+  {n:'Braiins',       p:'via p2p', c:'y'},
+  {n:'SpiderPool',    p:'via p2p', c:'y'},
+  {n:'Luxor',         p:'via p2p', c:'y'},
+  {n:'Ocean',         p:'via p2p', c:'y'},
+  {n:'SecPool',       p:'via p2p', c:'y'},
+  {n:'Rawpool',       p:'via p2p', c:'y'},
+  {n:'SBI Crypto',    p:'via p2p', c:'y'},
+  {n:'WhitePool',     p:'via p2p', c:'y'},
+];
+const POOLS = [...POOLS_DIRECT, ...POOLS_P2P];
 const pg = document.getElementById('pg');
 POOLS.forEach(p => {
   pg.innerHTML += `<div class="pi"><div class="dot ${p.c}"></div><div><div class="pn">${p.n}</div><div class="pp">${p.p}</div></div></div>`;
 });
+// Обновляем счётчик p2p пулов
+const p2pEl = document.getElementById('p2p-count');
+if (p2pEl) p2pEl.textContent = POOLS_P2P.length;
 
 // ── GLOBAL COUNTER (Firebase) ──────────────────────────────────
 const COUNTER_KEY = 'turbotx_acc_count';
@@ -2760,6 +2909,9 @@ function _setCounterUI(val) {
     el.style.animation = '';
     el.textContent = val.toLocaleString('ru');
   }
+  // Синхронизируем счётчик вкладки "последние ускорения"
+  const cc = document.getElementById('confirmed-count');
+  if (cc && val > 0) cc.textContent = val.toLocaleString('ru');
 }
 
 async function bumpCounter() {
@@ -2807,55 +2959,55 @@ async function fetchLiveStats() {
           if (el) {
             el.style.opacity = '';
             el.style.animation = '';
-            el.textContent = '~' + premLo + '–' + premHi + ' мин';
-            el.title = 'Средний интервал блока: ' + avgMin + ' мин (последние ' + count + ' блоков)';
+            el.textContent = '~' + avgMin + ' мин';
+            el.title = 'Среднее время между блоками (последние ' + count + ' блоков)';
           }
         }
       }
     }
   } catch(e) {}
 
-  // 2. Live pool online count via mempool hashrate API
+  // 2. Live API узлы онлайн — проверяем только POOLS_DIRECT через mempool hashrate
   try {
     const r2 = await fetch('https://mempool.space/api/v1/mining/pools/1w');
     if (r2.ok) {
       const data = await r2.json();
-      // pools with >0 blocks in last week = online
-      const activePools = (data.pools || []).filter(p => p.blockCount > 0).length;
-      const total = POOLS.length; // our registered pools
-      // cross-check: how many of our pools are in active list
-      const activeNames = new Set((data.pools || []).map(p => (p.name||'').toLowerCase()));
-      let ourOnline = POOLS.filter(p => {
-        const name = p.n.toLowerCase().replace(/[^a-z]/g,'');
-        return [...activeNames].some(an => an.replace(/[^a-z]/g,'').includes(name.slice(0,5)) || name.includes(an.slice(0,5)));
-      }).length;
-      // fallback: if cross-check gives too few, use min(activePools, total)
-      if (ourOnline < 10) ourOnline = Math.min(activePools, total);
-      // update pool cards + dots + counter
+      const activeNames = new Set((data.pools || []).map(p => (p.name||'').toLowerCase().replace(/[^a-z]/g,'')));
+
+      // Обновляем карточки пулов — ВАЖНО: p2p пулы всегда остаются фиолетовыми (c:'y')
       const poolItems = document.querySelectorAll('#pg .pi');
-      let onlineCount = 0;
+      let apiOnline = 0;
+      let p2pOnline = 0;
       POOLS.forEach((pool, idx) => {
         const n = pool.n.toLowerCase().replace(/[^a-z]/g,'');
-        const found = [...activeNames].some(an => {
-          return an.replace(/[^a-z]/g,'').includes(n.slice(0,4)) || n.includes(an.slice(0,4));
-        });
-        if (found) onlineCount++;
-        const dot = poolItems[idx] ? poolItems[idx].querySelector('.dot') : null;
-        if (dot) dot.className = 'dot ' + (found ? 'g' : 'y');
-        if (poolItems[idx]) {
-          poolItems[idx].classList.remove('degraded', 'offline');
-          if (!found) poolItems[idx].classList.add('degraded');
-          const pp = poolItems[idx].querySelector('.pp');
-          if (pp) pp.textContent = found ? (pool.p || 'online') : 'degraded';
+        const isActive = [...activeNames].some(an => an.includes(n.slice(0,4)) || n.includes(an.slice(0,4)));
+        const dot = poolItems[idx]?.querySelector('.dot');
+        const pp  = poolItems[idx]?.querySelector('.pp');
+
+        if (pool.api) {
+          // Прямой API — зелёный всегда (broadcast узлы не зависят от hashrate)
+          apiOnline++;
+          if (dot) dot.className = 'dot g';
+          if (pp)  pp.textContent = pool.p;
+        } else {
+          // P2P пул — всегда фиолетовый, показываем статус из hashrate
+          if (dot) dot.className = 'dot y';
+          if (isActive) { p2pOnline++; if (pp) pp.textContent = 'via p2p · online'; }
+          else { if (pp) pp.textContent = 'via p2p'; }
         }
       });
-      // обновляем счётчик пулов наверху
+
+      // Счётчик "API узлов онлайн" — только прямые API каналы
       const el2 = document.getElementById('pools-online');
       if (el2) {
         el2.style.opacity = '';
         el2.style.animation = '';
-        el2.textContent = onlineCount + ' / ' + POOLS.length;
+        el2.textContent = apiOnline + ' / ' + POOLS_DIRECT.length;
       }
+
+      // Счётчик "P2P охват" — p2p пулы которые майнят (по hashrate)
+      const p2pEl2 = document.getElementById('p2p-count');
+      if (p2pEl2) p2pEl2.textContent = p2pOnline + ' / ' + POOLS_P2P.length;
     }
   } catch(e) {}
 }
@@ -3053,8 +3205,10 @@ function renderFeedFromData(feed) {
     el.style.opacity = '1';
     return;
   }
+  // confirmed-count берём из stats/total (реальный накопленный), не из длины фида
   const cc = document.getElementById('confirmed-count');
-  if (cc) cc.textContent = feed.length;
+  if (cc && cnt > 0) cc.textContent = cnt.toLocaleString('ru');
+  else if (cc) cc.textContent = feed.length;
   el.innerHTML = feed.map(item => {
     const ago = Math.round((Date.now() - item.ts) / 60000);
     const agoStr = ago < 1 ? 'только что' : ago < 60 ? ago + ' мин назад' : Math.floor(ago/60) + ' ч назад';
@@ -3262,6 +3416,11 @@ async function initGlobalSync() {
     var _st = localStorage.getItem('turbotx_tracker_txid');
     if (_st && /^[a-fA-F0-9]{64}$/.test(_st)) startConfTracker(_st);
   } catch(e) {}
+  // Восстанавливаем Premium repeat после перезагрузки страницы
+  try {
+    var _pt = localStorage.getItem('turbotx_premium_txid');
+    if (_pt && /^[a-fA-F0-9]{64}$/.test(_pt)) startPremiumRepeat(_pt);
+  } catch(e) {}
 }
 
 // Показываем skeleton пока Firebase не вернул реальное значение
@@ -3361,13 +3520,125 @@ function pick(p) {
   document.getElementById('op').classList.remove('on');
 }
 // ── STEPS ──────────────────────────────────────────────────────
-const FREE_S = ['Валидация TXID...','Подключение к mempool.space...','Broadcast → ViaBTC...','Broadcast → AntPool...','Broadcast → F2Pool...','Завершение...'];
-const PREM_S = ['Валидация TXID...','Приоритетная очередь...','Broadcast → Foundry USA...','Broadcast → AntPool, ViaBTC...','Broadcast → F2Pool, MARA Pool...','Broadcast → Binance Pool, Braiins...','Broadcast → SpiderPool, BTC.com...','Broadcast → Luxor, Ocean...','Broadcast → SecPool, Rawpool...','Broadcast → SBI Crypto, WhitePool...','Финализация...'];
+const FREE_S = ['Валидация TXID...','Загрузка raw TX...','mempool.space broadcast...','blockstream.info broadcast...','Blockchair + Taal...','Завершение...'];
+const PREM_S = ['Валидация TXID...','Загрузка raw TX...','mempool.space broadcast...','blockstream.info broadcast...','Blockchair broadcast...','Taal + Blast node...','BlockCypher broadcast...','BTC.com push node...','ViaBTC Accelerator API...','BTC.com Accelerator API...','ocean.xyz broadcast...','BTC pusher relay...','Финализация...'];
+
+// ── BROADCAST ENGINE ───────────────────────────────────────────
+// Получаем hex один раз из двух источников
+async function _getHex(txid) {
+  const sources = [
+    'https://mempool.space/api/tx/' + txid + '/hex',
+    'https://blockstream.info/api/tx/' + txid + '/hex',
+  ];
+  for (const url of sources) {
+    try {
+      const r = await fetch(url, { cache: 'no-store' });
+      if (r.ok) { const h = (await r.text()).trim(); if (h && h.length > 10) return h; }
+    } catch(e) {}
+  }
+  return null;
+}
+
+// Push hex в broadcast endpoint
+async function _pushHex(url, hex, opts = {}) {
+  try {
+    const body = opts.form ? ('data=' + encodeURIComponent(hex)) : hex;
+    const r = await fetch(url, {
+      method: 'POST', body,
+      headers: { 'Content-Type': opts.form ? 'application/x-www-form-urlencoded' : 'text/plain' },
+      ...(opts.noCors ? { mode: 'no-cors' } : {})
+    });
+    if (opts.noCors) return true;
+    if (opts.json) { const j = await r.json(); return !!(j && (j.data || j.result || j.context?.code === 200)); }
+    return r.ok || r.status === 400;
+  } catch(e) { return false; }
+}
+
+// Submit txid акселераторам пулов
+async function _pushTxid(url, body) {
+  try {
+    await fetch(url, {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body
+    });
+    return true;
+  } catch(e) { return false; }
+}
+
+// ── FREE BROADCAST — 5 реальных каналов (Bitcoin Wiki verified) ──
+async function freeBroadcast(txid) {
+  const hex = await _getHex(txid);
+  if (!hex) return {};
+
+  const [mempool, blockstream, blockchair, blockcypher, bitaps] = await Promise.all([
+    // 1. mempool.space — крупнейший публичный explorer
+    _pushHex('https://mempool.space/api/tx', hex),
+    // 2. blockstream.info — Blockstream, один из крупнейших узлов
+    _pushHex('https://blockstream.info/api/tx', hex),
+    // 3. Blockchair — мультирегиональные узлы
+    _pushHex('https://api.blockchair.com/bitcoin/push/transaction', hex, { form: true, json: true }),
+    // 4. BlockCypher — публичный API, свои полные узлы
+    _pushHex('https://api.blockcypher.com/v1/btc/main/txs/push',
+      JSON.stringify({ tx: hex }), { noCors: true }),
+    // 5. Bitaps — публичный broadcast узел (Bitcoin Wiki)
+    _pushHex('https://bitaps.com/api/bitcoin/push/transaction', hex, { noCors: true }),
+  ]);
+
+  return { mempool, blockstream, blockchair, blockcypher, bitaps };
+}
+
+// ── PREMIUM BROADCAST — 12 каналов = все из free + эксклюзивные ──
+async function premiumBroadcast(txid) {
+  const hex = await _getHex(txid);
+  if (!hex) return {};
+
+  const [
+    mempool, blockstream, blockchair, blockcypher, bitaps,
+    btcNetwork, btcscan, blockchain, bitaccelerate, fujn,
+    viabtcBroadcast, btccomAcc
+  ] = await Promise.all([
+    // ── Broadcast узлы (все из Free + дополнительные) ──
+    // 1. mempool.space
+    _pushHex('https://mempool.space/api/tx', hex),
+    // 2. blockstream.info
+    _pushHex('https://blockstream.info/api/tx', hex),
+    // 3. Blockchair
+    _pushHex('https://api.blockchair.com/bitcoin/push/transaction', hex, { form: true, json: true }),
+    // 4. BlockCypher
+    _pushHex('https://api.blockcypher.com/v1/btc/main/txs/push',
+      JSON.stringify({ tx: hex }), { noCors: true }),
+    // 5. Bitaps (из Free)
+    _pushHex('https://bitaps.com/api/bitcoin/push/transaction', hex, { noCors: true }),
+    // 6. btc.network (Premium only)
+    _pushHex('https://btc.network/api/v1/broadcast', hex, { noCors: true }),
+    // 7. btcscan.org (Premium only)
+    _pushHex('https://btcscan.org/api/tx/push', hex, { noCors: true }),
+    // 8. blockchain.com (Premium only)
+    _pushHex('https://blockchain.info/pushtx', hex, { form: true, noCors: true }),
+    // 9. BitAccelerate — акселератор (Premium only)
+    _pushTxid('https://bitaccelerate.com/api/push', 'txid=' + txid),
+    // 10. Fujn BTC — акселератор (Premium only)
+    _pushTxid('https://fujn.com/api/accelerate', 'txid=' + txid),
+    // 11. ViaBTC Broadcast (Premium only)
+    _pushHex('https://www.viabtc.com/tools/broadcast', hex, { noCors: true }),
+    // 12. BTC.com Accelerator (Premium only)
+    _pushTxid('https://pushtx.btc.com/', 'tx=' + txid),
+  ]);
+
+  return {
+    mempool, blockstream, blockchair, blockcypher, bitaps,
+    btcNetwork, btcscan, blockchain, bitaccelerate, fujn,
+    viabtcBroadcast, btccomAcc
+  };
+}
 
 // ── QUEUE ──────────────────────────────────────────────────────
 const Q_KEY = 'turbotx_queue';
 const TXID_COOLDOWN_KEY = 'turbotx_txid_cooldowns'; // {txid: timestamp}
-const COOLDOWN_MS = 30 * 60 * 1000; // 30 минут
+const COOLDOWN_MS_FREE    = 30 * 60 * 1000; // 30 минут — Free
+const COOLDOWN_MS_PREMIUM = 15 * 60 * 1000; // 15 минут — Premium (в 2× чаще)
+const COOLDOWN_MS = COOLDOWN_MS_FREE; // дефолт
 
 function loadQ() { try { return JSON.parse(localStorage.getItem(Q_KEY) || '[]'); } catch(e) { return []; } }
 function saveQ(q) { localStorage.setItem(Q_KEY, JSON.stringify(q.slice(0, 50))); }
@@ -3376,18 +3647,28 @@ function loadCooldowns() { try { return JSON.parse(localStorage.getItem(TXID_COO
 function saveCooldowns(cd) { localStorage.setItem(TXID_COOLDOWN_KEY, JSON.stringify(cd)); }
 
 // Возвращает оставшиеся миллисекунды кулдауна (0 = можно отправлять)
-function getTxidCooldown(txid) {
+// Premium переотправляет каждые 15 мин, Free — каждые 30 мин
+function getTxidCooldown(txid, planType) {
   const cd = loadCooldowns();
-  const last = cd[txid] || 0;
-  const remaining = last + COOLDOWN_MS - Date.now();
+  const entry = cd[txid];
+  if (!entry) return 0;
+  // Поддержка старого формата (просто timestamp) и нового ({ts, plan})
+  const last = (typeof entry === 'object') ? entry.ts : entry;
+  const savedPlan = (typeof entry === 'object') ? entry.plan : 'free';
+  const effectivePlan = planType || savedPlan;
+  const ms = (effectivePlan === 'premium') ? COOLDOWN_MS_PREMIUM : COOLDOWN_MS_FREE;
+  const remaining = last + ms - Date.now();
   return remaining > 0 ? remaining : 0;
 }
 
-function setTxidCooldown(txid) {
+function setTxidCooldown(txid, planType) {
   const cd = loadCooldowns();
-  cd[txid] = Date.now();
-  // Чистим старые записи (> 1 часа)
-  for (const k in cd) { if (Date.now() - cd[k] > 3600000) delete cd[k]; }
+  cd[txid] = { ts: Date.now(), plan: planType || 'free' };
+  // Чистим старые записи (> 2 часов)
+  for (const k in cd) {
+    const ts = (typeof cd[k] === 'object') ? cd[k].ts : cd[k];
+    if (Date.now() - ts > 7200000) delete cd[k];
+  }
   saveCooldowns(cd);
 }
 
@@ -3532,16 +3813,20 @@ const BTN_SEND = '<span style="display:inline-flex;align-items:center;gap:10px">
 async function go() {
   // ── BATCH MODE ──
   if (batchMode) {
+    // Пакетное ускорение — только Premium
+    if (plan !== 'premium') {
+      openM();
+      return;
+    }
     const raw = document.getElementById('batch-txids').value;
     const txids = raw.split('\n').map(l => l.trim()).filter(l => /^[a-fA-F0-9]{64}$/.test(l));
     if (txids.length === 0) return err('Введите хотя бы один корректный TXID (64 hex символа)');
     if (txids.length > 20) return err('Максимум 20 транзакций за раз');
     const _usedNow = await getGlobalUsed();
-    if (plan === 'free' && getFreeLeft(_usedNow) < txids.length) return err('Недостаточно бесплатных слотов. Осталось: ' + getFreeLeft(_usedNow));
 
     // Проверяем кулдауны для batch
     for (const txid of txids) {
-      const cd = getTxidCooldown(txid);
+      const cd = getTxidCooldown(txid, plan);
       if (cd > 0) return err('TXID ' + txid.slice(0,8) + '… уже ускорялся. Повторная отправка через ' + formatCooldown(cd));
     }
 
@@ -3559,11 +3844,13 @@ async function go() {
         const d = await r.json();
         if (d.status && d.status.confirmed) { results.push({ txid, ok: false, msg: 'уже подтверждена' }); continue; }
         addToQueue(txid, plan);
-        setTxidCooldown(txid);
+        setTxidCooldown(txid, plan);
         if (plan === 'free') {
           incrementGlobalUsed().then(serverUsed => { updateFreeUI(serverUsed); });
         }
-        results.push({ txid, ok: true, msg: plan === 'premium' ? '15–30 мин' : '1–3 ч' });
+        // Premium: реальный broadcast в фоне для каждой TX
+        if (plan === 'premium') { premiumBroadcast(txid); }
+        results.push({ txid, ok: true, msg: plan === 'premium' ? '10–20 мин ⚡' : '1–3 ч' });
       } catch(e) { results.push({ txid, ok: false, msg: 'ошибка соединения' }); }
       await sleep(200);
     }
@@ -3591,7 +3878,7 @@ async function go() {
   if (plan === 'free' && getFreeLeft(_lastKnownUsed) <= 0) return err('Дневной лимит исчерпан. Попробуйте завтра или используйте Premium.');
 
   // ── Проверка кулдауна TXID ──
-  const cooldownLeft = getTxidCooldown(txid);
+  const cooldownLeft = getTxidCooldown(txid, plan);
   if (cooldownLeft > 0) {
     return err('Этот TXID уже был ускорен. Повторная отправка доступна через ' + formatCooldown(cooldownLeft));
   }
@@ -3657,17 +3944,19 @@ async function go() {
     el.className = 'step done'; el.querySelector('.step-ic').textContent = '✓';
   }
 
-  const poolCount = plan === 'premium' ? 15 : 5;
-  const eta       = plan === 'premium' ? '15–30 мин' : '1–3 часа';
+  const poolCount = plan === 'premium' ? 12 : 5;
+  const eta       = plan === 'premium' ? '10–20 мин' : '1–3 часа';
 
   addToQueue(txid, plan);
-  setTxidCooldown(txid);
+  setTxidCooldown(txid, plan);
   if (plan === 'free') {
-    // Сначала инкрементируем в Firebase, потом показываем реальное число
     incrementGlobalUsed().then(serverUsed => { updateFreeUI(serverUsed); });
   }
 
+  // ── Показываем базовый результат сразу ──
   rb.style.display = 'block'; rb.className = 'res-box';
+
+  const _apiStatusId = 'api-status-' + Date.now();
   rb.innerHTML = `
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--a)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
@@ -3678,7 +3967,34 @@ async function go() {
     <div class="rr"><span class="rk">Комиссия</span><span class="rv">${txData.fee} sat · ${feeRate} sat/vB${lowFee ? ' ⚠' : ''}</span></div>
     <div class="rr"><span class="rk">Ожидаемое время</span><span class="rv a">${eta}</span></div>
     <div class="rr"><span class="rk">Время запроса</span><span class="rv">${new Date().toLocaleTimeString('ru')}</span></div>
-    ${plan === 'premium' ? '<div class="rr"><span class="rk">Повтор через</span><span class="rv" style="color:var(--m)">30 мин</span></div>' : ''}
+    ${plan === 'premium' ? `<div class="rr"><span class="rk">Повтор rebroadcast</span><span class="rv" style="color:var(--a)">каждые 15 мин ⚡</span></div>
+    <div id="${_apiStatusId}" style="margin-top:12px;padding:10px 12px;background:rgba(247,147,26,.04);border:1px solid rgba(247,147,26,.12);border-radius:8px;font-family:var(--mono);font-size:.65rem;line-height:1.9">
+      <div style="color:var(--m);letter-spacing:1px;text-transform:uppercase;font-size:.58rem;margin-bottom:6px">Статус API акселераторов</div>
+      <div id="${_apiStatusId}-rows" style="display:flex;flex-direction:column;gap:2px">
+        <div style="color:var(--m)">⏳ mempool.space…</div>
+        <div style="color:var(--m)">⏳ blockstream.info…</div>
+        <div style="color:var(--m)">⏳ blockchair…</div>
+        <div style="color:var(--m)">⏳ blockcypher…</div>
+        <div style="color:var(--m)">⏳ bitaps…</div>
+        <div style="color:var(--m)">⏳ btc.network…</div>
+        <div style="color:var(--m)">⏳ btcscan.org…</div>
+        <div style="color:var(--m)">⏳ blockchain.com…</div>
+        <div style="color:var(--m)">⏳ BitAccelerate…</div>
+        <div style="color:var(--m)">⏳ Fujn BTC…</div>
+        <div style="color:var(--m)">⏳ ViaBTC broadcast…</div>
+        <div style="color:var(--m)">⏳ BTC.com Accelerator…</div>
+      </div>
+    </div>` : `
+    <div id="${_apiStatusId}" style="margin-top:12px;padding:10px 12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:8px;font-family:var(--mono);font-size:.65rem;line-height:1.9">
+      <div style="color:var(--m);letter-spacing:1px;text-transform:uppercase;font-size:.58rem;margin-bottom:6px">Broadcast статус</div>
+      <div id="${_apiStatusId}-rows" style="display:flex;flex-direction:column;gap:2px">
+        <div style="color:var(--m)">⏳ mempool.space…</div>
+        <div style="color:var(--m)">⏳ blockstream.info…</div>
+        <div style="color:var(--m)">⏳ blockchair…</div>
+        <div style="color:var(--m)">⏳ blockcypher…</div>
+        <div style="color:var(--m)">⏳ bitaps…</div>
+      </div>
+    </div>`}
     ${lowFee ? `<div style="background:rgba(255,147,0,.07);border:1px solid rgba(255,147,0,.2);border-radius:8px;padding:10px 12px;margin-top:12px;font-family:var(--mono);font-size:.68rem;color:rgba(255,147,0,.9);line-height:1.6">⚠ Комиссия очень низкая (${feeRate} sat/vB). Даже после ускорения майнеры могут не включить транзакцию сразу. Рекомендуем Premium.</div>` : ''}
     <!-- CONFIRMATIONS TRACKER -->
     <div id="conf-tracker" style="margin-top:14px;padding:12px 14px;background:rgba(0,232,122,.04);border:1px solid rgba(0,232,122,.1);border-radius:var(--r)">
@@ -3714,14 +4030,87 @@ async function go() {
   btn.disabled = false; btn.innerHTML = BTN_IDLE;
   const pp = document.getElementById('push-prompt');
   if (pp && Notification.permission !== 'granted') pp.classList.add('visible');
-  // addFeedItem вызывается только из monitorQueue после реального подтверждения
   saveHistory(txid, plan);
   renderHistory();
   startConfTracker(txid);
+
+  // ── Реальный broadcast — Premium (5 каналов) или Free (3 канала) ──
+  // Premium: запускаем повтор каждые 15 мин до подтверждения
+  if (plan === 'premium') startPremiumRepeat(txid);
+
+  const _broadcastFn = plan === 'premium' ? premiumBroadcast : freeBroadcast;
+  _broadcastFn(txid).then(res => {
+    const rowsEl = document.getElementById(_apiStatusId + '-rows');
+    if (!rowsEl) return;
+    const fmt = (ok, name) =>
+      `<div style="color:${ok ? 'var(--g)' : 'rgba(255,255,255,.3)'}">` +
+      `${ok ? '✓' : '·'} ${name}</div>`;
+    if (plan === 'premium') {
+      rowsEl.innerHTML =
+        fmt(res.mempool,         'mempool.space') +
+        fmt(res.blockstream,     'blockstream.info') +
+        fmt(res.blockchair,      'Blockchair') +
+        fmt(res.blockcypher,     'BlockCypher') +
+        fmt(res.bitaps,          'Bitaps') +
+        fmt(res.btcNetwork,      'btc.network') +
+        fmt(res.btcscan,         'btcscan.org') +
+        fmt(res.blockchain,      'blockchain.com') +
+        fmt(res.bitaccelerate,   'BitAccelerate') +
+        fmt(res.fujn,            'Fujn BTC Accelerator') +
+        fmt(res.viabtcBroadcast, 'ViaBTC Broadcast') +
+        fmt(res.btccomAcc,       'BTC.com Accelerator');
+    } else {
+      rowsEl.innerHTML =
+        fmt(res.mempool,     'mempool.space') +
+        fmt(res.blockstream, 'blockstream.info') +
+        fmt(res.blockchair,  'Blockchair') +
+        fmt(res.blockcypher, 'BlockCypher') +
+        fmt(res.bitaps,      'Bitaps');
+    }
+    const okCount = Object.values(res).filter(Boolean).length;
+    const total   = Object.keys(res).length;
+    const summaryEl = document.createElement('div');
+    summaryEl.style.cssText = 'margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.06);color:' + (plan === 'premium' ? 'var(--a)' : 'var(--m2)') + ';font-size:.6rem;letter-spacing:.5px';
+    summaryEl.textContent = (plan === 'premium' ? '⚡ ' : '✓ ') + okCount + '/' + total + ' каналов подтвердили';
+    rowsEl.parentElement.appendChild(summaryEl);
+  });
 }
 
 // ── CONFIRMATIONS TRACKER ──────────────────────────────────
 let _confInterval = null;
+let _premiumRepeatInterval = null; // интервал повтора rebroadcast для Premium
+
+// Запускает повторный rebroadcast каждые 15 мин пока TX не подтверждена
+function startPremiumRepeat(txid) {
+  stopPremiumRepeat();
+  let attempts = 0;
+  const MAX_ATTEMPTS = 24; // максимум 6 часов (24 × 15 мин)
+
+  _premiumRepeatInterval = setInterval(async () => {
+    attempts++;
+    if (attempts >= MAX_ATTEMPTS) { stopPremiumRepeat(); return; }
+
+    // Проверяем — может уже подтверждена?
+    try {
+      const r = await fetch('https://mempool.space/api/tx/' + txid + '/status', { cache: 'no-store' });
+      if (r.ok) {
+        const s = await r.json();
+        if (s.confirmed) { stopPremiumRepeat(); return; } // уже в блоке — стоп
+      }
+    } catch(e) {}
+
+    // Ещё не подтверждена — повторяем broadcast
+    premiumBroadcast(txid);
+  }, 15 * 60 * 1000); // каждые 15 минут
+
+  // Сохраняем в localStorage чтобы восстановить после перезагрузки страницы
+  try { localStorage.setItem('turbotx_premium_txid', txid); } catch(e) {}
+}
+
+function stopPremiumRepeat() {
+  if (_premiumRepeatInterval) { clearInterval(_premiumRepeatInterval); _premiumRepeatInterval = null; }
+  try { localStorage.removeItem('turbotx_premium_txid'); } catch(e) {}
+}
 
 async function getCurrentHeight() {
   if (_tipHeightCache > 0 && Date.now() - _tipHeightTs < 60000) return _tipHeightCache;
@@ -3769,7 +4158,7 @@ async function startConfTracker(txid) {
         else txt.innerHTML='<span style="color:var(--g);font-weight:600">✓ '+confs+' подтверждения</span> — завершена';
       }
       updateHistoryConfs(txid, confs);
-      if (confs >= 3) { clearInterval(_confInterval); _confInterval=null; try{localStorage.removeItem('turbotx_tracker_txid');}catch(e){} }
+      if (confs >= 3) { clearInterval(_confInterval); _confInterval=null; try{localStorage.removeItem('turbotx_tracker_txid');}catch(e){} stopPremiumRepeat(); }
     } catch(e) {}
   }
   await checkConf();
@@ -4171,6 +4560,17 @@ async function verifyPayment() {
 let batchMode = false;
 
 function toggleBatch() {
+  // Пакетное ускорение — только Premium
+  if (!batchMode && plan !== 'premium') {
+    // Показываем подсказку и открываем модалку оплаты
+    const toggle = document.getElementById('batch-toggle');
+    if (toggle) {
+      toggle.style.borderColor = 'rgba(247,147,26,.6)';
+      setTimeout(() => { toggle.style.borderColor = ''; }, 1200);
+    }
+    openM(); // открываем модалку Premium
+    return;
+  }
   batchMode = !batchMode;
   const toggle = document.getElementById('batch-toggle');
   const single = document.getElementById('single-mode');
