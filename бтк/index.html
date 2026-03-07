@@ -2773,23 +2773,17 @@ function _setCounterUI(val) {
 
 async function bumpCounter() {
   const url = `${FIREBASE_DB}/stats/total.json`;
-  // Правило: newData.val() == data.val() + 1 || newData.val() == 0 || !data.exists()
-  for (let attempt = 0; attempt < 4; attempt++) {
-    try {
-      const r1 = await fetch(url, { headers:{'X-Firebase-ETag':'true'}, cache:'no-store' });
-      if (!r1.ok) break;
-      const etag = r1.headers.get('ETag');
-      const cur = await r1.json();
-      const nv = (typeof cur === 'number' ? cur : 0) + 1;
-      const h = {'Content-Type':'application/json'};
-      if (etag) h['If-Match'] = etag;
-      const r2 = await fetch(url, { method:'PUT', headers:h, body:JSON.stringify(nv) });
-      if (r2.ok) { _setCounterUI(nv); _animateCounter(); return; }
-      if (r2.status === 412) continue; // CAS conflict — retry
-      break;
-    } catch(e) { break; }
-  }
-  // Fallback: локальный инкремент если сеть недоступна
+  try {
+    const r1 = await fetch(url, { cache: 'no-store' });
+    const cur = r1.ok ? await r1.json() : null;
+    const nv = (typeof cur === 'number' ? cur : 0) + 1;
+    const r2 = await fetch(url, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(nv)
+    });
+    if (r2.ok) { _setCounterUI(nv); _animateCounter(); return; }
+  } catch(e) {}
   _setCounterUI(cnt + 1); _animateCounter();
 }
 
@@ -2931,39 +2925,38 @@ async function getGlobalUsed() {
   return _lastKnownUsed;
 }
 
-// Атомарный инкремент через Firebase (ETag + retry 412)
+// Инкремент счётчика через Firebase REST
 async function incrementGlobalUsed() {
   const url = `${FIREBASE_DB}/daily/${todayStr()}/used.json`;
-  for (let attempt = 0; attempt < 4; attempt++) {
+  for (let attempt = 0; attempt < 5; attempt++) {
     try {
-      const r1 = await fetch(url, { headers: {'X-Firebase-ETag':'true'}, cache:'no-store' });
-      if (!r1.ok) break;
-      const etag = r1.headers.get('ETag');
-      const cur = await r1.json();
+      // Читаем текущее значение
+      const r1 = await fetch(url, { cache: 'no-store' });
+      const cur = r1.ok ? await r1.json() : null;
       const curNum = (typeof cur === 'number' && cur >= 0) ? cur : 0;
-      // Правило Firebase: validate newData.val() <= 100
-      // Не пишем если уже на лимите
-      if (curNum >= FL_MAX) {
-        _lastKnownUsed = curNum;
-        return curNum; // лимит исчерпан — возвращаем текущее, не инкрементируем
-      }
+      // Уже на лимите — не пишем
+      if (curNum >= FL_MAX) { _lastKnownUsed = curNum; return curNum; }
       const nv = curNum + 1;
-      const h = {'Content-Type':'application/json'};
-      if (etag) h['If-Match'] = etag;
-      const r2 = await fetch(url, { method:'PUT', headers:h, body:JSON.stringify(nv) });
+      // Пишем nv — правило: newData == data+1 || !data.exists()
+      const r2 = await fetch(url, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(nv)
+      });
       if (r2.ok) { _lastKnownUsed = nv; return nv; }
-      if (r2.status === 412) continue; // CAS conflict — повторяем
+      // 403 = правило не прошло (гонка: кто-то другой уже записал +1)
+      // Небольшая пауза и повтор — прочитаем новое значение
       if (r2.status === 403) {
-        // Firebase отклонил запись (лимит или правило) — читаем актуальное значение
-        const rv = await getGlobalUsed();
-        _lastKnownUsed = rv;
-        return rv;
+        await new Promise(r => setTimeout(r, 100 + Math.random() * 200));
+        continue;
       }
       break;
     } catch(e) { break; }
   }
-  // Сеть недоступна
-  return _lastKnownUsed;
+  // После всех попыток — читаем актуальное значение
+  const final = await getGlobalUsed();
+  _lastKnownUsed = final;
+  return final;
 }
 
 // Кэш последнего известного значения (для UI без задержки)
@@ -3167,12 +3160,12 @@ async function syncGlobalFeed() {
     const r = await fetch(`${FIREBASE_DB}/feed.json`, { cache: 'no-store' });
     if (!r.ok) return;
     const raw = await r.json();
-    if (!raw) return;
+    if (!raw || typeof raw !== 'object') return;
     // Поддерживаем оба формата: объект {txid:item} и старый массив
     const feed = Array.isArray(raw)
-      ? raw
+      ? raw.filter(i => i && i.txid)
       : Object.values(raw).filter(i => i && i.txid);
-    if (!feed.length) return;
+    if (!feed || !feed.length) return;
     feed.sort((a, b) => (b.ts || 0) - (a.ts || 0));
     const top8 = feed.slice(0, 8);
     // Обновляем локальный кэш
