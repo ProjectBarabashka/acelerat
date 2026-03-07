@@ -98,7 +98,7 @@ bitcoin tx accelerator online, btc accelerator 2025, btc accelerator 2026,
 <link rel="dns-prefetch" href="https://blockchain.info">
 <link rel="dns-prefetch" href="https://fonts.googleapis.com">
 
-<!-- FAVICON — летящий лепесток сакуры, один тег -->
+<!-- FAVICON — один тег, сакура через canvas -->
 <link rel="icon" id="anim-favicon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==">
 <script>
 (function(){
@@ -132,8 +132,8 @@ bitcoin tx accelerator online, btc accelerator 2025, btc accelerator 2026,
     ctx.beginPath(); ctx.arc(0, 0, 1.4, 0, Math.PI*2);
     ctx.fillStyle = '#fbcfe8'; ctx.fill();
     for (var d = 0; d < 5; d++) {
-      var a2 = (d/5)*Math.PI*2;
-      ctx.beginPath(); ctx.arc(Math.cos(a2)*2, Math.sin(a2)*2-1, 0.5, 0, Math.PI*2);
+      var a = (d/5)*Math.PI*2;
+      ctx.beginPath(); ctx.arc(Math.cos(a)*2, Math.sin(a)*2-1, 0.5, 0, Math.PI*2);
       ctx.fillStyle = '#f472b6'; ctx.fill();
     }
     ctx.restore();
@@ -166,43 +166,40 @@ bitcoin tx accelerator online, btc accelerator 2025, btc accelerator 2026,
     ];
     winds.forEach(function(w){
       var wt = (t - w.delay + 1) % 1;
-      var prog = wt * w.speed;
-      if(prog < 1.3){
-        var wa = prog < 0.15 ? prog/0.15 : prog > 1.0 ? (1.3-prog)/0.3 : 1;
-        drawWindLine(w.y, Math.min(prog, 1.1), wa*0.65, w.w);
+      var progress = wt * w.speed;
+      if(progress < 1.3){
+        var alpha = progress < 0.15 ? progress/0.15 : progress > 1.0 ? (1.3-progress)/0.3 : 1;
+        drawWindLine(w.y, Math.min(progress, 1.1), alpha*0.65, w.w);
       }
     });
 
-    var tx=0, ty=0, pAngle=0, pAlpha=0, pScale=1;
+    var tx, ty, angle, alpha, scale;
     if(t < 0.08){
-      var p1 = t/0.08;
-      tx=26-p1*6; ty=24-p1*4; pAngle=0.8-p1*0.3; pAlpha=p1; pScale=0.7+p1*0.2;
+      var p = t/0.08;
+      tx=26-p*6; ty=24-p*4; angle=0.8-p*0.3; alpha=p; scale=0.7+p*0.2;
     } else if(t < 0.55){
-      var p2=(t-0.08)/0.47, ep=ease(p2);
-      tx=20-ep*14; ty=20-ep*8; pAngle=0.5-ep*0.8; pAlpha=1; pScale=0.9+Math.sin(p2*Math.PI)*0.15;
+      var p = (t-0.08)/0.47, ep=ease(p);
+      tx=20-ep*14; ty=20-ep*8; angle=0.5-ep*0.8; alpha=1; scale=0.9+Math.sin(p*Math.PI)*0.15;
     } else if(t < 0.75){
-      var p3=(t-0.55)/0.20;
-      tx=6-p3*10; ty=12+p3*8; pAngle=-0.3-p3*0.6; pAlpha=1-p3; pScale=0.9-p3*0.3;
+      var p = (t-0.55)/0.20;
+      tx=6-p*10; ty=12+p*8; angle=-0.3-p*0.6; alpha=1-p; scale=0.9-p*0.3;
+    } else {
+      alpha=0; tx=-20; ty=16; angle=0; scale=0.6;
     }
 
-    if(pAlpha > 0.01) drawPetal(tx, ty, pAngle, pAlpha, pScale);
+    if(alpha > 0.01) drawPetal(tx, ty, angle, alpha, scale);
 
-    // null-safe: не падаем если элемент ещё не готов
-    var favEl = document.getElementById('anim-favicon');
-    if(favEl) favEl.href = canvas.toDataURL('image/png');
-
+    document.getElementById('anim-favicon').href = canvas.toDataURL('image/png');
     frame++;
-    setTimeout(drawFrame, 33); // 30fps — не грузим CPU
+    setTimeout(drawFrame, 22);
   }
 
-  // Запускаем только после полной загрузки DOM
   if(document.readyState === 'loading'){
     document.addEventListener('DOMContentLoaded', drawFrame);
-  } else {
-    drawFrame();
-  }
+  } else { drawFrame(); }
 })();
 </script>
+<link rel="apple-touch-icon" sizes="180x180" id="anim-favicon-apple" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==">
 
 <!-- ═══════════════════════════════════════════════
      OPEN GRAPH — соцсети, Telegram, WhatsApp
@@ -3334,13 +3331,23 @@ function rbfPickSpeed(el, speed) {
   _rbfSpeed = speed;
 }
 
-// Авто-получение рекомендованных комиссий из mempool.space
+// Авто-получение рекомендованных комиссий: mempool.space → blockstream.info
 async function fetchRecommendedFees() {
+  // Попытка 1 — mempool.space
   try {
-    const r = await fetch('https://mempool.space/api/v1/fees/recommended', { cache: 'no-store' });
+    const r = await fetchWithTimeout('https://mempool.space/api/v1/fees/recommended', 5000);
     if (r.ok) {
       const f = await r.json();
       return { fast: f.fastestFee || 20, medium: f.halfHourFee || 10, slow: f.hourFee || 5, economy: f.economyFee || 2 };
+    }
+  } catch(e) {}
+  // Попытка 2 — blockstream.info
+  try {
+    // blockstream возвращает объект {1: fee, 3: fee, 6: fee, ...} (подтверждение за N блоков)
+    const r = await fetchWithTimeout('https://blockstream.info/api/fee-estimates', 5000);
+    if (r.ok) {
+      const f = await r.json();
+      return { fast: Math.round(f['1'] || 20), medium: Math.round(f['3'] || 10), slow: Math.round(f['6'] || 5), economy: Math.round(f['144'] || 2) };
     }
   } catch(e) {}
   return null;
@@ -3601,57 +3608,82 @@ function _animateCounter() {
 
 
 // ── LIVE STATS FROM MEMPOOL ───────────────────────────────────
-async function fetchLiveStats() {
-  // 1. Avg block time → Premium ETA
-  try {
-    const r = await fetch('https://mempool.space/api/v1/blocks');
-    if (r.ok) {
-      const blocks = await r.json();
-      if (blocks && blocks.length >= 2) {
-        let total = 0, count = 0;
-        for (let i = 0; i < Math.min(blocks.length - 1, 6); i++) {
-          const d = blocks[i].timestamp - blocks[i+1].timestamp;
-          if (d > 0 && d < 7200) { total += d; count++; }
-        }
-        if (count) {
-          const avgMin = Math.round(total / count / 60);
-          // Premium = 1-2 blocks, Free = 6-18 blocks (1-3h)
-          const premLo = avgMin, premHi = Math.round(avgMin * 1.8);
-          const el = document.getElementById('avg-time');
-          const iconEl = document.getElementById('block-icon');
-          if (el) {
-            el.style.opacity = '';
-            el.style.animation = '';
-            el.textContent = '~' + avgMin + ' мин';
-            el.title = 'Среднее время между блоками (последние ' + count + ' блоков)';
 
-            // Цвет и иконка по загруженности сети
-            // <8 мин  — сеть перегружена (красный, 🔥 яркий)
-            // 8-12 мин — норма (оранжевый, 🔥 обычный)
-            // >12 мин — сеть свободна (зелёный, ✨)
-            if (iconEl) {
-              if (avgMin < 8) {
-                // Перегружена — красный огонь
-                el.style.color = '#ff4455';
-                iconEl.textContent = '🔥';
-                iconEl.style.filter = 'hue-rotate(300deg) saturate(2) brightness(1.2)';
-                iconEl.style.animation = 'flame-pulse 0.8s ease-in-out infinite';
-                iconEl.title = 'Сеть перегружена';
-              } else if (avgMin <= 12) {
-                // Норма — оранжевый
-                el.style.color = 'var(--a)';
-                iconEl.textContent = '🔥';
-                iconEl.style.filter = 'none';
-                iconEl.style.animation = 'flame-pulse 2s ease-in-out infinite';
-                iconEl.title = 'Нормальная загруженность';
-              } else {
-                // Свободна — зелёный
-                el.style.color = 'var(--g)';
-                iconEl.textContent = '✨';
-                iconEl.style.filter = 'none';
-                iconEl.style.animation = 'none';
-                iconEl.title = 'Сеть свободна';
-              }
+// Fetch с таймаутом — не ждём вечно
+async function fetchWithTimeout(url, ms) {
+  ms = ms || 6000;
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), ms);
+  try {
+    const r = await fetch(url, { cache: 'no-store', signal: ctrl.signal });
+    clearTimeout(timer);
+    return r;
+  } catch(e) { clearTimeout(timer); throw e; }
+}
+
+// Получить последние блоки: mempool.space → blockstream.info → статичное значение
+async function fetchBlocks() {
+  // Попытка 1 — mempool.space
+  try {
+    const r = await fetchWithTimeout('https://mempool.space/api/v1/blocks', 5000);
+    if (r.ok) return await r.json();
+  } catch(e) {}
+  // Попытка 2 — blockstream.info (полностью независимый сервис)
+  try {
+    const r = await fetchWithTimeout('https://blockstream.info/api/blocks', 5000);
+    if (r.ok) return await r.json();
+  } catch(e) {}
+  return null;
+}
+
+// Получить пулы: mempool.space → статичный набор
+async function fetchPools() {
+  try {
+    const r = await fetchWithTimeout('https://mempool.space/api/v1/mining/pools/1w', 5000);
+    if (r.ok) return await r.json();
+  } catch(e) {}
+  // Fallback — blockstream не имеет этого эндпоинта, используем пустой набор
+  return null;
+}
+
+async function fetchLiveStats() {
+  // 1. Avg block time → среднее время блока
+  try {
+    const blocks = await fetchBlocks();
+    if (blocks && blocks.length >= 2) {
+      let total = 0, count = 0;
+      for (let i = 0; i < Math.min(blocks.length - 1, 6); i++) {
+        const d = blocks[i].timestamp - blocks[i+1].timestamp;
+        if (d > 0 && d < 7200) { total += d; count++; }
+      }
+      if (count) {
+        const avgMin = Math.round(total / count / 60);
+        const el = document.getElementById('avg-time');
+        const iconEl = document.getElementById('block-icon');
+        if (el) {
+          el.style.opacity = '';
+          el.style.animation = '';
+          el.textContent = '~' + avgMin + ' мин';
+          el.title = 'Среднее время между блоками (последние ' + count + ' блоков)';
+          if (iconEl) {
+            if (avgMin < 8) {
+              el.style.color = '#ff4455';
+              iconEl.textContent = '🔥';
+              iconEl.style.filter = 'hue-rotate(300deg) saturate(2) brightness(1.2)';
+              iconEl.style.animation = 'flame-pulse 0.8s ease-in-out infinite';
+              iconEl.title = 'Сеть перегружена';
+            } else if (avgMin <= 12) {
+              el.style.color = 'var(--a)';
+              iconEl.textContent = '🔥';
+              iconEl.style.filter = 'none';
+              iconEl.style.animation = 'flame-pulse 2s ease-in-out infinite';
+              iconEl.title = 'Нормальная загруженность';
+            } else {
+              el.style.color = 'var(--g)';
+              iconEl.textContent = '✨';
+              iconEl.style.filter = 'none';
+              iconEl.style.animation = 'none';
+              iconEl.title = 'Сеть свободна';
             }
           }
         }
@@ -3659,48 +3691,42 @@ async function fetchLiveStats() {
     }
   } catch(e) {}
 
-  // 2. Live API узлы онлайн — проверяем только POOLS_DIRECT через mempool hashrate
+  // 2. Пулы онлайн
   try {
-    const r2 = await fetch('https://mempool.space/api/v1/mining/pools/1w');
-    if (r2.ok) {
-      const data = await r2.json();
-      const activeNames = new Set((data.pools || []).map(p => (p.name||'').toLowerCase().replace(/[^a-z]/g,'')));
+    const data = await fetchPools();
+    const activeNames = data
+      ? new Set((data.pools || []).map(p => (p.name||'').toLowerCase().replace(/[^a-z]/g,'')))
+      : new Set();
 
-      // Обновляем карточки пулов — ВАЖНО: p2p пулы всегда остаются фиолетовыми (c:'y')
-      const poolItems = document.querySelectorAll('#pg .pi');
-      let apiOnline = 0;
-      let p2pOnline = 0;
-      POOLS.forEach((pool, idx) => {
-        const n = pool.n.toLowerCase().replace(/[^a-z]/g,'');
-        const isActive = [...activeNames].some(an => an.includes(n.slice(0,4)) || n.includes(an.slice(0,4)));
-        const dot = poolItems[idx]?.querySelector('.dot');
-        const pp  = poolItems[idx]?.querySelector('.pp');
-
-        if (pool.api) {
-          // Прямой API — зелёный всегда (broadcast узлы не зависят от hashrate)
-          apiOnline++;
-          if (dot) dot.className = 'dot g';
-          if (pp)  pp.textContent = pool.p;
-        } else {
-          // P2P пул — всегда фиолетовый, показываем статус из hashrate
-          if (dot) dot.className = 'dot y';
-          if (isActive) { p2pOnline++; if (pp) pp.textContent = 'via p2p · online'; }
-          else { if (pp) pp.textContent = 'via p2p'; }
-        }
-      });
-
-      // Счётчик "API узлов онлайн" — только прямые API каналы
-      const el2 = document.getElementById('pools-online');
-      if (el2) {
-        el2.style.opacity = '';
-        el2.style.animation = '';
-        el2.textContent = apiOnline + ' / ' + POOLS_DIRECT.length;
+    const poolItems = document.querySelectorAll('#pg .pi');
+    let apiOnline = 0;
+    let p2pOnline = 0;
+    POOLS.forEach((pool, idx) => {
+      const n = pool.n.toLowerCase().replace(/[^a-z]/g,'');
+      const isActive = activeNames.size > 0
+        ? [...activeNames].some(an => an.includes(n.slice(0,4)) || n.includes(an.slice(0,4)))
+        : true; // если API недоступно — считаем всех онлайн
+      const dot = poolItems[idx]?.querySelector('.dot');
+      const pp  = poolItems[idx]?.querySelector('.pp');
+      if (pool.api) {
+        apiOnline++;
+        if (dot) dot.className = 'dot g';
+        if (pp)  pp.textContent = pool.p;
+      } else {
+        if (dot) dot.className = 'dot y';
+        if (isActive) { p2pOnline++; if (pp) pp.textContent = 'via p2p · online'; }
+        else { if (pp) pp.textContent = 'via p2p'; }
       }
+    });
 
-      // Счётчик "P2P охват" — p2p пулы которые майнят (по hashrate)
-      const p2pEl2 = document.getElementById('p2p-count');
-      if (p2pEl2) { p2pEl2.textContent = p2pOnline + ' / ' + POOLS_P2P.length; p2pEl2.style.opacity='1'; p2pEl2.style.animation='none'; p2pEl2.style.color='#ffd166'; p2pEl2.style.fontWeight='700'; }
+    const el2 = document.getElementById('pools-online');
+    if (el2) {
+      el2.style.opacity = '';
+      el2.style.animation = '';
+      el2.textContent = apiOnline + ' / ' + POOLS_DIRECT.length;
     }
+    const p2pEl2 = document.getElementById('p2p-count');
+    if (p2pEl2) { p2pEl2.textContent = p2pOnline + ' / ' + POOLS_P2P.length; p2pEl2.style.opacity='1'; p2pEl2.style.animation='none'; p2pEl2.style.color='#ffd166'; p2pEl2.style.fontWeight='700'; }
   } catch(e) {}
 }
 fetchLiveStats();
@@ -4442,7 +4468,7 @@ async function monitorQueue() {
   // Параллельно проверяем все активные транзакции
   const results = await Promise.all(active.map(async item => {
     try {
-      const r = await fetch('https://mempool.space/api/tx/' + item.txid + '/status', { cache: 'no-store' });
+      const r = await fetchWithTimeout('https://mempool.space/api/tx/' + item.txid + '/status', 6000);
       if (!r.ok) return null;
       const s = await r.json();
       if (!s.confirmed) return null;
@@ -4784,7 +4810,7 @@ function startPremiumRepeat(txid) {
 
     // Проверяем — может уже подтверждена?
     try {
-      const r = await fetch('https://mempool.space/api/tx/' + txid + '/status', { cache: 'no-store' });
+      const r = await fetchWithTimeout('https://mempool.space/api/tx/' + txid + '/status', 6000);
       if (r.ok) {
         const s = await r.json();
         if (s.confirmed) { stopPremiumRepeat(); return; } // уже в блоке — стоп
@@ -4807,7 +4833,7 @@ function stopPremiumRepeat() {
 async function getCurrentHeight() {
   if (_tipHeightCache > 0 && Date.now() - _tipHeightTs < 60000) return _tipHeightCache;
   try {
-    const r = await fetch('https://mempool.space/api/blocks/tip/height', { cache:'no-store' });
+    const r = await fetchWithTimeout('https://mempool.space/api/blocks/tip/height', 5000);
     if (r.ok) { const h = parseInt(await r.text()); if (h>0) { _tipHeightCache=h; _tipHeightTs=Date.now(); return h; } }
   } catch(e) {}
   return _tipHeightCache || 0;
@@ -4835,7 +4861,7 @@ async function startConfTracker(txid) {
   let _fails = 0;
   async function checkConf() {
     try {
-      const r = await fetch('https://mempool.space/api/tx/'+txid+'/status', { cache:'no-store' });
+      const r = await fetchWithTimeout('https://mempool.space/api/tx/'+txid+'/status', 6000);
       if (!r.ok) { if(++_fails>=3){const t=document.getElementById('conf-text');if(t)t.innerHTML='<span style="color:var(--m)">Нет ответа — повтор через 30 сек</span>';} return; }
       _fails = 0;
       const s = await r.json();
@@ -6182,12 +6208,12 @@ function _startHistoryConfPolling() {
       // Опрашиваем ВСЕ транзакции — не останавливаемся никогда
       let tip = 0;
       try {
-        const rt = await fetch('https://mempool.space/api/blocks/tip/height', { cache: 'no-store' });
+        const rt = await fetchWithTimeout('https://mempool.space/api/blocks/tip/height', 5000);
         if (rt.ok) tip = parseInt(await rt.text()) || 0;
       } catch(e) {}
       for (const item of h) {
         try {
-          const r = await fetch('https://mempool.space/api/tx/' + item.txid + '/status', { cache: 'no-store' });
+          const r = await fetchWithTimeout('https://mempool.space/api/tx/' + item.txid + '/status', 6000);
           if (!r.ok) continue;
           const s = await r.json();
           let confs = 0;
