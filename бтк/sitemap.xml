@@ -1,14 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+        xmlns:xhtml="http://www.w3.org/1999/xhtml"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
 
   <url>
     <loc>https://acelerat.vercel.app/</loc>
-    <lastmod>2026-03-05</lastmod>
-    <changefreq>weekly</changefreq>
+    <lastmod>2026-03-07</lastmod>
+    <changefreq>daily</changefreq>
     <priority>1.0</priority>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://acelerat.vercel.app/"/>
+
+    <!-- hreflang — говорим Google: это оригинал для всех регионов -->
+    <xhtml:link rel="alternate" hreflang="ru"        href="https://acelerat.vercel.app/"/>
+    <xhtml:link rel="alternate" hreflang="en"        href="https://acelerat.vercel.app/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://acelerat.vercel.app/"/>
+
+    <!-- image sitemap — помогает попасть в Google Images -->
+    <image:image>
+      <image:loc>https://acelerat.vercel.app/og-image.png</image:loc>
+      <image:title>TurboTX — Bitcoin Transaction Accelerator</image:title>
+      <image:caption>Лучший бесплатный ускоритель Bitcoin транзакций. Rebroadcast в 15+ майнинг-пулов.</image:caption>
+    </image:image>
   </url>
 
 </urlset>
