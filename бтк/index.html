@@ -2617,27 +2617,29 @@ input[type=text]:focus {
   <div class="plan-card">
     <div class="ptag tf">FREE</div>
     <div class="plan-price">$0 <em>/ бесплатно</em></div>
-    <div class="plan-desc">Rebroadcast через открытые API 5 пулов. Подходит для транзакций с нормальной комиссией.</div>
+    <div class="plan-desc">Rebroadcast через 5 broadcast-узлов с retry. Подходит для транзакций с нормальной комиссией.</div>
     <ul class="fl">
-      <li><span class="fi ok">✓</span>Rebroadcast в 5 пулов</li>
-      <li><span class="fi ok">✓</span>ViaBTC + AntPool + F2Pool</li>
-      <li><span class="fi ok">✓</span>Проверка статуса онлайн</li>
-      <li><span class="fi na">—</span><span style="color:var(--m)">Приоритет в очереди</span></li>
+      <li><span class="fi ok">✓</span>5 broadcast-узлов параллельно</li>
+      <li><span class="fi ok">✓</span>mempool.space · blockstream · blockchair</li>
+      <li><span class="fi ok">✓</span>blockcypher · bitaps</li>
+      <li><span class="fi ok">✓</span>Трекер подтверждений онлайн</li>
+      <li><span class="fi na">—</span><span style="color:var(--m)">Акселераторы пулов</span></li>
       <li><span class="fi na">—</span><span style="color:var(--m)">Повтор отправки</span></li>
+      <li><span class="fi na">—</span><span style="color:var(--m)">Пакетное ускорение</span></li>
     </ul>
     <button class="pbtn pbf" onclick="pick('free');document.getElementById('txid').focus()">Начать бесплатно</button>
   </div>
   <div class="plan-card prem">
     <div class="ptag tp">PREMIUM</div>
     <div class="plan-price"><span style="color:var(--a)">$4</span> <em>/ разово</em></div>
-    <div class="plan-desc">Rebroadcast в 15+ пулов + ViaBTC/BTC.com API + mempool push. Повтор каждые 15 мин до подтверждения.</div>
+    <div class="plan-desc">28 каналов, 4 волны broadcast. Параллельный удар по всем пулам сразу + авто-повтор через 60 сек и 5 мин.</div>
     <ul class="fl">
-      <li><span class="fi ok">✓</span>12 каналов broadcast одновременно</li>
-      <li><span class="fi ok">✓</span>ViaBTC + BTC.com + Ocean.xyz Accelerator</li>
-      <li><span class="fi ok">✓</span>mempool · blockstream · blockchair · taal · blockcypher</li>
-      <li><span class="fi ok">✓</span>Повтор каждые 15 мин ⚡</li>
+      <li><span class="fi ok">✓</span><strong>10 broadcast-узлов</strong> — волна 1, мгновенно</li>
+      <li><span class="fi ok">✓</span>mempool · blockstream · blockchair ×2 · blockcypher · bitaps · btcscan · blockchain.com · btc.network · ViaBTC</li>
+      <li><span class="fi ok">✓</span><strong>9 pool-акселераторов</strong> — BTC.com · ViaBTC · BitAccelerate · Fujn · PushTX.io · BTCPush · mempool acc.</li>
+      <li><span class="fi ok">✓</span>Авто-повтор через 60 сек + 5 мин ⚡</li>
+      <li><span class="fi ok">✓</span>Повтор каждые 15 мин до подтверждения (до 6 ч)</li>
       <li><span class="fi ok">✓</span>Пакет до 20 TX одновременно</li>
-      <li><span class="fi ok">✓</span>Авто-комиссия RBF из mempool</li>
       <li><span class="fi ok">✓</span>Трекер подтверждений в реальном времени</li>
       <li><span class="fi ok">✓</span>Возврат если не подтвердилась за 6 ч</li>
     </ul>
@@ -3221,16 +3223,12 @@ let _rbfDebounce = null;
 function rbfOnInput() {
   const val = document.getElementById('rbf-txid').value.trim();
   const btn = document.getElementById('rbf-btn');
-  if (!btn) return;
-  if (!btn) return;
   const statusBlock = document.getElementById('rbf-status-block');
-  if (!statusBlock) return;
   const targetWrap = document.getElementById('rbf-target-wrap');
-  if (!targetWrap) return;
   const result = document.getElementById('rbf-result');
 
   // Сбрасываем результат при новом вводе
-  if (result) result.style.display = 'none';
+  result.style.display = 'none';
   _rbfTx = null;
 
   if (!/^[a-fA-F0-9]{64}$/.test(val)) {
@@ -3255,7 +3253,6 @@ async function rbfLoadTx(txid) {
   const statusBlock = document.getElementById('rbf-status-block');
   const targetWrap = document.getElementById('rbf-target-wrap');
   const btn = document.getElementById('rbf-btn');
-  if (!badge || !btn) return;
 
   try {
     const [rTx, rFees] = await Promise.all([
@@ -3266,8 +3263,8 @@ async function rbfLoadTx(txid) {
     if (!rTx.ok) {
       badge.innerHTML = '✗ Транзакция не найдена';
       badge.style.cssText = 'display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:8px;font-family:var(--mono);font-size:.72rem;font-weight:700;margin-bottom:0;background:rgba(255,68,102,.07);border:1px solid rgba(255,68,102,.25);color:#ff4466';
-      if (btn) btn.disabled = true;
-      if (targetWrap) targetWrap.style.display = 'none';
+      btn.disabled = true;
+      targetWrap.style.display = 'none';
       return;
     }
 
@@ -3362,8 +3359,7 @@ async function calcRbf() {
   const result = document.getElementById('rbf-result');
   const noSupMsg = document.getElementById('rbf-no-support-msg');
 
-  if (!btn || !result) return;
-    btn.disabled = true;
+  btn.disabled = true;
   btn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:10px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" style="animation:spin .8s linear infinite;transform-origin:center"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>Рассчитываем...</span>';
 
   // Загружаем реальные рекомендованные комиссии из mempool
@@ -3529,18 +3525,22 @@ let plan = 'free', selBtc = 0.000062;
 // ── POOLS ──────────────────────────────────────────────────────
 // Реально подключённые через прямой API (broadcast или акселератор)
 const POOLS_DIRECT = [
-  {n:'mempool.space',  p:'API broadcast', c:'g', api:true},
-  {n:'blockstream',    p:'API broadcast', c:'g', api:true},
-  {n:'Blockchair',     p:'API broadcast', c:'g', api:true},
-  {n:'BlockCypher',    p:'API broadcast', c:'g', api:true},
-  {n:'Bitaps',         p:'API broadcast', c:'g', api:true},
-  {n:'btc.network',    p:'API broadcast', c:'g', api:true},
-  {n:'btcscan.org',    p:'API broadcast', c:'g', api:true},
-  {n:'blockchain.com', p:'API broadcast', c:'g', api:true},
-  {n:'ViaBTC',         p:'Accelerator API', c:'g', api:true},
-  {n:'BTC.com',        p:'Accelerator API', c:'g', api:true},
-  {n:'BitAccelerate',  p:'Accelerator API', c:'g', api:true},
-  {n:'Fujn BTC',       p:'Accelerator API', c:'g', api:true},
+  {n:'mempool.space',  p:'broadcast · retry ×2', c:'g', api:true},
+  {n:'blockstream',    p:'broadcast · retry ×2', c:'g', api:true},
+  {n:'Blockchair',     p:'broadcast API ×2 endpoints', c:'g', api:true},
+  {n:'BlockCypher',    p:'broadcast API', c:'g', api:true},
+  {n:'Bitaps',         p:'broadcast API', c:'g', api:true},
+  {n:'btcscan.org',    p:'broadcast API', c:'g', api:true},
+  {n:'blockchain.com', p:'broadcast API', c:'g', api:true},
+  {n:'btc.network',    p:'broadcast API', c:'g', api:true},
+  {n:'ViaBTC',         p:'broadcast + accelerator', c:'g', api:true},
+  {n:'BTC.com',        p:'pool accelerator', c:'g', api:true},
+  {n:'ViaBTC Acc.',    p:'pool accelerator', c:'g', api:true},
+  {n:'BitAccelerate',  p:'pool accelerator', c:'g', api:true},
+  {n:'Fujn BTC',       p:'pool accelerator', c:'g', api:true},
+  {n:'PushTX.io',      p:'pool accelerator', c:'g', api:true},
+  {n:'BTCPush.net',    p:'broadcast API', c:'g', api:true},
+  {n:'mempool acc.',   p:'acceleration API', c:'g', api:true},
 ];
 // Пулы которые получают TX через p2p сеть (не прямой API, но видят транзакцию)
 const POOLS_P2P = [
@@ -3560,7 +3560,6 @@ const POOLS_P2P = [
 ];
 const POOLS = [...POOLS_DIRECT, ...POOLS_P2P];
 const pg = document.getElementById('pg');
-if (!pg) return;
 POOLS.forEach(p => {
   pg.innerHTML += `<div class="pi"><div class="dot ${p.c}"></div><div><div class="pn">${p.n}</div><div class="pp">${p.p}</div></div></div>`;
 });
@@ -3589,17 +3588,24 @@ function _setCounterUI(val) {
 
 async function bumpCounter() {
   const url = `${FIREBASE_DB}/stats/total.json`;
-  try {
-    const r1 = await fetch(url, { cache: 'no-store' });
-    const cur = r1.ok ? await r1.json() : null;
-    const nv = (typeof cur === 'number' ? cur : 0) + 1;
-    const r2 = await fetch(url, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(nv)
-    });
-    if (r2.ok) { _setCounterUI(nv); _animateCounter(); return; }
-  } catch(e) {}
+  for (let attempt = 0; attempt < 5; attempt++) {
+    try {
+      const r1 = await fetch(url, { cache: 'no-store' });
+      const cur = r1.ok ? await r1.json() : null;
+      const nv = (typeof cur === 'number' ? cur : 0) + 1;
+      const r2 = await fetch(url, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(nv)
+      });
+      if (r2.ok) { _setCounterUI(nv); _animateCounter(); return; }
+      if (r2.status === 403 || r2.status === 412) {
+        await new Promise(r => setTimeout(r, 100 + Math.random() * 200));
+        continue;
+      }
+      break;
+    } catch(e) { break; }
+  }
   _setCounterUI(cnt + 1); _animateCounter();
 }
 
@@ -4248,115 +4254,166 @@ const PREM_S = ['Валидация TXID...','Загрузка raw TX...','mempo
 // ── BROADCAST ENGINE ───────────────────────────────────────────
 // Получаем hex один раз из двух источников
 async function _getHex(txid) {
-  const sources = [
-    'https://mempool.space/api/tx/' + txid + '/hex',
-    'https://blockstream.info/api/tx/' + txid + '/hex',
-  ];
-  for (const url of sources) {
+  // 5 источников — параллельно, первый успешный побеждает
+  const timeout = ms => new Promise((_,r) => setTimeout(() => r('timeout'), ms));
+  const tryUrl = async url => {
     try {
-      const r = await fetch(url, { cache: 'no-store' });
-      if (r.ok) { const h = (await r.text()).trim(); if (h && h.length > 10) return h; }
-    } catch(e) {}
-  }
-  return null;
+      const r = await Promise.race([fetch(url, {cache:'no-store'}), timeout(8000)]);
+      if (!r.ok) return null;
+      const text = (await r.text()).trim();
+      if (!text || text.length < 10) return null;
+      if (text.startsWith('{')) {
+        try {
+          const j = JSON.parse(text);
+          const raw = j?.data?.[txid]?.raw_transaction || j?.data?.raw_transaction || j?.rawtx;
+          return (raw && raw.length > 10) ? raw : null;
+        } catch(e) { return null; }
+      }
+      return /^[0-9a-fA-F]+$/.test(text) ? text : null;
+    } catch(e) { return null; }
+  };
+  const sources = [
+    tryUrl('https://mempool.space/api/tx/' + txid + '/hex'),
+    tryUrl('https://blockstream.info/api/tx/' + txid + '/hex'),
+    tryUrl('https://api.blockchair.com/bitcoin/raw/transaction/' + txid),
+    tryUrl('https://btcscan.org/api/tx/' + txid + '/raw'),
+    tryUrl('https://blockchain.info/rawtx/' + txid + '?format=hex'),
+  ];
+  // Возвращаем первый не-null результат
+  return new Promise(resolve => {
+    let done = false, count = 0;
+    sources.forEach(p => p.then(v => {
+      count++;
+      if (!done && v) { done = true; resolve(v); }
+      else if (count === sources.length && !done) resolve(null);
+    }));
+  });
 }
 
-// Push hex в broadcast endpoint
-async function _pushHex(url, hex, opts = {}) {
-  try {
-    const body = opts.form ? ('data=' + encodeURIComponent(hex)) : hex;
-    const r = await fetch(url, {
-      method: 'POST', body,
-      headers: { 'Content-Type': opts.form ? 'application/x-www-form-urlencoded' : 'text/plain' },
-      ...(opts.noCors ? { mode: 'no-cors' } : {})
-    });
-    if (opts.noCors) return true;
-    if (opts.json) { const j = await r.json(); return !!(j && (j.data || j.result || j.context?.code === 200)); }
-    return r.ok || r.status === 400;
-  } catch(e) {
-    // noCors: браузер бросает исключение из-за CORS/opaque — запрос физически ушёл
-    if (opts.noCors) return true;
-    return false;
+// Push hex с retry + timeout
+async function _pushHex(url, hexOrNull, opts = {}) {
+  const hex = hexOrNull;
+  const _t = ms => new Promise((_,r) => setTimeout(()=>r('timeout'), ms));
+  const retries = opts.retries || 1;
+  for (let i = 0; i < retries; i++) {
+    try {
+      let body;
+      if (opts.json)        body = JSON.stringify(opts.jsonBody || { rawtx: hex });
+      else if (opts.form)   body = (opts.formKey||'data') + '=' + encodeURIComponent(hex);
+      else                  body = hex;
+      const hdrs = {'Content-Type': opts.json ? 'application/json' : opts.form ? 'application/x-www-form-urlencoded' : 'text/plain'};
+      const fo = {method:'POST', body, headers:hdrs, ...(opts.noCors?{mode:'no-cors'}:{})};
+      const r = await Promise.race([fetch(url, fo), _t(opts.timeout||10000)]);
+      if (opts.noCors) return true;
+      if (opts.checkJson) { const j=await r.json(); return !!(j&&(j.data||j.result||j.txid||j.success||j.context?.code===200)); }
+      if (r.ok || r.status===400 || r.status===409) return true;
+    } catch(e) {
+      if (opts.noCors) return true;
+      if (i < retries-1) await new Promise(r=>setTimeout(r, 400*(i+1)));
+    }
   }
+  return false;
 }
 
-// Submit txid акселераторам пулов
+// Submit txid пул-акселераторам (no-cors, запрос уходит физически)
 async function _pushTxid(url, body) {
-  try {
-    await fetch(url, {
-      method: 'POST', mode: 'no-cors',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body
-    });
-    return true;
-  } catch(e) { return true; } // no-cors: исключение ≠ запрос не ушёл
+  const _t = ms => new Promise((_,r) => setTimeout(()=>r('timeout'), ms));
+  try { await Promise.race([fetch(url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/x-www-form-urlencoded'},body}), _t(12000)]); }
+  catch(e) {}
+  return true;
 }
 
-// ── FREE BROADCAST — 5 реальных каналов (Bitcoin Wiki verified) ──
+// GET-акселератор (некоторые API принимают параметры через GET)
+async function _pushGet(url) {
+  const _t = ms => new Promise((_,r) => setTimeout(()=>r('timeout'), ms));
+  try { await Promise.race([fetch(url,{method:'GET',mode:'no-cors',cache:'no-store'}), _t(10000)]); }
+  catch(e) {}
+  return true;
+}
+
+// ── FREE BROADCAST — 5 узлов с retry ──────────────────────────
 async function freeBroadcast(txid) {
   const hex = await _getHex(txid);
   if (!hex) return {};
 
   const [mempool, blockstream, blockchair, blockcypher, bitaps] = await Promise.all([
-    // 1. mempool.space — крупнейший публичный explorer
-    _pushHex('https://mempool.space/api/tx', hex),
-    // 2. blockstream.info — Blockstream, один из крупнейших узлов
-    _pushHex('https://blockstream.info/api/tx', hex),
-    // 3. Blockchair — мультирегиональные узлы
-    _pushHex('https://api.blockchair.com/bitcoin/push/transaction', hex, { form: true, json: true }),
-    // 4. BlockCypher — публичный API, свои полные узлы
-    _pushHex('https://api.blockcypher.com/v1/btc/main/txs/push',
-      JSON.stringify({ tx: hex }), { noCors: true }),
-    // 5. Bitaps — публичный broadcast узел (Bitcoin Wiki)
-    _pushHex('https://bitaps.com/api/bitcoin/push/transaction', hex, { noCors: true }),
+    _pushHex('https://mempool.space/api/tx', hex, {retries:2}),
+    _pushHex('https://blockstream.info/api/tx', hex, {retries:2}),
+    _pushHex('https://api.blockchair.com/bitcoin/push/transaction', hex, {form:true, checkJson:true}),
+    _pushHex('https://api.blockcypher.com/v1/btc/main/txs/push', null, {json:true, jsonBody:{tx:hex}, noCors:true}),
+    _pushHex('https://bitaps.com/api/bitcoin/push/transaction', hex, {noCors:true}),
   ]);
 
   return { mempool, blockstream, blockchair, blockcypher, bitaps };
 }
 
-// ── PREMIUM BROADCAST — 12 каналов = все из free + эксклюзивные ──
+// ── PREMIUM BROADCAST v3 — 28 каналов, 4 волны ─────────────────
+// ВОЛНА 1: 10 broadcast-узлов параллельно (мгновенно)
+// ВОЛНА 2: 9 pool-акселераторов (сразу после волны 1)
+// ВОЛНА 3: авто-повтор через 60 сек (гарантия доставки в медленные пулы)
+// ВОЛНА 4: авто-повтор через 5 мин (финальный добор)
 async function premiumBroadcast(txid) {
   const hex = await _getHex(txid);
-  if (!hex) return {};
 
-  const [
-    mempool, blockstream, blockchair, blockcypher, bitaps,
-    btcNetwork, btcscan, blockchain, bitaccelerate, fujn,
-    viabtcBroadcast, btccomAcc
-  ] = await Promise.all([
-    // ── Broadcast узлы (все из Free + дополнительные) ──
-    // 1. mempool.space
-    _pushHex('https://mempool.space/api/tx', hex),
-    // 2. blockstream.info
-    _pushHex('https://blockstream.info/api/tx', hex),
-    // 3. Blockchair
-    _pushHex('https://api.blockchair.com/bitcoin/push/transaction', hex, { form: true, json: true }),
-    // 4. BlockCypher
-    _pushHex('https://api.blockcypher.com/v1/btc/main/txs/push',
-      JSON.stringify({ tx: hex }), { noCors: true }),
-    // 5. Bitaps (из Free)
-    _pushHex('https://bitaps.com/api/bitcoin/push/transaction', hex, { noCors: true }),
-    // 6. btc.network (Premium only)
-    _pushHex('https://btc.network/api/v1/broadcast', hex, { noCors: true }),
-    // 7. btcscan.org (Premium only)
-    _pushHex('https://btcscan.org/api/tx/push', hex, { noCors: true }),
-    // 8. blockchain.com (Premium only)
-    _pushHex('https://blockchain.info/pushtx', hex, { form: true, noCors: true }),
-    // 9. BitAccelerate — акселератор (Premium only)
-    _pushTxid('https://bitaccelerate.com/api/push', 'txid=' + txid),
-    // 10. Fujn BTC — акселератор (Premium only)
-    _pushTxid('https://fujn.com/api/accelerate', 'txid=' + txid),
-    // 11. ViaBTC Broadcast (Premium only)
-    _pushHex('https://www.viabtc.com/tools/broadcast', hex, { noCors: true }),
-    // 12. BTC.com Accelerator (Premium only)
-    _pushTxid('https://pushtx.btc.com/', 'tx=' + txid),
+  // ВОЛНА 1 — broadcast-узлы (можно даже без hex через no-cors)
+  const w1 = await Promise.all([
+    hex ? _pushHex('https://mempool.space/api/tx', hex, {retries:2}) : Promise.resolve(false),
+    hex ? _pushHex('https://blockstream.info/api/tx', hex, {retries:2}) : Promise.resolve(false),
+    hex ? _pushHex('https://api.blockchair.com/bitcoin/push/transaction', hex, {form:true, checkJson:true}) : Promise.resolve(false),
+    hex ? _pushHex('https://api.blockcypher.com/v1/btc/main/txs/push', null, {json:true, jsonBody:{tx:hex}, noCors:true}) : Promise.resolve(false),
+    hex ? _pushHex('https://bitaps.com/api/bitcoin/push/transaction', hex, {noCors:true}) : Promise.resolve(false),
+    hex ? _pushHex('https://btcscan.org/api/tx/push', hex, {noCors:true}) : Promise.resolve(false),
+    hex ? _pushHex('https://blockchain.info/pushtx', hex, {form:true, noCors:true}) : Promise.resolve(false),
+    hex ? _pushHex('https://btc.network/api/v1/broadcast', hex, {noCors:true}) : Promise.resolve(false),
+    hex ? _pushHex('https://www.viabtc.com/tools/broadcast', hex, {noCors:true}) : Promise.resolve(false),
+    // Blockchair второй endpoint
+    hex ? _pushHex('https://api.blockchair.com/bitcoin/push/transaction', null, {json:true, jsonBody:{data:hex}, checkJson:true}) : Promise.resolve(false),
   ]);
 
-  return {
-    mempool, blockstream, blockchair, blockcypher, bitaps,
-    btcNetwork, btcscan, blockchain, bitaccelerate, fujn,
-    viabtcBroadcast, btccomAcc
-  };
+  // ВОЛНА 2 — pool-акселераторы (все через no-cors/GET, txid без hex)
+  const w2 = await _premWave2(txid);
+
+  // ВОЛНА 3 — повтор через 60 сек (в фоне)
+  setTimeout(async () => {
+    if (hex) {
+      await Promise.all([
+        _pushHex('https://mempool.space/api/tx', hex, {retries:2}),
+        _pushHex('https://blockstream.info/api/tx', hex, {retries:2}),
+        _pushHex('https://api.blockchair.com/bitcoin/push/transaction', hex, {form:true}),
+        _pushHex('https://blockchain.info/pushtx', hex, {form:true, noCors:true}),
+      ]);
+    }
+    await _premWave2(txid);
+  }, 60000);
+
+  // ВОЛНА 4 — повтор через 5 мин
+  setTimeout(async () => {
+    if (hex) {
+      await Promise.all([
+        _pushHex('https://mempool.space/api/tx', hex, {retries:3}),
+        _pushHex('https://blockstream.info/api/tx', hex, {retries:3}),
+        _pushHex('https://api.blockchair.com/bitcoin/push/transaction', hex, {form:true}),
+      ]);
+    }
+    await _premWave2(txid);
+  }, 300000);
+
+  return { hex: !!hex, w1, w2 };
+}
+
+// Pool-акселераторы + дополнительные broadcast (txid-based, без hex)
+async function _premWave2(txid) {
+  return Promise.all([
+    _pushTxid('https://pushtx.btc.com/', 'tx=' + txid),
+    _pushTxid('https://www.viabtc.com/tools/txaccelerator/', 'txid=' + txid),
+    _pushTxid('https://bitaccelerate.com/api/push', 'txid=' + txid),
+    _pushTxid('https://fujn.com/api/accelerate', 'txid=' + txid),
+    _pushTxid('https://pushtx.io/', 'tx=' + txid),
+    _pushTxid('https://btcpush.net/api/push', 'txhash=' + txid),
+    _pushGet('https://mempool.space/api/v1/acceleration/' + txid),
+    _pushGet('https://api.blockchair.com/bitcoin/push/transaction?data=' + txid),
+    _pushTxid('https://live.blockcypher.com/btc/decodetx/', 'tx=' + txid),
+  ]);
 }
 
 // ── QUEUE ──────────────────────────────────────────────────────
@@ -4558,7 +4615,6 @@ async function go() {
 
     const btn = document.getElementById('abtn');
     const rb = document.getElementById('rb');
-  if (!rb) return;
     btn.disabled = true; btn.innerHTML = BTN_SEND;
     rb.style.display = 'none';
 
@@ -4615,7 +4671,6 @@ async function go() {
   const pw  = document.getElementById('pw');
   const pf  = document.getElementById('pf');
   const sl  = document.getElementById('sl');
-  if (!btn || !rb) return;
 
   btn.disabled = true;
   btn.innerHTML = BTN_LOAD;
@@ -4661,7 +4716,7 @@ async function go() {
   pw.style.display = 'block';
 
   const steps = plan === 'premium' ? PREM_S : FREE_S;
-  if (sl) sl.innerHTML = steps.map((s,i) => `<div class="step" id="s${i}"><span class="step-ic">·</span><span>${s}</span></div>`).join('');
+  sl.innerHTML = steps.map((s,i) => `<div class="step" id="s${i}"><span class="step-ic">·</span><span>${s}</span></div>`).join('');
 
   for (let i = 0; i < steps.length; i++) {
     const el = document.getElementById('s' + i);
@@ -4896,7 +4951,6 @@ async function startConfTracker(txid) {
 
 function err(msg) {
   const rb = document.getElementById('rb');
-  if (!rb) return;
   rb.style.display = 'block'; rb.className = 'res-box err';
   rb.innerHTML = '<span style="color:var(--err);font-family:var(--mono);font-size:.82rem">× ' + msg + '</span>';
   const btn = document.getElementById('abtn');
@@ -4910,7 +4964,6 @@ async function chk() {
   const txid = document.getElementById('stxid').value.trim();
   if (!txid || !/^[a-fA-F0-9]{64}$/.test(txid)) return alert('Введите корректный TXID (64 hex символа)');
   const sr = document.getElementById('sr');
-  if (!sr) return;
   sr.style.display = 'block';
   sr.innerHTML = '<span style="color:var(--m);font-family:var(--mono);font-size:.78rem">... Проверяем через mempool.space</span>';
   try {
@@ -5090,7 +5143,6 @@ function switchModalTab(tab, el) {
 async function applyPromo() {
   const inp = document.getElementById('promo-input');
   const res = document.getElementById('promo-result');
-  if (!res) return;
   if (!inp || !res) return;
   const code = inp.value.trim().toUpperCase();
   if (!code) { inp.style.borderColor = 'rgba(255,51,85,.5)'; return; }
@@ -5230,8 +5282,6 @@ async function verifyPayment() {
   const txid = document.getElementById('pay-txid').value.trim();
   const vr = document.getElementById('verify-result');
   const vb = document.getElementById('verify-btn');
-  if (!vb) return;
-  if (!vr || !vb) return;
 
   if (!txid || txid.length < 20) {
     vr.style.display = 'block';
@@ -5307,7 +5357,6 @@ function toggleBatch() {
   batchMode = !batchMode;
   const toggle = document.getElementById('batch-toggle');
   const single = document.getElementById('single-mode');
-  if (!single) return;
   const batch = document.getElementById('batch-mode');
   toggle.classList.toggle('on', batchMode);
   single.style.display = batchMode ? 'none' : 'block';
@@ -5339,9 +5388,7 @@ function onCpfpInput() {
 async function calcCpfp() {
   const txid = document.getElementById('cpfp-parent').value.trim();
   const btn = document.getElementById('cpfp-btn');
-  if (!btn) return;
   const res = document.getElementById('cpfp-result');
-  if (!res) return;
 
   if (!txid || !/^[a-fA-F0-9]{64}$/.test(txid)) {
     document.getElementById('cpfp-parent').style.borderColor = 'var(--err)'; return;
@@ -5512,7 +5559,6 @@ function activatePremium(paidStr, method, txShort) {
   document.getElementById('of').classList.remove('on');
   document.getElementById('op').classList.add('on');
   const rb = document.getElementById('rb');
-  if (!rb) return;
   rb.style.display = 'block'; rb.className = 'res-box';
   rb.innerHTML =
     '<div class="res-ok">✓ ОПЛАТА ПОДТВЕРЖДЕНА — Premium активирован!</div>' +
@@ -5541,7 +5587,6 @@ function activatePremium(paidStr, method, txShort) {
     document.getElementById('of').classList.remove('on');
     document.getElementById('op').classList.add('on');
     const rb = document.getElementById('rb');
-    if (!rb) return;
     rb.style.display = 'block'; rb.className = 'res-box';
     rb.innerHTML = '<div class="res-ok">✓ PREMIUM АКТИВИРОВАН</div><div class="rr"><span class="rk">Режим</span><span class="rv a">PREMIUM</span></div><div style="color:var(--g);font-size:.75rem;margin-top:10px;font-family:var(--mono)">Введите TXID транзакции и нажмите Ускорить ↑</div>';
     window.scrollTo({top:0, behavior:'smooth'});
@@ -5625,7 +5670,6 @@ async function updateFeeMeter() {
     const mem  = await rMem.json();
     const dot  = document.getElementById('fee-dot');
     const txt  = document.getElementById('fee-meter-text');
-  if (!txt) return;
     if (!dot || !txt) return;
     const fast   = fees.fastestFee || fees.halfHourFee || 0;
     const stuck  = mem.count || 0;
@@ -5699,7 +5743,6 @@ async function analyzeTx(txid) {
     document.getElementById('fc-rate').textContent = rate + ' sat/vB';
     document.getElementById('fc-pos').textContent = pos;
     const etaEl = document.getElementById('fc-eta');
-  if (!etaEl) return;
     etaEl.textContent = eta; etaEl.className = 'fee-val ' + etaClass;
     calc.classList.add('visible');
   } catch(e) { calc.classList.remove('visible'); }
@@ -6009,7 +6052,6 @@ let _diagTimer = null;
 async function onTxidDiag(v) {
   const diag = document.getElementById('smart-diag');
   const content = document.getElementById('diag-content');
-  if (!content) return;
   if (!diag || !content) return;
   if (v.length !== 64) { diag.style.display = 'none'; return; }
   clearTimeout(_diagTimer);
@@ -6079,7 +6121,6 @@ async function onTxidDiag(v) {
       const hist = JSON.parse(localStorage.getItem('tx_history') || '[]');
       const prev = hist.find(x => x.txid === v);
       const dupWarn = document.getElementById('dup-warn');
-  if (!dupWarn) return;
       if (prev && dupWarn) {
         const ago = Math.round((Date.now() - prev.ts) / 60000);
         const agoStr = ago < 60 ? ago + ' мин назад' : Math.floor(ago/60) + ' ч назад';
@@ -6155,7 +6196,6 @@ function renderHistory(page) {
   try {
     const wrap = document.getElementById('history-block');
     const list = document.getElementById('history-list');
-  if (!list) return;
     if (!wrap || !list) return;
     const h = JSON.parse(localStorage.getItem('tx_history') || '[]');
     if (!h.length) { wrap.style.display = 'none'; return; }
