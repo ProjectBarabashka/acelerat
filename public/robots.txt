@@ -1,0 +1,41 @@
+# ═══════════════════════════════════════
+# TurboTX — Bitcoin Transaction Accelerator
+# https://acelerat.vercel.app/
+# ═══════════════════════════════════════
+
+# Всем поисковикам: индексировать всё
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /_next/
+Disallow: /cdn-cgi/
+
+# Google — явное разрешение
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+# Google Images — разрешаем картинки
+User-agent: Googlebot-Image
+Allow: /
+
+# Яндекс
+User-agent: Yandexbot
+Allow: /
+Crawl-delay: 2
+
+# YandexImages
+User-agent: YandexImages
+Allow: /
+
+# Bing
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 2
+
+# DuckDuckGo
+User-agent: DuckDuckBot
+Allow: /
+
+# Основной sitemap
+Sitemap: https://acelerat.vercel.app/sitemap.xml
