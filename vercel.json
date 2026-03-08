@@ -10,19 +10,20 @@
   },
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/$1" },
-    { "src": "/(.*)",     "dest": "/public/$1" }
+    { "src": "/(.*)", "dest": "/public/$1" }
   ],
   "env": {
-    "7534670357:AAHAMw2uZ3gdubmsDZ0nAjtuD6ktLDohHLY":        "@tg_token",
-    "https://web.telegram.org/k/#-1073571772348":      "@tg_chat_id",
-    "@Sup_TurboTX": "@tg_support_chat"
+    "TG_TOKEN": "@tg_token",
+    "TG_CHAT_ID": "@tg_chat_id",
+    "TG_SUPPORT": "@tg_support_chat"
   },
   "headers": [
     {
       "source": "/api/(.*)",
       "headers": [
-        { "key": "Access-Control-Allow-Origin",  "value": "*" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS" }
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version" }
       ]
     }
   ]
