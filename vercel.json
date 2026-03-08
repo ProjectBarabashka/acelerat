@@ -1,7 +1,5 @@
 {
   "version": 2,
-  "buildCommand": null,
-  "outputDirectory": "main",
   "functions": {
     "api/*.js": {
       "runtime": "nodejs18.x",
@@ -19,13 +17,13 @@
       ]
     }
   ],
-  "routes": [
-    { "src": "/api/(.*)", "dest": "/api/$1" },
-    { "src": "/(.*)", "dest": "/main/$1" }
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/(.*)", "destination": "/public/$1" }
   ],
   "env": {
-    "TG_TOKEN": "tg_token",
-    "TG_CHAT_ID": "tg_chat_id",
-    "TG_SUPPORT": "tg_support_chat"
+    "TG_TOKEN": "твои_данные",
+    "TG_CHAT_ID": "твои_данные",
+    "TG_SUPPORT": "твои_данные"
   }
 }
