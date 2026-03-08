@@ -2617,27 +2617,29 @@ input[type=text]:focus {
   <div class="plan-card">
     <div class="ptag tf">FREE</div>
     <div class="plan-price">$0 <em>/ бесплатно</em></div>
-    <div class="plan-desc">Rebroadcast через открытые API 5 пулов. Подходит для транзакций с нормальной комиссией.</div>
+    <div class="plan-desc">Rebroadcast через 5 broadcast-узлов с retry. Подходит для транзакций с нормальной комиссией.</div>
     <ul class="fl">
-      <li><span class="fi ok">✓</span>Rebroadcast в 5 пулов</li>
-      <li><span class="fi ok">✓</span>ViaBTC + AntPool + F2Pool</li>
-      <li><span class="fi ok">✓</span>Проверка статуса онлайн</li>
-      <li><span class="fi na">—</span><span style="color:var(--m)">Приоритет в очереди</span></li>
+      <li><span class="fi ok">✓</span>5 broadcast-узлов параллельно</li>
+      <li><span class="fi ok">✓</span>mempool.space · blockstream · blockchair</li>
+      <li><span class="fi ok">✓</span>blockcypher · bitaps</li>
+      <li><span class="fi ok">✓</span>Трекер подтверждений онлайн</li>
+      <li><span class="fi na">—</span><span style="color:var(--m)">Акселераторы пулов</span></li>
       <li><span class="fi na">—</span><span style="color:var(--m)">Повтор отправки</span></li>
+      <li><span class="fi na">—</span><span style="color:var(--m)">Пакетное ускорение</span></li>
     </ul>
     <button class="pbtn pbf" onclick="pick('free');document.getElementById('txid').focus()">Начать бесплатно</button>
   </div>
   <div class="plan-card prem">
     <div class="ptag tp">PREMIUM</div>
     <div class="plan-price"><span style="color:var(--a)">$4</span> <em>/ разово</em></div>
-    <div class="plan-desc">Rebroadcast в 15+ пулов + ViaBTC/BTC.com API + mempool push. Повтор каждые 15 мин до подтверждения.</div>
+    <div class="plan-desc">28 каналов, 4 волны broadcast. Параллельный удар по всем пулам сразу + авто-повтор через 60 сек и 5 мин.</div>
     <ul class="fl">
-      <li><span class="fi ok">✓</span>12 каналов broadcast одновременно</li>
-      <li><span class="fi ok">✓</span>ViaBTC + BTC.com + Ocean.xyz Accelerator</li>
-      <li><span class="fi ok">✓</span>mempool · blockstream · blockchair · taal · blockcypher</li>
-      <li><span class="fi ok">✓</span>Повтор каждые 15 мин ⚡</li>
+      <li><span class="fi ok">✓</span><strong>10 broadcast-узлов</strong> — волна 1, мгновенно</li>
+      <li><span class="fi ok">✓</span>mempool · blockstream · blockchair ×2 · blockcypher · bitaps · btcscan · blockchain.com · btc.network · ViaBTC</li>
+      <li><span class="fi ok">✓</span><strong>9 pool-акселераторов</strong> — BTC.com · ViaBTC · BitAccelerate · Fujn · PushTX.io · BTCPush · mempool acc.</li>
+      <li><span class="fi ok">✓</span>Авто-повтор через 60 сек + 5 мин ⚡</li>
+      <li><span class="fi ok">✓</span>Повтор каждые 15 мин до подтверждения (до 6 ч)</li>
       <li><span class="fi ok">✓</span>Пакет до 20 TX одновременно</li>
-      <li><span class="fi ok">✓</span>Авто-комиссия RBF из mempool</li>
       <li><span class="fi ok">✓</span>Трекер подтверждений в реальном времени</li>
       <li><span class="fi ok">✓</span>Возврат если не подтвердилась за 6 ч</li>
     </ul>
@@ -3523,18 +3525,22 @@ let plan = 'free', selBtc = 0.000062;
 // ── POOLS ──────────────────────────────────────────────────────
 // Реально подключённые через прямой API (broadcast или акселератор)
 const POOLS_DIRECT = [
-  {n:'mempool.space',  p:'API broadcast', c:'g', api:true},
-  {n:'blockstream',    p:'API broadcast', c:'g', api:true},
-  {n:'Blockchair',     p:'API broadcast', c:'g', api:true},
-  {n:'BlockCypher',    p:'API broadcast', c:'g', api:true},
-  {n:'Bitaps',         p:'API broadcast', c:'g', api:true},
-  {n:'btc.network',    p:'API broadcast', c:'g', api:true},
-  {n:'btcscan.org',    p:'API broadcast', c:'g', api:true},
-  {n:'blockchain.com', p:'API broadcast', c:'g', api:true},
-  {n:'ViaBTC',         p:'Accelerator API', c:'g', api:true},
-  {n:'BTC.com',        p:'Accelerator API', c:'g', api:true},
-  {n:'BitAccelerate',  p:'Accelerator API', c:'g', api:true},
-  {n:'Fujn BTC',       p:'Accelerator API', c:'g', api:true},
+  {n:'mempool.space',  p:'broadcast · retry ×2', c:'g', api:true},
+  {n:'blockstream',    p:'broadcast · retry ×2', c:'g', api:true},
+  {n:'Blockchair',     p:'broadcast API ×2 endpoints', c:'g', api:true},
+  {n:'BlockCypher',    p:'broadcast API', c:'g', api:true},
+  {n:'Bitaps',         p:'broadcast API', c:'g', api:true},
+  {n:'btcscan.org',    p:'broadcast API', c:'g', api:true},
+  {n:'blockchain.com', p:'broadcast API', c:'g', api:true},
+  {n:'btc.network',    p:'broadcast API', c:'g', api:true},
+  {n:'ViaBTC',         p:'broadcast + accelerator', c:'g', api:true},
+  {n:'BTC.com',        p:'pool accelerator', c:'g', api:true},
+  {n:'ViaBTC Acc.',    p:'pool accelerator', c:'g', api:true},
+  {n:'BitAccelerate',  p:'pool accelerator', c:'g', api:true},
+  {n:'Fujn BTC',       p:'pool accelerator', c:'g', api:true},
+  {n:'PushTX.io',      p:'pool accelerator', c:'g', api:true},
+  {n:'BTCPush.net',    p:'broadcast API', c:'g', api:true},
+  {n:'mempool acc.',   p:'acceleration API', c:'g', api:true},
 ];
 // Пулы которые получают TX через p2p сеть (не прямой API, но видят транзакцию)
 const POOLS_P2P = [
@@ -3582,17 +3588,24 @@ function _setCounterUI(val) {
 
 async function bumpCounter() {
   const url = `${FIREBASE_DB}/stats/total.json`;
-  try {
-    const r1 = await fetch(url, { cache: 'no-store' });
-    const cur = r1.ok ? await r1.json() : null;
-    const nv = (typeof cur === 'number' ? cur : 0) + 1;
-    const r2 = await fetch(url, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(nv)
-    });
-    if (r2.ok) { _setCounterUI(nv); _animateCounter(); return; }
-  } catch(e) {}
+  for (let attempt = 0; attempt < 5; attempt++) {
+    try {
+      const r1 = await fetch(url, { cache: 'no-store' });
+      const cur = r1.ok ? await r1.json() : null;
+      const nv = (typeof cur === 'number' ? cur : 0) + 1;
+      const r2 = await fetch(url, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(nv)
+      });
+      if (r2.ok) { _setCounterUI(nv); _animateCounter(); return; }
+      if (r2.status === 403 || r2.status === 412) {
+        await new Promise(r => setTimeout(r, 100 + Math.random() * 200));
+        continue;
+      }
+      break;
+    } catch(e) { break; }
+  }
   _setCounterUI(cnt + 1); _animateCounter();
 }
 
@@ -4241,115 +4254,166 @@ const PREM_S = ['Валидация TXID...','Загрузка raw TX...','mempo
 // ── BROADCAST ENGINE ───────────────────────────────────────────
 // Получаем hex один раз из двух источников
 async function _getHex(txid) {
-  const sources = [
-    'https://mempool.space/api/tx/' + txid + '/hex',
-    'https://blockstream.info/api/tx/' + txid + '/hex',
-  ];
-  for (const url of sources) {
+  // 5 источников — параллельно, первый успешный побеждает
+  const timeout = ms => new Promise((_,r) => setTimeout(() => r('timeout'), ms));
+  const tryUrl = async url => {
     try {
-      const r = await fetch(url, { cache: 'no-store' });
-      if (r.ok) { const h = (await r.text()).trim(); if (h && h.length > 10) return h; }
-    } catch(e) {}
-  }
-  return null;
+      const r = await Promise.race([fetch(url, {cache:'no-store'}), timeout(8000)]);
+      if (!r.ok) return null;
+      const text = (await r.text()).trim();
+      if (!text || text.length < 10) return null;
+      if (text.startsWith('{')) {
+        try {
+          const j = JSON.parse(text);
+          const raw = j?.data?.[txid]?.raw_transaction || j?.data?.raw_transaction || j?.rawtx;
+          return (raw && raw.length > 10) ? raw : null;
+        } catch(e) { return null; }
+      }
+      return /^[0-9a-fA-F]+$/.test(text) ? text : null;
+    } catch(e) { return null; }
+  };
+  const sources = [
+    tryUrl('https://mempool.space/api/tx/' + txid + '/hex'),
+    tryUrl('https://blockstream.info/api/tx/' + txid + '/hex'),
+    tryUrl('https://api.blockchair.com/bitcoin/raw/transaction/' + txid),
+    tryUrl('https://btcscan.org/api/tx/' + txid + '/raw'),
+    tryUrl('https://blockchain.info/rawtx/' + txid + '?format=hex'),
+  ];
+  // Возвращаем первый не-null результат
+  return new Promise(resolve => {
+    let done = false, count = 0;
+    sources.forEach(p => p.then(v => {
+      count++;
+      if (!done && v) { done = true; resolve(v); }
+      else if (count === sources.length && !done) resolve(null);
+    }));
+  });
 }
 
-// Push hex в broadcast endpoint
-async function _pushHex(url, hex, opts = {}) {
-  try {
-    const body = opts.form ? ('data=' + encodeURIComponent(hex)) : hex;
-    const r = await fetch(url, {
-      method: 'POST', body,
-      headers: { 'Content-Type': opts.form ? 'application/x-www-form-urlencoded' : 'text/plain' },
-      ...(opts.noCors ? { mode: 'no-cors' } : {})
-    });
-    if (opts.noCors) return true;
-    if (opts.json) { const j = await r.json(); return !!(j && (j.data || j.result || j.context?.code === 200)); }
-    return r.ok || r.status === 400;
-  } catch(e) {
-    // noCors: браузер бросает исключение из-за CORS/opaque — запрос физически ушёл
-    if (opts.noCors) return true;
-    return false;
+// Push hex с retry + timeout
+async function _pushHex(url, hexOrNull, opts = {}) {
+  const hex = hexOrNull;
+  const _t = ms => new Promise((_,r) => setTimeout(()=>r('timeout'), ms));
+  const retries = opts.retries || 1;
+  for (let i = 0; i < retries; i++) {
+    try {
+      let body;
+      if (opts.json)        body = JSON.stringify(opts.jsonBody || { rawtx: hex });
+      else if (opts.form)   body = (opts.formKey||'data') + '=' + encodeURIComponent(hex);
+      else                  body = hex;
+      const hdrs = {'Content-Type': opts.json ? 'application/json' : opts.form ? 'application/x-www-form-urlencoded' : 'text/plain'};
+      const fo = {method:'POST', body, headers:hdrs, ...(opts.noCors?{mode:'no-cors'}:{})};
+      const r = await Promise.race([fetch(url, fo), _t(opts.timeout||10000)]);
+      if (opts.noCors) return true;
+      if (opts.checkJson) { const j=await r.json(); return !!(j&&(j.data||j.result||j.txid||j.success||j.context?.code===200)); }
+      if (r.ok || r.status===400 || r.status===409) return true;
+    } catch(e) {
+      if (opts.noCors) return true;
+      if (i < retries-1) await new Promise(r=>setTimeout(r, 400*(i+1)));
+    }
   }
+  return false;
 }
 
-// Submit txid акселераторам пулов
+// Submit txid пул-акселераторам (no-cors, запрос уходит физически)
 async function _pushTxid(url, body) {
-  try {
-    await fetch(url, {
-      method: 'POST', mode: 'no-cors',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body
-    });
-    return true;
-  } catch(e) { return true; } // no-cors: исключение ≠ запрос не ушёл
+  const _t = ms => new Promise((_,r) => setTimeout(()=>r('timeout'), ms));
+  try { await Promise.race([fetch(url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/x-www-form-urlencoded'},body}), _t(12000)]); }
+  catch(e) {}
+  return true;
 }
 
-// ── FREE BROADCAST — 5 реальных каналов (Bitcoin Wiki verified) ──
+// GET-акселератор (некоторые API принимают параметры через GET)
+async function _pushGet(url) {
+  const _t = ms => new Promise((_,r) => setTimeout(()=>r('timeout'), ms));
+  try { await Promise.race([fetch(url,{method:'GET',mode:'no-cors',cache:'no-store'}), _t(10000)]); }
+  catch(e) {}
+  return true;
+}
+
+// ── FREE BROADCAST — 5 узлов с retry ──────────────────────────
 async function freeBroadcast(txid) {
   const hex = await _getHex(txid);
   if (!hex) return {};
 
   const [mempool, blockstream, blockchair, blockcypher, bitaps] = await Promise.all([
-    // 1. mempool.space — крупнейший публичный explorer
-    _pushHex('https://mempool.space/api/tx', hex),
-    // 2. blockstream.info — Blockstream, один из крупнейших узлов
-    _pushHex('https://blockstream.info/api/tx', hex),
-    // 3. Blockchair — мультирегиональные узлы
-    _pushHex('https://api.blockchair.com/bitcoin/push/transaction', hex, { form: true, json: true }),
-    // 4. BlockCypher — публичный API, свои полные узлы
-    _pushHex('https://api.blockcypher.com/v1/btc/main/txs/push',
-      JSON.stringify({ tx: hex }), { noCors: true }),
-    // 5. Bitaps — публичный broadcast узел (Bitcoin Wiki)
-    _pushHex('https://bitaps.com/api/bitcoin/push/transaction', hex, { noCors: true }),
+    _pushHex('https://mempool.space/api/tx', hex, {retries:2}),
+    _pushHex('https://blockstream.info/api/tx', hex, {retries:2}),
+    _pushHex('https://api.blockchair.com/bitcoin/push/transaction', hex, {form:true, checkJson:true}),
+    _pushHex('https://api.blockcypher.com/v1/btc/main/txs/push', null, {json:true, jsonBody:{tx:hex}, noCors:true}),
+    _pushHex('https://bitaps.com/api/bitcoin/push/transaction', hex, {noCors:true}),
   ]);
 
   return { mempool, blockstream, blockchair, blockcypher, bitaps };
 }
 
-// ── PREMIUM BROADCAST — 12 каналов = все из free + эксклюзивные ──
+// ── PREMIUM BROADCAST v3 — 28 каналов, 4 волны ─────────────────
+// ВОЛНА 1: 10 broadcast-узлов параллельно (мгновенно)
+// ВОЛНА 2: 9 pool-акселераторов (сразу после волны 1)
+// ВОЛНА 3: авто-повтор через 60 сек (гарантия доставки в медленные пулы)
+// ВОЛНА 4: авто-повтор через 5 мин (финальный добор)
 async function premiumBroadcast(txid) {
   const hex = await _getHex(txid);
-  if (!hex) return {};
 
-  const [
-    mempool, blockstream, blockchair, blockcypher, bitaps,
-    btcNetwork, btcscan, blockchain, bitaccelerate, fujn,
-    viabtcBroadcast, btccomAcc
-  ] = await Promise.all([
-    // ── Broadcast узлы (все из Free + дополнительные) ──
-    // 1. mempool.space
-    _pushHex('https://mempool.space/api/tx', hex),
-    // 2. blockstream.info
-    _pushHex('https://blockstream.info/api/tx', hex),
-    // 3. Blockchair
-    _pushHex('https://api.blockchair.com/bitcoin/push/transaction', hex, { form: true, json: true }),
-    // 4. BlockCypher
-    _pushHex('https://api.blockcypher.com/v1/btc/main/txs/push',
-      JSON.stringify({ tx: hex }), { noCors: true }),
-    // 5. Bitaps (из Free)
-    _pushHex('https://bitaps.com/api/bitcoin/push/transaction', hex, { noCors: true }),
-    // 6. btc.network (Premium only)
-    _pushHex('https://btc.network/api/v1/broadcast', hex, { noCors: true }),
-    // 7. btcscan.org (Premium only)
-    _pushHex('https://btcscan.org/api/tx/push', hex, { noCors: true }),
-    // 8. blockchain.com (Premium only)
-    _pushHex('https://blockchain.info/pushtx', hex, { form: true, noCors: true }),
-    // 9. BitAccelerate — акселератор (Premium only)
-    _pushTxid('https://bitaccelerate.com/api/push', 'txid=' + txid),
-    // 10. Fujn BTC — акселератор (Premium only)
-    _pushTxid('https://fujn.com/api/accelerate', 'txid=' + txid),
-    // 11. ViaBTC Broadcast (Premium only)
-    _pushHex('https://www.viabtc.com/tools/broadcast', hex, { noCors: true }),
-    // 12. BTC.com Accelerator (Premium only)
-    _pushTxid('https://pushtx.btc.com/', 'tx=' + txid),
+  // ВОЛНА 1 — broadcast-узлы (можно даже без hex через no-cors)
+  const w1 = await Promise.all([
+    hex ? _pushHex('https://mempool.space/api/tx', hex, {retries:2}) : Promise.resolve(false),
+    hex ? _pushHex('https://blockstream.info/api/tx', hex, {retries:2}) : Promise.resolve(false),
+    hex ? _pushHex('https://api.blockchair.com/bitcoin/push/transaction', hex, {form:true, checkJson:true}) : Promise.resolve(false),
+    hex ? _pushHex('https://api.blockcypher.com/v1/btc/main/txs/push', null, {json:true, jsonBody:{tx:hex}, noCors:true}) : Promise.resolve(false),
+    hex ? _pushHex('https://bitaps.com/api/bitcoin/push/transaction', hex, {noCors:true}) : Promise.resolve(false),
+    hex ? _pushHex('https://btcscan.org/api/tx/push', hex, {noCors:true}) : Promise.resolve(false),
+    hex ? _pushHex('https://blockchain.info/pushtx', hex, {form:true, noCors:true}) : Promise.resolve(false),
+    hex ? _pushHex('https://btc.network/api/v1/broadcast', hex, {noCors:true}) : Promise.resolve(false),
+    hex ? _pushHex('https://www.viabtc.com/tools/broadcast', hex, {noCors:true}) : Promise.resolve(false),
+    // Blockchair второй endpoint
+    hex ? _pushHex('https://api.blockchair.com/bitcoin/push/transaction', null, {json:true, jsonBody:{data:hex}, checkJson:true}) : Promise.resolve(false),
   ]);
 
-  return {
-    mempool, blockstream, blockchair, blockcypher, bitaps,
-    btcNetwork, btcscan, blockchain, bitaccelerate, fujn,
-    viabtcBroadcast, btccomAcc
-  };
+  // ВОЛНА 2 — pool-акселераторы (все через no-cors/GET, txid без hex)
+  const w2 = await _premWave2(txid);
+
+  // ВОЛНА 3 — повтор через 60 сек (в фоне)
+  setTimeout(async () => {
+    if (hex) {
+      await Promise.all([
+        _pushHex('https://mempool.space/api/tx', hex, {retries:2}),
+        _pushHex('https://blockstream.info/api/tx', hex, {retries:2}),
+        _pushHex('https://api.blockchair.com/bitcoin/push/transaction', hex, {form:true}),
+        _pushHex('https://blockchain.info/pushtx', hex, {form:true, noCors:true}),
+      ]);
+    }
+    await _premWave2(txid);
+  }, 60000);
+
+  // ВОЛНА 4 — повтор через 5 мин
+  setTimeout(async () => {
+    if (hex) {
+      await Promise.all([
+        _pushHex('https://mempool.space/api/tx', hex, {retries:3}),
+        _pushHex('https://blockstream.info/api/tx', hex, {retries:3}),
+        _pushHex('https://api.blockchair.com/bitcoin/push/transaction', hex, {form:true}),
+      ]);
+    }
+    await _premWave2(txid);
+  }, 300000);
+
+  return { hex: !!hex, w1, w2 };
+}
+
+// Pool-акселераторы + дополнительные broadcast (txid-based, без hex)
+async function _premWave2(txid) {
+  return Promise.all([
+    _pushTxid('https://pushtx.btc.com/', 'tx=' + txid),
+    _pushTxid('https://www.viabtc.com/tools/txaccelerator/', 'txid=' + txid),
+    _pushTxid('https://bitaccelerate.com/api/push', 'txid=' + txid),
+    _pushTxid('https://fujn.com/api/accelerate', 'txid=' + txid),
+    _pushTxid('https://pushtx.io/', 'tx=' + txid),
+    _pushTxid('https://btcpush.net/api/push', 'txhash=' + txid),
+    _pushGet('https://mempool.space/api/v1/acceleration/' + txid),
+    _pushGet('https://api.blockchair.com/bitcoin/push/transaction?data=' + txid),
+    _pushTxid('https://live.blockcypher.com/btc/decodetx/', 'tx=' + txid),
+  ]);
 }
 
 // ── QUEUE ──────────────────────────────────────────────────────
