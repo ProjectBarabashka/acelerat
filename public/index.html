@@ -78,8 +78,98 @@
 <link rel="dns-prefetch" href="https://blockchain.info">
 <link rel="dns-prefetch" href="https://fonts.googleapis.com">
 
-<!-- FAVICON — статичная SVG сакура (анимация убрана, не нагружает CPU) -->
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%230d0d14'/%3E%3Cg transform='translate(16,16)'%3E%3Cellipse rx='3.5' ry='6.5' fill='%23fce7f3' stroke='%23f9a8d4' stroke-width='0.4' transform='rotate(0) translate(0,-5)'/%3E%3Cellipse rx='3.5' ry='6.5' fill='%23fbcfe8' stroke='%23f9a8d4' stroke-width='0.4' transform='rotate(72) translate(0,-5)'/%3E%3Cellipse rx='3.5' ry='6.5' fill='%23fce7f3' stroke='%23f9a8d4' stroke-width='0.4' transform='rotate(144) translate(0,-5)'/%3E%3Cellipse rx='3.5' ry='6.5' fill='%23fbcfe8' stroke='%23f9a8d4' stroke-width='0.4' transform='rotate(216) translate(0,-5)'/%3E%3Cellipse rx='3.5' ry='6.5' fill='%23fce7f3' stroke='%23f9a8d4' stroke-width='0.4' transform='rotate(288) translate(0,-5)'/%3E%3Ccircle r='3' fill='%23fdf2f8'/%3E%3Ccircle r='1.5' fill='%23fbcfe8'/%3E%3Ccircle cx='1.8' cy='-1.3' r='0.6' fill='%23f472b6'/%3E%3Ccircle cx='-1.8' cy='-1.3' r='0.6' fill='%23f472b6'/%3E%3Ccircle cx='0' cy='2.1' r='0.6' fill='%23f472b6'/%3E%3C/g%3E%3C/svg%3E">
+<!-- FAVICON — один тег, сакура через canvas -->
+<link rel="icon" id="anim-favicon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==">
+<script>
+(function(){
+  var canvas = document.createElement('canvas');
+  canvas.width = 32; canvas.height = 32;
+  var ctx = canvas.getContext('2d');
+  var frame = 0;
+  var CYCLE = 140;
+  function drawPetal(cx, cy, angle, alpha, scale) {
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.translate(cx, cy);
+    ctx.rotate(angle);
+    ctx.scale(scale, scale);
+    for (var p = 0; p < 5; p++) {
+      ctx.save();
+      ctx.rotate((p / 5) * Math.PI * 2);
+      var grd = ctx.createRadialGradient(0, -5, 1, 0, -5, 7);
+      grd.addColorStop(0,   'rgba(253,242,248,1)');
+      grd.addColorStop(0.5, 'rgba(251,207,232,1)');
+      grd.addColorStop(1,   'rgba(249,168,212,0.7)');
+      ctx.beginPath();
+      ctx.ellipse(0, -5, 3, 6, 0, 0, Math.PI * 2);
+      ctx.fillStyle = grd;
+      ctx.fill();
+      ctx.restore();
+    }
+    ctx.beginPath(); ctx.arc(0, 0, 2.8, 0, Math.PI*2);
+    ctx.fillStyle = '#fce7f3'; ctx.fill();
+    ctx.beginPath(); ctx.arc(0, 0, 1.4, 0, Math.PI*2);
+    ctx.fillStyle = '#fbcfe8'; ctx.fill();
+    for (var d = 0; d < 5; d++) {
+      var a = (d/5)*Math.PI*2;
+      ctx.beginPath(); ctx.arc(Math.cos(a)*2, Math.sin(a)*2-1, 0.5, 0, Math.PI*2);
+      ctx.fillStyle = '#f472b6'; ctx.fill();
+    }
+    ctx.restore();
+  }
+  function drawWindLine(y, progress, alpha, width) {
+    var x0 = -2 + progress * 38, len = 14;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+    ctx.lineWidth = width; ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(x0, y);
+    ctx.quadraticCurveTo(x0+len*0.5, y-1, x0+len, y);
+    ctx.stroke(); ctx.restore();
+  }
+  function ease(t){ return t<0.5 ? 2*t*t : -1+(4-2*t)*t; }
+  function drawFrame() {
+    ctx.clearRect(0, 0, 32, 32);
+    ctx.beginPath(); ctx.arc(16,16,15.5,0,Math.PI*2);
+    ctx.fillStyle = '#0d0d14'; ctx.fill();
+    var t = (frame % CYCLE) / CYCLE;
+    var winds = [
+      {y:11, delay:0,    speed:1.4, w:1.2},
+      {y:16, delay:0.15, speed:1.3, w:0.9},
+      {y:21, delay:0.30, speed:1.2, w:0.7}
+    ];
+    winds.forEach(function(w){
+      var wt = (t - w.delay + 1) % 1;
+      var progress = wt * w.speed;
+      if(progress < 1.3){
+        var alpha = progress < 0.15 ? progress/0.15 : progress > 1.0 ? (1.3-progress)/0.3 : 1;
+        drawWindLine(w.y, Math.min(progress, 1.1), alpha*0.65, w.w);
+      }
+    });
+    var tx, ty, angle, alpha, scale;
+    if(t < 0.08){
+      var p = t/0.08;
+      tx=26-p*6; ty=24-p*4; angle=0.8-p*0.3; alpha=p; scale=0.7+p*0.2;
+    } else if(t < 0.55){
+      var p = (t-0.08)/0.47, ep=ease(p);
+      tx=20-ep*14; ty=20-ep*8; angle=0.5-ep*0.8; alpha=1; scale=0.9+Math.sin(p*Math.PI)*0.15;
+    } else if(t < 0.75){
+      var p = (t-0.55)/0.20;
+      tx=6-p*10; ty=12+p*8; angle=-0.3-p*0.6; alpha=1-p; scale=0.9-p*0.3;
+    } else {
+      alpha=0; tx=-20; ty=16; angle=0; scale=0.6;
+    }
+    if(alpha > 0.01) drawPetal(tx, ty, angle, alpha, scale);
+    document.getElementById('anim-favicon').href = canvas.toDataURL('image/png');
+    frame++;
+    setTimeout(drawFrame, 22);
+  }
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', drawFrame);
+  } else { drawFrame(); }
+})();
+</script>
 
 <!-- OPEN GRAPH — соцсети, Telegram, WhatsApp -->
 <meta property="og:type"              content="website">
@@ -123,9 +213,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-<noscript><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet"></noscript>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
 <style>
 /* ========== ОСНОВНЫЕ СТИЛИ ========== */
 :root{
@@ -1291,8 +1379,8 @@ input[type=text]:focus { border-color: rgba(247,147,26,.5) !important; box-shado
   <div class="fg">
     <label>Режим ускорения</label>
     <div class="plan-row">
-      <div class="plan-opt on" id="of" onclick="pick('free')"><div class="po-title" style="display:flex;align-items:center;gap:7px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0"><rect x="2.5" y="10.5" width="19" height="12" rx="3" fill="rgba(247,147,26,0.12)" stroke="#f7931a" stroke-width="1.6" stroke-linejoin="round"/><path d="M7 10.5V7.5a5 5 0 0 1 9.9-1" stroke="#f7931a" stroke-width="1.6" stroke-linecap="round" fill="none"/><circle cx="12" cy="16" r="2" fill="#f7931a" opacity="0.85"/><rect x="11" y="16.8" width="2" height="3" rx="1" fill="#f7931a" opacity="0.7"/></svg> Бесплатный</div><div class="po-desc">Rebroadcast в 5 пулов</div><div class="po-price">$0 — бесплатно</div></div>
-      <div class="plan-opt" id="op" onclick="pick('premium')"><div class="po-title" style="display:flex;align-items:center;gap:7px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0"><defs><linearGradient id="cg15" x1="2" y1="5" x2="22" y2="19" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#FFE566"/><stop offset="45%" stop-color="#F7931A"/><stop offset="100%" stop-color="#FF6B00"/></linearGradient></defs><path d="M3 19h18" stroke="url(#cg15)" stroke-width="2" stroke-linecap="round"/><path d="M3 19L4.5 9.5L9 14L12 6L15 14L19.5 9.5L21 19z" fill="url(#cg15)" stroke="url(#cg15)" stroke-width="0.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="12" cy="6" r="1.4" fill="#FFE566"/><circle cx="4.5" cy="9.5" r="1.1" fill="#FFE566"/><circle cx="19.5" cy="9.5" r="1.1" fill="#FFE566"/></svg> Premium</div><div class="po-desc">15 пулов + приоритет</div><div class="po-price" style="color:var(--a);font-weight:700">от <span id="plan-opt-price">…</span></div></div>
+      <div class="plan-opt on" id="of" onclick="pick('free')"><div class="po-title" style="display:flex;align-items:center;gap:7px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x='3' y='11' width='18' height='11' rx='2'/><path d='M7 11V7a5 5 0 0 1 10 0v4'/></svg> Бесплатный</div><div class="po-desc">Rebroadcast в 5 пулов</div><div class="po-price">$0 — бесплатно</div></div>
+      <div class="plan-opt" id="op" onclick="pick('premium')"><div class="po-title" style="display:flex;align-items:center;gap:7px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polygon points='12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2'/></svg> Premium</div><div class="po-desc">15 пулов + приоритет</div><div class="po-price" style="color:var(--a);font-weight:700">от <span id="plan-opt-price">…</span></div></div>
     </div>
   </div>
 
@@ -1322,8 +1410,8 @@ input[type=text]:focus { border-color: rgba(247,147,26,.5) !important; box-shado
 
 <!-- PLANS -->
 <div style="margin-bottom:28px"><div class="sh">Выберите план</div><div class="plans">
-  <div class="plan-card"><div class="ptag tf" style="display:inline-flex;align-items:center;gap:5px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;vertical-align:middle;margin-right:5px"><rect x="2.5" y="10.5" width="19" height="12" rx="3" fill="rgba(247,147,26,0.12)" stroke="#f7931a" stroke-width="1.6" stroke-linejoin="round"/><path d="M7 10.5V7.5a5 5 0 0 1 9.9-1" stroke="#f7931a" stroke-width="1.6" stroke-linecap="round" fill="none"/><circle cx="12" cy="16" r="2" fill="#f7931a" opacity="0.85"/><rect x="11" y="16.8" width="2" height="3" rx="1" fill="#f7931a" opacity="0.7"/></svg>FREE</div><div class="plan-price">$0 <em>/ бесплатно</em></div><div class="plan-desc">Серверный broadcast через 3 CORS-узла. Реальные ответы от каждого канала. Авто-повтор через 20 мин.</div><ul class="fl"><li><span class="fi ok">✓</span>blockstream.info — Esplora (CORS ✓, реальный ответ)</li><li><span class="fi ok">✓</span>Blockchair broadcast (CORS ✓, реальный ответ)</li><li><span class="fi ok">✓</span>BlockCypher broadcast (CORS ✓)</li><li><span class="fi ok">✓</span>Серверный API — без CORS-ограничений</li><li><span class="fi ok">✓</span>Авто-повтор через 20 мин</li><li><span class="fi ok">✓</span>Трекер подтверждений онлайн</li><li><span class="fi na">—</span><span style="color:var(--m)">Пул-акселераторы (8 пулов)</span></li><li><span class="fi na">—</span><span style="color:var(--m)">6 волн повтора до 4 ч</span></li></ul><button class="pbtn pbf" onclick="pick('free');document.getElementById('txid').focus()"><span style="display:inline-flex;align-items:center;gap:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0"><rect x="2.5" y="10.5" width="19" height="12" rx="3" fill="rgba(247,147,26,0.12)" stroke="#f7931a" stroke-width="1.6" stroke-linejoin="round"/><path d="M7 10.5V7.5a5 5 0 0 1 9.9-1" stroke="#f7931a" stroke-width="1.6" stroke-linecap="round" fill="none"/><circle cx="12" cy="16" r="2" fill="#f7931a" opacity="0.85"/><rect x="11" y="16.8" width="2" height="3" rx="1" fill="#f7931a" opacity="0.7"/></svg>Начать бесплатно</span></button></div>
-  <div class="plan-card prem"><div class="ptag tp" style="display:inline-flex;align-items:center;gap:5px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;vertical-align:middle;margin-right:5px"><defs><linearGradient id="cgbadge" x1="2" y1="5" x2="22" y2="19" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#FFE566"/><stop offset="45%" stop-color="#F7931A"/><stop offset="100%" stop-color="#FF6B00"/></linearGradient></defs><path d="M3 19h18" stroke="url(#cgbadge)" stroke-width="2" stroke-linecap="round"/><path d="M3 19L4.5 9.5L9 14L12 6L15 14L19.5 9.5L21 19z" fill="url(#cgbadge)" stroke="url(#cgbadge)" stroke-width="0.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="12" cy="6" r="1.4" fill="#FFE566"/><circle cx="4.5" cy="9.5" r="1.1" fill="#FFE566"/><circle cx="19.5" cy="9.5" r="1.1" fill="#FFE566"/></svg>PREMIUM</div><div class="plan-price"><span style="color:var(--a)" id="plan-price-usd">$4</span> <em>/ разово</em> <span id="plan-price-tag" style="display:inline-flex;align-items:center;gap:4px;font-size:.57rem;font-family:var(--mono);padding:2px 8px;border-radius:4px;background:rgba(247,147,26,.12);color:var(--a);vertical-align:middle;margin-left:4px"><span class="net-heart calm sm" id="price-tag-dot"><svg width="12" height="12" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g class="h-flame"><path d="M9 19 Q7 15 9.5 11 Q10.5 15 12 11 Q13.5 15 14.5 11 Q17 15 15 19" fill="#ff6b00" opacity=".85"/></g><path class="h-body" d="M12 20.5C12 20.5 2.5 14 2.5 8C2.5 5.2 4.7 3 7.5 3C9.1 3 10.6 3.8 12 5.2C13.4 3.8 14.9 3 16.5 3C19.3 3 21.5 5.2 21.5 8C21.5 14 12 20.5 12 20.5Z"/><g class="h-ice" stroke="#cff0ff" stroke-width="1" stroke-linecap="round" fill="none"><line x1="12" y1="5.5" x2="12" y2="8.5"/><line x1="10.4" y1="6.3" x2="13.6" y2="7.7"/><line x1="10.4" y1="7.7" x2="13.6" y2="6.3"/></g></svg></span><span id="price-tag-text">сеть</span></span></div><div id="plan-conf-time" style="font-family:var(--mono);font-size:.62rem;color:var(--g);margin-top:2px;margin-bottom:4px">Premium ≈ 10–20 мин ⚡</div><div class="plan-desc">22 канала: 7 hex-узлов + 15 пулов (~80% хешрейта). Реальные ответы от Foundry, AntPool, MARA. 6 волн до 4 часов.</div><ul class="fl"><li><span class="fi ok">✓</span><strong>7 hex-broadcast узлов</strong> — blockstream · Blockchair · BlockCypher · btcscan · mempool</li><li><span class="fi ok">✓</span><strong>15 пул-акселераторов</strong> — Foundry ⭐ · AntPool · MARA ⭐ · ViaBTC · SpiderPool ★ · Luxor ★ · CloverPool · BitFuFu ★</li><li><span class="fi ok">✓</span><strong>~80% хешрейта</strong> Bitcoin охвачено одним запросом</li><li><span class="fi ok">✓</span><strong>6 волн</strong>: 0 → 15 → 30 → 60 → 120 → 240 мин ⚡</li><li><span class="fi ok">✓</span>Цена $3–18 — дешевле когда сеть спокойна</li><li><span class="fi ok">✓</span>Пакет до 20 TX · Возврат за 6 ч если не помогло</li></ul><button class="pbtn pbp" onclick="openM()"><span style="display:inline-flex;align-items:center;gap:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0"><defs><linearGradient id="cg16" x1="2" y1="5" x2="22" y2="19" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#FFE566"/><stop offset="45%" stop-color="#F7931A"/><stop offset="100%" stop-color="#FF6B00"/></linearGradient></defs><path d="M3 19h18" stroke="url(#cg16)" stroke-width="2" stroke-linecap="round"/><path d="M3 19L4.5 9.5L9 14L12 6L15 14L19.5 9.5L21 19z" fill="url(#cg16)" stroke="url(#cg16)" stroke-width="0.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="12" cy="6" r="1.4" fill="#FFE566"/><circle cx="4.5" cy="9.5" r="1.1" fill="#FFE566"/><circle cx="19.5" cy="9.5" r="1.1" fill="#FFE566"/></svg>Купить Premium — <span id="plan-btn-price">$4</span></span></button></div>
+  <div class="plan-card"><div class="ptag tf">FREE</div><div class="plan-price">$0 <em>/ бесплатно</em></div><div class="plan-desc">Серверный broadcast через 3 CORS-узла. Реальные ответы от каждого канала. Авто-повтор через 20 мин.</div><ul class="fl"><li><span class="fi ok">✓</span>blockstream.info — Esplora (CORS ✓, реальный ответ)</li><li><span class="fi ok">✓</span>Blockchair broadcast (CORS ✓, реальный ответ)</li><li><span class="fi ok">✓</span>BlockCypher broadcast (CORS ✓)</li><li><span class="fi ok">✓</span>Серверный API — без CORS-ограничений</li><li><span class="fi ok">✓</span>Авто-повтор через 20 мин</li><li><span class="fi ok">✓</span>Трекер подтверждений онлайн</li><li><span class="fi na">—</span><span style="color:var(--m)">Пул-акселераторы (8 пулов)</span></li><li><span class="fi na">—</span><span style="color:var(--m)">6 волн повтора до 4 ч</span></li></ul><button class="pbtn pbf" onclick="pick('free');document.getElementById('txid').focus()">Начать бесплатно</button></div>
+  <div class="plan-card prem"><div class="ptag tp">PREMIUM</div><div class="plan-price"><span style="color:var(--a)" id="plan-price-usd">$4</span> <em>/ разово</em> <span id="plan-price-tag" style="display:inline-flex;align-items:center;gap:4px;font-size:.57rem;font-family:var(--mono);padding:2px 8px;border-radius:4px;background:rgba(247,147,26,.12);color:var(--a);vertical-align:middle;margin-left:4px"><span class="net-heart calm sm" id="price-tag-dot"><svg width="12" height="12" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g class="h-flame"><path d="M9 19 Q7 15 9.5 11 Q10.5 15 12 11 Q13.5 15 14.5 11 Q17 15 15 19" fill="#ff6b00" opacity=".85"/></g><path class="h-body" d="M12 20.5C12 20.5 2.5 14 2.5 8C2.5 5.2 4.7 3 7.5 3C9.1 3 10.6 3.8 12 5.2C13.4 3.8 14.9 3 16.5 3C19.3 3 21.5 5.2 21.5 8C21.5 14 12 20.5 12 20.5Z"/><g class="h-ice" stroke="#cff0ff" stroke-width="1" stroke-linecap="round" fill="none"><line x1="12" y1="5.5" x2="12" y2="8.5"/><line x1="10.4" y1="6.3" x2="13.6" y2="7.7"/><line x1="10.4" y1="7.7" x2="13.6" y2="6.3"/></g></svg></span><span id="price-tag-text">сеть</span></span></div><div id="plan-conf-time" style="font-family:var(--mono);font-size:.62rem;color:var(--g);margin-top:2px;margin-bottom:4px">Premium ≈ 10–20 мин ⚡</div><div class="plan-desc">22 канала: 7 hex-узлов + 15 пулов (~80% хешрейта). Реальные ответы от Foundry, AntPool, MARA. 6 волн до 4 часов.</div><ul class="fl"><li><span class="fi ok">✓</span><strong>7 hex-broadcast узлов</strong> — blockstream · Blockchair · BlockCypher · btcscan · mempool</li><li><span class="fi ok">✓</span><strong>15 пул-акселераторов</strong> — Foundry ⭐ · AntPool · MARA ⭐ · ViaBTC · SpiderPool ★ · Luxor ★ · CloverPool · BitFuFu ★</li><li><span class="fi ok">✓</span><strong>~80% хешрейта</strong> Bitcoin охвачено одним запросом</li><li><span class="fi ok">✓</span><strong>6 волн</strong>: 0 → 15 → 30 → 60 → 120 → 240 мин ⚡</li><li><span class="fi ok">✓</span>Цена $3–18 — дешевле когда сеть спокойна</li><li><span class="fi ok">✓</span>Пакет до 20 TX · Возврат за 6 ч если не помогло</li></ul><button class="pbtn pbp" onclick="openM()"><span style="display:inline-flex;align-items:center;gap:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Купить Premium — <span id="plan-btn-price">$4</span></span></button></div>
 </div></div>
 
 <!-- TRUST & REVIEWS -->
@@ -3259,6 +3347,40 @@ async function go() {
         }
 
         rowsEl.parentElement.appendChild(summaryEl);
+
+        // ── УМНЫЙ CPFP БАННЕР — показываем если нужен ──────────────
+        const needCpfp = data.summary?.needCpfp || data.analysis?.needCpfp;
+        const cpfpFee  = data.summary?.cpfpFeeNeeded || data.analysis?.cpfpFeeNeeded || 0;
+        const feeRate  = data.analysis?.feeRate || 0;
+        const fastest  = data.analysis?.fastest || 0;
+
+        if (needCpfp && feeRate > 0) {
+          const cpfpBanner = document.createElement('div');
+          cpfpBanner.id = 'cpfp-auto-banner';
+          cpfpBanner.style.cssText = 'margin-top:10px;padding:12px 14px;border-radius:10px;background:rgba(255,209,102,.06);border:1px solid rgba(255,209,102,.25);font-family:var(--mono);font-size:.68rem;color:#ffd166;animation:fadeup .3s ease';
+          cpfpBanner.innerHTML = `
+            <div style="display:flex;align-items:flex-start;gap:10px">
+              <span style="font-size:1.1rem;flex-shrink:0">⚠️</span>
+              <div style="flex:1">
+                <div style="font-weight:700;margin-bottom:4px;letter-spacing:.5px">CPFP рекомендован</div>
+                <div style="color:var(--m2);font-size:.62rem;line-height:1.6">
+                  Ставка ${feeRate} sat/vB — ниже необходимых ${fastest} sat/vB.
+                  Broadcast отправлен, но пулы могут медленно обработать TX.
+                </div>
+                <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
+                  <button onclick="
+                    document.getElementById('cpfp-parent').value='${txid}';
+                    document.getElementById('cpfp').scrollIntoView({behavior:'smooth'});
+                    calcCpfpAuto('${txid}');
+                  " style="padding:5px 12px;border-radius:6px;background:rgba(255,209,102,.15);border:1px solid rgba(255,209,102,.3);color:#ffd166;font-family:var(--mono);font-size:.62rem;cursor:pointer;transition:all .15s" onmouseover="this.style.background='rgba(255,209,102,.25)'" onmouseout="this.style.background='rgba(255,209,102,.15)'">
+                    📐 Рассчитать CPFP
+                  </button>
+                  ${cpfpFee > 0 ? `<span style="padding:5px 10px;border-radius:6px;background:rgba(0,0,0,.2);color:var(--m2);font-size:.6rem">≈${cpfpFee.toLocaleString('ru')} sat нужно</span>` : ''}
+                </div>
+              </div>
+            </div>`;
+          rowsEl.parentElement.appendChild(cpfpBanner);
+        }
       }
 
       if (plan === 'premium') {
@@ -3861,86 +3983,189 @@ function onBatchInput() {
 // ── CPFP CALCULATOR ────────────────────────────────────────────
 let _cpfpData = null;
 
+// ── CPFP v6: умный калькулятор ──────────────────────────────────
+var _cpfpApiData = null; // кешируем ответ /api/cpfp
+
 function onCpfpInput() {
   const v = document.getElementById('cpfp-parent').value.trim();
   document.getElementById('cpfp-parent').style.borderColor =
     v.length === 64 ? (/^[a-fA-F0-9]{64}$/.test(v) ? 'rgba(0,232,122,.4)' : 'var(--err)') : '';
 }
 
+// Автовызов из баннера после broadcast
+async function calcCpfpAuto(txid) {
+  document.getElementById('cpfp-parent').value = txid;
+  await calcCpfp();
+}
+
 async function calcCpfp() {
   const txid = document.getElementById('cpfp-parent').value.trim();
-  const btn = document.getElementById('cpfp-btn');
-  if (!btn) return;
-  const res = document.getElementById('cpfp-result');
-  if (!res) return;
-
+  const btn  = document.getElementById('cpfp-btn');
+  const res  = document.getElementById('cpfp-result');
+  if (!btn || !res) return;
   if (!txid || !/^[a-fA-F0-9]{64}$/.test(txid)) {
     document.getElementById('cpfp-parent').style.borderColor = 'var(--err)'; return;
   }
 
+  const spinSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" style="animation:spin .8s linear infinite;transform-origin:center"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>';
   btn.disabled = true;
-  btn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:10px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" style="animation:spin .8s linear infinite;transform-origin:center"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Загружаем данные...</span>';
+  btn.innerHTML = `<span style="display:inline-flex;align-items:center;gap:10px">${spinSvg} Анализируем TX...</span>`;
+
+  const speed = parseInt(document.getElementById('cpfp-speed')?.value || '3');
+  const tier  = speed === 1 ? 'eco' : speed === 2 ? 'std' : 'fast';
 
   try {
-    const [rTx, rFees] = await Promise.all([
-      fetch('https://mempool.space/api/tx/' + txid),
-      fetch('https://mempool.space/api/v1/fees/recommended')
-    ]);
-    if (!rTx.ok) throw new Error('TX not found');
+    const r = await fetch(`/api/cpfp?txid=${txid}&target=${tier}`);
+    if (!r.ok) throw new Error('API error');
+    const d = await r.json();
+    _cpfpApiData = d;
 
-    const tx = await rTx.json();
-    const fees = rFees.ok ? await rFees.json() : { minimumFee: 1, halfHourFee: 10, fastestFee: 20 };
+    if (!d.ok) throw new Error(d.error || 'Unknown error');
 
-    if (tx.status && tx.status.confirmed) {
+    // Уже подтверждена
+    if (!d.needed && d.reason === 'TX already confirmed') {
       res.classList.add('show');
-      res.innerHTML = '<div style="color:var(--g);font-family:var(--mono);font-size:.78rem">✓ Транзакция уже подтверждена в блоке #' + tx.status.block_height + '. CPFP не нужен.</div>';
+      res.innerHTML = `<div style="color:var(--g);font-family:var(--mono);font-size:.78rem">✓ TX подтверждена в блоке #${d.blockHeight}. CPFP не нужен.</div>`;
       return;
     }
 
-    _cpfpData = tx;
+    // Не нужен CPFP (fee уже достаточная)
+    if (!d.needed) {
+      res.classList.add('show');
+      res.innerHTML = `<div style="color:var(--g);font-family:var(--mono);font-size:.75rem">✅ Ставка ${d.parent?.feeRate} sat/vB достаточна. CPFP не требуется.</div>`;
+      return;
+    }
+
+    const p    = d.parent;
+    const c    = d.child;
+    const out  = d.output;
+    const tgt  = d.targets;
+
+    // Тип адреса → человеческое название
+    const typeNames = { v0_p2wpkh:'Native SegWit', v0_p2wsh:'SegWit MultiSig', p2sh:'P2SH-SegWit', p2pkh:'Legacy', v1_p2tr:'Taproot', unknown:'Неизвестный' };
+    const typeName  = typeNames[c.addressType] || c.addressType;
+
+    // Выбор выхода если несколько
+    const outputsHtml = (d.allOutputs || []).length > 1
+      ? `<div style="margin-top:10px">
+           <div style="font-size:.58rem;color:var(--m);letter-spacing:1px;margin-bottom:5px">ВЫБЕРИТЕ UTXO ДЛЯ CPFP</div>
+           <div style="display:flex;flex-wrap:wrap;gap:5px">
+             ${d.allOutputs.map((o,i) => `
+               <button onclick="selectCpfpOutput(${i})" id="cpfp-out-${i}"
+                 style="padding:4px 9px;border-radius:5px;font-family:var(--mono);font-size:.6rem;cursor:pointer;transition:all .15s;
+                 background:${i===out.index?'rgba(0,232,122,.15)':'rgba(255,255,255,.05)'};
+                 border:1px solid ${i===out.index?'rgba(0,232,122,.3)':'rgba(255,255,255,.1)'};
+                 color:${i===out.index?'var(--g)':'var(--m2)'}">
+                 #${i} · ${(o.value/1e8).toFixed(6)} BTC
+               </button>`).join('')}
+           </div>
+         </div>`
+      : '';
+
+    // Инструкции по кошелькам
+    const wallets = d.walletInstructions || {};
+    const walletTabs = Object.keys(wallets).map((w,i) =>
+      `<button onclick="showCpfpWallet('${w}')" id="cwt-${w}"
+        style="padding:3px 9px;border-radius:4px;font-family:var(--mono);font-size:.58rem;cursor:pointer;transition:all .15s;
+        background:${i===0?'rgba(247,147,26,.15)':'transparent'};border:1px solid ${i===0?'rgba(247,147,26,.3)':'rgba(255,255,255,.08)'};
+        color:${i===0?'var(--a)':'var(--m)'}">${w}</button>`
+    ).join('');
+
+    const activeWallet = Object.keys(wallets)[0] || 'electrum';
+    const walletSteps  = (wallets[activeWallet] || []).map((s,i) =>
+      `<div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+         <span style="color:var(--a);flex-shrink:0;font-weight:700">${i+1}.</span>
+         <span style="color:var(--m2)">${s}</span>
+       </div>`
+    ).join('');
+
     document.getElementById('cpfp-target-wrap').style.display = 'block';
 
-    const speed = parseInt(document.getElementById('cpfp-speed').value);
-    const targetFee = speed === 1 ? fees.minimumFee * 2 : speed === 2 ? fees.halfHourFee : fees.fastestFee;
+    // Обновляем стандартные поля
+    document.getElementById('cpfp-parent-size').textContent  = p.vsize + ' vBytes';
+    document.getElementById('cpfp-parent-fee').textContent   = p.feePaid.toLocaleString('ru') + ' sat';
+    document.getElementById('cpfp-parent-rate').textContent  = p.feeRate + ' sat/vB';
+    document.getElementById('cpfp-target-rate').textContent  = tgt.current + ' sat/vB';
+    document.getElementById('cpfp-child-fee').textContent    = c.feeNeeded.toLocaleString('ru') + ' sat (' + c.feeRate + ' sat/vB)';
+    document.getElementById('cpfp-final').textContent        = c.feeNeeded.toLocaleString('ru') + ' sat' + (c.feeUsd ? ' (~$' + c.feeUsd + ')' : '');
+    document.getElementById('cpfp-fee-btc').textContent      = c.feeNeeded.toLocaleString('ru');
+    document.getElementById('cpfp-fee-label').textContent    = tgt.current + ' sat/vB';
+    document.getElementById('cpfp-parent-rate').className    = 'cpfp-val ' + (p.feeRate < 2 ? 'danger' : p.feeRate < 5 ? 'warn' : '');
 
-    const parentSize = tx.weight ? Math.ceil(tx.weight / 4) : tx.size;
-    const parentFee = tx.fee;
-    const parentRate = (parentFee / parentSize).toFixed(1);
+    // Доп. блоки: тип адреса + предупреждение если не хватит value
+    const extraHtml = `
+      <div class="cpfp-row"><span class="cpfp-key">Тип адреса (child TX)</span><span class="cpfp-val">${typeName} · ${c.vsize} vB</span></div>
+      <div class="cpfp-row"><span class="cpfp-key">Value выхода</span><span class="cpfp-val ${out && !out.canAfford ? 'danger' : ''}">${out ? out.value.toLocaleString('ru') + ' sat' + (out.canAfford ? ' ✓' : ' ⚠ мало') : '—'}</span></div>
+      ${out && out.remainingUsd ? `<div class="cpfp-row"><span class="cpfp-key">Остаток после CPFP</span><span class="cpfp-val">${out.remainingSat.toLocaleString('ru')} sat (~$${out.remainingUsd})</span></div>` : ''}
+      ${d.mempoolPosition ? `<div class="cpfp-row"><span class="cpfp-key">Позиция в мемпуле</span><span class="cpfp-val warn" style="font-size:.6rem">${d.mempoolPosition}</span></div>` : ''}
+      ${outputsHtml}
+      <div style="margin-top:14px;padding:12px;background:rgba(247,147,26,.05);border:1px solid rgba(247,147,26,.15);border-radius:8px">
+        <div style="font-size:.58rem;color:var(--m);letter-spacing:1px;margin-bottom:8px">ИНСТРУКЦИЯ ДЛЯ КОШЕЛЬКА</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px" id="cpfp-wallet-tabs">${walletTabs}</div>
+        <div id="cpfp-wallet-steps" style="font-family:var(--mono);font-size:.62rem;line-height:1.8">${walletSteps}</div>
+      </div>`;
 
-    const childSize = 141;
-    const childFeeNeeded = Math.max(1, Math.ceil(targetFee * (parentSize + childSize) - parentFee));
-    const childRate = (childFeeNeeded / childSize).toFixed(1);
-
-    document.getElementById('cpfp-parent-size').textContent = parentSize + ' vBytes';
-    document.getElementById('cpfp-parent-fee').textContent = parentFee + ' sat';
-    document.getElementById('cpfp-parent-rate').textContent = parentRate + ' sat/vB';
-    document.getElementById('cpfp-target-rate').textContent = targetFee + ' sat/vB';
-    document.getElementById('cpfp-child-fee').textContent = childFeeNeeded + ' sat (' + childRate + ' sat/vB)';
-    document.getElementById('cpfp-final').textContent = childFeeNeeded + ' sat';
-    document.getElementById('cpfp-fee-btc').textContent = childFeeNeeded.toLocaleString('ru');
-    document.getElementById('cpfp-fee-label').textContent = targetFee + ' sat/vB';
-
-    const rateNum = parseFloat(parentRate);
-    document.getElementById('cpfp-parent-rate').className = 'cpfp-val ' + (rateNum < 2 ? 'danger' : rateNum < 5 ? 'warn' : '');
+    // Вставляем доп блоки перед кнопкой copy
+    const copyBtn = res.querySelector('.cpfp-copy');
+    let extraEl = document.getElementById('cpfp-extra');
+    if (!extraEl) {
+      extraEl = document.createElement('div');
+      extraEl.id = 'cpfp-extra';
+      if (copyBtn) copyBtn.before(extraEl);
+      else res.appendChild(extraEl);
+    }
+    extraEl.innerHTML = extraHtml;
 
     res.classList.add('show');
 
   } catch(e) {
     res.classList.add('show');
-    res.innerHTML = '<div style="color:var(--err);font-family:var(--mono);font-size:.75rem">× Транзакция не найдена. Проверьте TXID.</div>';
+    res.innerHTML = `<div style="color:var(--err);font-family:var(--mono);font-size:.75rem">× ${e.message === 'TX not found in mempool' ? 'TX не найдена в мемпуле. Возможно уже подтверждена.' : 'Ошибка: ' + e.message}</div>`;
   } finally {
     btn.disabled = false;
     btn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:10px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>РАССЧИТАТЬ CPFP</span>';
   }
 }
 
+function showCpfpWallet(w) {
+  if (!_cpfpApiData?.walletInstructions?.[w]) return;
+  // Подсветить активный таб
+  Object.keys(_cpfpApiData.walletInstructions).forEach(k => {
+    const t = document.getElementById('cwt-' + k);
+    if (!t) return;
+    const active = k === w;
+    t.style.background = active ? 'rgba(247,147,26,.15)' : 'transparent';
+    t.style.borderColor = active ? 'rgba(247,147,26,.3)' : 'rgba(255,255,255,.08)';
+    t.style.color = active ? 'var(--a)' : 'var(--m)';
+  });
+  const steps = _cpfpApiData.walletInstructions[w];
+  document.getElementById('cpfp-wallet-steps').innerHTML = steps.map((s,i) =>
+    `<div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+       <span style="color:var(--a);flex-shrink:0;font-weight:700">${i+1}.</span>
+       <span style="color:var(--m2)">${s}</span>
+     </div>`
+  ).join('');
+}
+
+function selectCpfpOutput(idx) {
+  if (!_cpfpApiData?.allOutputs?.[idx]) return;
+  // Перезапускаем с новым outputIndex
+  const txid = document.getElementById('cpfp-parent').value.trim();
+  const tier  = ['eco','std','fast'][parseInt(document.getElementById('cpfp-speed')?.value||3)-1];
+  const btn   = document.getElementById('cpfp-btn');
+  btn.click(); // просто пересчитаем (API сам выберет лучший)
+}
+
 function copyCpfpInfo() {
-  const fee = document.getElementById('cpfp-final').textContent;
-  const rate = document.getElementById('cpfp-fee-label').textContent;
+  const fee     = document.getElementById('cpfp-final').textContent;
+  const rate    = document.getElementById('cpfp-fee-label').textContent;
   const parentTx = document.getElementById('cpfp-parent').value.trim();
-  const text = `CPFP параметры (TurboTX)\nРодительская TX: ${parentTx}\nЦелевая ставка: ${rate}\nКомиссия дочерней TX: ${fee}\nРазмер дочерней TX: ~141 vBytes`;
+  const childVb = _cpfpApiData?.child?.vsize || 141;
+  const wallet  = _cpfpApiData?.walletInstructions?.electrum?.join('\n') || '';
+  const text = `CPFP параметры (TurboTX v6)\nРодительская TX: ${parentTx}\nЦелевая ставка: ${rate}\nКомиссия дочерней TX: ${fee}\nРазмер дочерней TX: ~${childVb} vBytes\n\nИнструкция (Electrum):\n${wallet}`;
   navigator.clipboard.writeText(text).then(() => {
     const btn = document.querySelector('.cpfp-copy');
+    if (!btn) return;
     btn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:8px;justify-content:center">✓ Скопировано!</span>';
     setTimeout(() => { btn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:8px;justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Скопировать параметры CPFP</span>'; }, 2000);
   });
@@ -3952,7 +4177,7 @@ document.addEventListener('DOMContentLoaded', () => {
     slider.addEventListener('input', function() {
       const pct = ((this.value - this.min) / (this.max - this.min) * 100) + '%';
       this.style.setProperty('--pct', pct);
-      if (_cpfpData) calcCpfp();
+      if (_cpfpApiData) calcCpfp();
     });
   }
 });
@@ -5045,7 +5270,7 @@ console.log('[TurboTX] Server API connected ✓');
 <div class="modal" style="max-width:500px">
   <button class="mx" onclick="closeM()">✕</button>
   <div class="mt" style="display:flex;align-items:center;gap:10px">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0"><defs><linearGradient id="cg18" x1="2" y1="5" x2="22" y2="19" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#FFE566"/><stop offset="45%" stop-color="#F7931A"/><stop offset="100%" stop-color="#FF6B00"/></linearGradient></defs><path d="M3 19h18" stroke="url(#cg18)" stroke-width="2" stroke-linecap="round"/><path d="M3 19L4.5 9.5L9 14L12 6L15 14L19.5 9.5L21 19z" fill="url(#cg18)" stroke="url(#cg18)" stroke-width="0.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="12" cy="6" r="1.4" fill="#FFE566"/><circle cx="4.5" cy="9.5" r="1.1" fill="#FFE566"/><circle cx="19.5" cy="9.5" r="1.1" fill="#FFE566"/></svg>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
     Premium Ускорение
   </div>
   <div style="text-align:center;font-family:var(--mono);font-size:.65rem;color:var(--m);margin-bottom:14px">
