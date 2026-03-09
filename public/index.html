@@ -3812,45 +3812,41 @@ async function verifyPayment() {
   vb.disabled = true;
   vb.innerHTML = '<span style="display:inline-flex;align-items:center;gap:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" style="animation:spin .8s linear infinite;transform-origin:center"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>Проверяем...</span>';
   vr.style.display = 'block';
-  vr.innerHTML = '<span style="color:var(--m)">Ищем транзакцию в блокчейне...</span>';
+  vr.innerHTML = '<span style="color:var(--m)">🔍 Проверяем через сервер (BTC + USDT TRC-20)...</span>';
 
-  if (/^[a-fA-F0-9]{64}$/.test(txid)) {
-    vr.innerHTML = '<span style="color:var(--m)">Проверяем BTC через mempool.space...</span>';
-    const tx = await fetchTxFromAny(txid);
+  try {
+    const r = await fetch('/api/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ txHash: txid, expectedUsd: selectedUsd, method: 'auto' }),
+    });
+    const d = await r.json();
 
-    if (tx) {
-      const anyOut = (tx.vout || []).find(o => o.scriptpubkey_address === WALLET);
-      if (anyOut) {
-        const paid = (anyOut.value / 1e8).toFixed(6);
-        const conf = tx.status && tx.status.confirmed;
-        if (!conf) {
-          activatePremium(paid + ' BTC (в мемпуле)', 'Bitcoin', txid.slice(0,14) + '…' + txid.slice(-6));
-        } else {
-          activatePremium(paid + ' BTC', 'Bitcoin', txid.slice(0,14) + '…' + txid.slice(-6));
-        }
-        vb.disabled = false; vb.innerHTML = _VB_ORIG; return;
+    if (d.ok) {
+      // Сохраняем токен активации от сервера
+      if (d.activationToken) {
+        try { localStorage.setItem('turbotx_prem_token', d.activationToken); } catch(_) {}
       }
-      vr.innerHTML = '<div style="color:var(--err);line-height:1.8">BTC транзакция найдена, но платёж отправлен не на наш адрес.<br>' +
-        '<a href="https://mempool.space/tx/' + txid + '" target="_blank" style="color:var(--a)">Открыть на mempool.space →</a><br><br>' +
-        '<span style="color:var(--m);font-size:.65rem">Если ошибка — напишите @Sup_TurboTX с этим TXID</span></div>';
+      activatePremium(d.paid, d.method === 'btc' ? 'Bitcoin' : 'USDT TRC-20',
+        txid.slice(0,14) + '…' + txid.slice(-6));
       vb.disabled = false; vb.innerHTML = _VB_ORIG; return;
     }
 
-    vr.innerHTML = '<span style="color:var(--m)">BTC не найден, проверяем USDT TRC-20...</span>';
-    const usdtRes = await verifyUsdtPayment(txid, selectedUsd);
-    if (usdtRes.ok) {
-      activatePremium(usdtRes.paid + ' USDT', 'USDT TRC-20', txid.slice(0,14) + '…' + txid.slice(-6));
-      vb.disabled = false; vb.innerHTML = _VB_ORIG; return;
-    }
+    // Не ок — показываем причину
+    const errMsg = d.error || 'Транзакция не найдена или платёж отправлен не на наш адрес.';
+    const isBtcHash = /^[a-fA-F0-9]{64}$/.test(txid);
+    vr.innerHTML = '<div style="color:var(--err);line-height:1.9">' +
+      '× ' + errMsg + '<br><br>' +
+      (isBtcHash
+        ? '<a href="https://mempool.space/tx/' + txid + '" target="_blank" style="color:var(--a)">BTC →</a>&nbsp; '
+        : '') +
+      '<a href="https://tronscan.org/#/transaction/' + txid + '" target="_blank" style="color:#26d0a8">TRON →</a><br><br>' +
+      '<span style="color:var(--m);font-size:.65rem">TX ещё не попала в мемпул? Подождите 1–2 мин.<br>Если оплата прошла — напишите @Sup_TurboTX с этим TXID</span></div>';
 
-    vr.innerHTML = '<div style="color:var(--err);line-height:1.8">Транзакция не найдена.<br><br>' +
-      '<a href="https://mempool.space/tx/' + txid + '" target="_blank" style="color:var(--a)">Проверить BTC →</a>&nbsp;&nbsp;' +
-      '<a href="https://tronscan.org/#/transaction/' + txid + '" target="_blank" style="color:#26d0a8">Проверить USDT →</a><br><br>' +
-      '<span style="color:var(--m);font-size:.65rem">Транзакция ещё не попала в мемпул? Подождите 1–2 мин и попробуйте снова.<br>Если оплата прошла — напишите @Sup_TurboTX</span></div>';
-    vb.disabled = false; vb.innerHTML = _VB_ORIG; return;
+  } catch(e) {
+    vr.innerHTML = '<span style="color:var(--err)">× Ошибка соединения. Попробуйте снова или напишите @Sup_TurboTX</span>';
   }
 
-  vr.innerHTML = '<span style="color:var(--err)">× Неверный формат. Вставьте TXID из истории транзакций (64 символа).</span>';
   vb.disabled = false; vb.innerHTML = _VB_ORIG;
 }
 
