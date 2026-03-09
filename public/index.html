@@ -2344,14 +2344,20 @@ input[type=text]:focus {
     <strong id="tk-size" class="ticker-val ok" style="color:var(--t)">—</strong>
     <span>МБ</span>
   </span>
-  <span style="color:rgba(255,255,255,.1)">|</span>
-  <span style="display:flex;align-items:center;gap:4px">
-    <span style="color:var(--a)">⚡</span>
-    <strong id="tk-hashrate" style="color:var(--a)">—</strong>
-    <span style="color:var(--m)">EH/s</span>
-  </span>
   <!-- скрытый элемент для совместимости -->
   <span id="tk-minfee" style="display:none">—</span>
+</div>
+
+<!-- ГЛОБАЛЬНЫЙ ХЕШРЕЙТ (перенесён вверх) -->
+<div class="hashrate-bar" style="margin-top:0; margin-bottom:12px;">
+  <span style="color:var(--a)">⚡</span>
+  <span>Глобальный хешрейт сети:</span>
+  <strong id="hr-display" style="color:var(--t)">—</strong>
+  <span>EH/s</span>
+  <div class="hashrate-fill-wrap">
+    <div class="hashrate-fill" id="hr-fill" style="width:0%"></div>
+  </div>
+  <span id="hr-label" style="color:var(--m)">загружаем…</span>
 </div>
 
 <!-- STATS -->
@@ -3170,16 +3176,7 @@ input[type=text]:focus {
     <span style="display:flex;align-items:center;gap:5px"><span style="color:var(--accent3);font-size:.9em">★</span>Новый топ-пул 2026</span>
   </div>
   <div class="pools-grid" id="pg"></div>
-  <div class="hashrate-bar">
-    <span style="color:var(--a)">⚡</span>
-    <span>Глобальный хешрейт сети:</span>
-    <strong id="hr-display" style="color:var(--t)">—</strong>
-    <span>EH/s</span>
-    <div class="hashrate-fill-wrap">
-      <div class="hashrate-fill" id="hr-fill" style="width:0%"></div>
-    </div>
-    <span id="hr-label" style="color:var(--m)">загружаем…</span>
-  </div>
+  <!-- Хешрейт-бар удалён из секции пулов, теперь он находится выше -->
 </div>
 
 
@@ -3710,7 +3707,7 @@ function _rbfLedger() {
 
 function _rbfMobile() {
   return `Большинство мобильных кошельков (Exodus, Trust Wallet, Coinbase Wallet)<br>
-<strong style="color:#ff9320">не поддерживают RBF</strong> из интерфейса.<br><br>
+<strong style="color:#ff9320">не поддерживают</strong> RBF из интерфейса.<br><br>
 <strong style="color:var(--t)">Рекомендации:</strong><br>
 → Используйте наш <a href="javascript:void(0)" onclick="document.getElementById('cpfp').scrollIntoView({behavior:'smooth'})" style="color:var(--a)">CPFP калькулятор</a><br>
 → Или <a href="javascript:void(0)" onclick="document.getElementById('accelerate').scrollIntoView({behavior:'smooth'})" style="color:var(--a)">бесплатный rebroadcast</a> в 5 пулов`;
@@ -6113,9 +6110,6 @@ async function fetchHashrate() {
     if (hr && hr > 0) {
       const ehS = (hr / 1e18).toFixed(0);
       const ehNum = parseInt(ehS);
-      // Ticker в mempool bar
-      const el = document.getElementById('tk-hashrate');
-      if (el) { el.textContent = ehS; }
       // Hashrate bar под пулами
       const hrDisp = document.getElementById('hr-display');
       if (hrDisp) hrDisp.textContent = ehS;
