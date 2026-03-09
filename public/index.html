@@ -822,8 +822,60 @@ nav{
   width:5px;height:5px;border-radius:50%;background:var(--g);
   animation:livepulse 2s ease-in-out infinite
 }
-@keyframes livepulse{0%,100%{opacity:.9}50%{opacity:.2}}
+@keyframes livepulse{0%,100%{opacity:.9;transform:scale(1)}50%{opacity:.2;transform:scale(.7)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+/* ── Сердце-пульс состояния сети ─────────────────────────── */
+.net-heart {
+  display:inline-flex;align-items:center;justify-content:center;
+  flex-shrink:0;position:relative;
+  width:22px;height:22px;
+}
+.net-heart.sm { width:14px;height:14px; }
+.net-heart svg { overflow:visible;display:block; }
+
+/* Три анимации биения */
+@keyframes hb-calm {
+  0%,100%{transform:scale(1)}
+  50%    {transform:scale(.72)}
+}
+@keyframes hb-mid {
+  0%,100%{transform:scale(1)}
+  15%    {transform:scale(1.22)}
+  30%    {transform:scale(.8)}
+  45%    {transform:scale(1.1)}
+  60%    {transform:scale(.9)}
+}
+@keyframes hb-busy {
+  0%,100%{transform:scale(1)}
+  12%    {transform:scale(1.3)}
+  24%    {transform:scale(.7)}
+  36%    {transform:scale(1.18)}
+  50%    {transform:scale(.82)}
+  62%    {transform:scale(1.08)}
+  74%    {transform:scale(.92)}
+}
+
+/* Состояния */
+.net-heart.calm  svg { animation:hb-calm 3s ease-in-out infinite; }
+.net-heart.mid   svg { animation:hb-mid  1.5s ease-in-out infinite; }
+.net-heart.busy  svg { animation:hb-busy  .7s ease-in-out infinite; }
+
+/* Цвета заливки через CSS custom property — меняются плавно */
+.net-heart .h-body { transition:fill .8s,filter .8s; }
+.net-heart.calm  .h-body { fill:#5bc8f5; filter:drop-shadow(0 0 4px rgba(91,200,245,.6)); }
+.net-heart.mid   .h-body { fill:#ffd166; filter:drop-shadow(0 0 5px rgba(255,209,102,.6)); }
+.net-heart.busy  .h-body { fill:#ff4040; filter:drop-shadow(0 0 8px rgba(255,64,64,.7)) drop-shadow(0 0 16px rgba(247,147,26,.4)); }
+
+/* Слой льда / пламени */
+.net-heart .h-ice   { transition:opacity .8s; }
+.net-heart .h-flame { transition:opacity .8s; }
+.net-heart.calm  .h-ice   { opacity:1; }
+.net-heart.calm  .h-flame { opacity:0; }
+.net-heart.mid   .h-ice   { opacity:0; }
+.net-heart.mid   .h-flame { opacity:.4; }
+.net-heart.busy  .h-ice   { opacity:0; }
+.net-heart.busy  .h-flame { opacity:1; }
 @keyframes spin{to{transform:rotate(360deg)}}
 .acc-btn svg.spinning{animation:spin .8s linear infinite;transform-origin:center}
 
@@ -1392,39 +1444,19 @@ footer a:hover{color:var(--a)}
   /* Lang flags */
   #lang-flags{left:50px;bottom:16px;grid-template-columns:repeat(4,34px)}
 
-  /* FAQ */
-  .faq-section{padding-left:58px!important;padding-right:14px!important}
+  /* FAQ — убрано, теперь управляется глобальными правилами выше */
+  /* .faq-section{padding-left:58px!important} */
 }
 
-/* ── iOS safe area (notch / Dynamic Island / home bar) ── */
-@supports(padding:env(safe-area-inset-bottom)){
-  @media(max-width:767px){
-    nav{
-      padding-left:max(14px,env(safe-area-inset-left));
-      padding-right:max(14px,env(safe-area-inset-right));
-    }
-    .w{
-      padding-left:max(14px,env(safe-area-inset-left));
-      padding-right:max(14px,env(safe-area-inset-right));
-    }
-    footer{
-      padding-bottom:max(18px,env(safe-area-inset-bottom))!important;
-    }
-    #float-support{
-      bottom:max(18px,env(safe-area-inset-bottom));
-      left:max(10px,env(safe-area-inset-left));
-    }
-    #lang-flags{
-      bottom:max(16px,env(safe-area-inset-bottom));
+  /* иконки слева — iOS safe area */
+  @supports(padding:env(safe-area-inset-bottom)){
+    @media(max-width:767px){
+      #float-support{
+        bottom:max(18px,env(safe-area-inset-bottom));
+        left: max(8px, env(safe-area-inset-left));
+      }
     }
   }
-  /* iPhone с иконками слева — контент не перекрывается */
-  @media(max-width:600px){
-    nav{padding-left:max(58px,calc(env(safe-area-inset-left) + 44px))!important}
-    .w{padding-left:max(58px,calc(env(safe-area-inset-left) + 44px))!important}
-    .faq-section{padding-left:max(58px,calc(env(safe-area-inset-left) + 44px))!important}
-  }
-}
 
 /* ── Touch devices — убираем hover-артефакты ────── */
 @media(hover:none){
@@ -1433,15 +1465,13 @@ footer a:hover{color:var(--a)}
   .pbtn:active{transform:scale(.98)}
 }
 
-/* ── Floating support + lang icons ─────────────────── */
+/* ── Floating support — мобилки (≤600px уже учтены выше) ── */
 @media(max-width:600px){
   #float-support{flex-direction:column;gap:7px}
   .fs-icon{width:34px;height:34px}
-  .fs-icon::after{display:none}
   #lang-btn{width:34px;height:34px}
   .lang-flag-btn{width:34px;height:34px}
   .lang-flag-btn::after{display:none}
-  .faq-section{padding-left:58px!important;padding-right:14px!important}
 }
 
 /* ── iPad Pro / large tablet: ≥1024px ──────────────── */
@@ -2147,8 +2177,40 @@ input[type=text]:focus {
 .queue-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;background:var(--err);animation:blink-r 1.2s ease-in-out infinite;box-shadow:0 0 0 0 rgba(255,51,85,.4)}
 @keyframes blink-r{0%{opacity:1;box-shadow:0 0 6px 2px rgba(255,51,85,.5)}50%{opacity:.35;box-shadow:none}100%{opacity:1;box-shadow:0 0 6px 2px rgba(255,51,85,.5)}}
 
-/* ── FLOATING SOCIAL ── */
-#float-support{position:fixed;bottom:24px;left:16px;z-index:8900;display:flex;flex-direction:column;gap:8px}
+/* ── FLOATING SOCIAL — иконки слева, никогда не перекрывают контент ── */
+/*
+  Контент .w: max-width:940px, margin:auto → левый край = (V - 940) / 2
+  Иконка: ширина 36px → правый край иконки = left + 36px
+  Нужно: правый край иконки ≤ левый край .w
+  Формула: left + 36 ≤ (V-940)/2  →  left ≤ V/2 - 506
+  Итого: left = max(12px, calc(50% - 510px))  → иконка заканчивается в 4px ДО контента
+*/
+#float-support{
+  position:fixed;
+  bottom:24px;
+  left: max(12px, calc(50% - 510px));
+  z-index:8900;
+  display:flex;
+  flex-direction:column;
+  gap:8px
+}
+
+/* Когда экран уже 1036px → calc уходит в минус, иконки прижимаются к 12px
+   и начинают перекрывать .w (content left = (V-940)/2 < 48px при V < 1036px)
+   Добавляем padding-left контенту, чтобы сдвинуть его правее иконок */
+@media(max-width:1036px){
+  .w           { padding-left: 56px !important; }
+  nav          { padding-left: 56px !important; }
+  .faq-section { padding-left: 56px !important; } /* перекрывает inline padding:36px */
+  #float-support { left: 10px; }
+}
+@media(max-width:480px){
+  .w           { padding-left: 52px !important; padding-right: 12px !important; }
+  nav          { padding-left: 52px !important; }
+  .faq-section { padding-left: 52px !important; }
+  #float-support { left: 8px; bottom: 14px; }
+  .fs-icon::after { display: none; }
+}
 .fs-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;
   text-decoration:none;border:1px solid rgba(255,255,255,.09);background:rgba(13,13,20,.82);
   backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
@@ -2222,7 +2284,7 @@ input[type=text]:focus {
 <!-- MEMPOOL ALERT BAR -->
 <div id="mempool-bar" style="display:flex;align-items:center;justify-content:center;gap:14px;padding:9px 16px;margin-bottom:20px;background:rgba(255,255,255,.018);border:1px solid rgba(255,255,255,.055);border-radius:var(--r);font-family:var(--mono);font-size:.66rem;color:var(--m2);flex-wrap:wrap">
   <span style="display:flex;align-items:center;gap:5px">
-    <span style="width:5px;height:5px;border-radius:50%;background:var(--g);flex-shrink:0;animation:livepulse 2s infinite"></span>
+    <span class="net-heart calm" id="net-pulse-dot"><svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g class="h-flame"><path d="M9 19 Q7 15 9.5 11 Q10.5 15 12 11 Q13.5 15 14.5 11 Q17 15 15 19" fill="#ff6b00" opacity=".85"/><path d="M10.5 20 Q9 17 10.5 14 Q11.5 17 12 14 Q12.5 17 13.5 14 Q15 17 13.5 20" fill="#ffe066" opacity=".7"/></g><path class="h-body" d="M12 20.5C12 20.5 2.5 14 2.5 8C2.5 5.2 4.7 3 7.5 3C9.1 3 10.6 3.8 12 5.2C13.4 3.8 14.9 3 16.5 3C19.3 3 21.5 5.2 21.5 8C21.5 14 12 20.5 12 20.5Z"/><g class="h-ice" stroke="#cff0ff" stroke-width=".9" stroke-linecap="round" fill="none"><line x1="12" y1="5.5" x2="12" y2="8.5"/><line x1="10.4" y1="6.3" x2="13.6" y2="7.7"/><line x1="10.4" y1="7.7" x2="13.6" y2="6.3"/><line x1="7" y1="9.5" x2="7" y2="11.5"/><line x1="6" y1="10.1" x2="8" y2="10.9"/><line x1="17" y1="9.5" x2="17" y2="11.5"/><line x1="16" y1="10.1" x2="18" y2="10.9"/></g></svg></span>
     <span style="color:var(--m)">мемпул</span>
     <strong id="tk-stuck" style="color:var(--t)">—</strong>
     <span id="tk-stuck-badge" style="padding:1px 7px;border-radius:20px;font-size:.58rem"></span>
@@ -2545,7 +2607,7 @@ input[type=text]:focus {
 
   <!-- FEE HEALTH METER -->
   <div id="fee-meter" style="display:flex;align-items:center;gap:10px;padding:10px 14px;margin-bottom:14px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:var(--r);font-family:var(--mono);font-size:.65rem;color:var(--m2)">
-    <span style="width:8px;height:8px;border-radius:50%;background:var(--m);flex-shrink:0;transition:background .5s" id="fee-dot"></span>
+    <span class="net-heart calm" id="fee-dot"><svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g class="h-flame"><path d="M9 19 Q7 15 9.5 11 Q10.5 15 12 11 Q13.5 15 14.5 11 Q17 15 15 19" fill="#ff6b00" opacity=".85"/><path d="M10.5 20 Q9 17 10.5 14 Q11.5 17 12 14 Q12.5 17 13.5 14 Q15 17 13.5 20" fill="#ffe066" opacity=".7"/></g><path class="h-body" d="M12 20.5C12 20.5 2.5 14 2.5 8C2.5 5.2 4.7 3 7.5 3C9.1 3 10.6 3.8 12 5.2C13.4 3.8 14.9 3 16.5 3C19.3 3 21.5 5.2 21.5 8C21.5 14 12 20.5 12 20.5Z"/><g class="h-ice" stroke="#cff0ff" stroke-width=".9" stroke-linecap="round" fill="none"><line x1="12" y1="5.5" x2="12" y2="8.5"/><line x1="10.4" y1="6.3" x2="13.6" y2="7.7"/><line x1="10.4" y1="7.7" x2="13.6" y2="6.3"/><line x1="7" y1="9.5" x2="7" y2="11.5"/><line x1="6" y1="10.1" x2="8" y2="10.9"/><line x1="17" y1="9.5" x2="17" y2="11.5"/><line x1="16" y1="10.1" x2="18" y2="10.9"/></g></svg></span>
     <span id="fee-meter-text">Загружаем данные сети...</span>
   </div>
 
@@ -2696,7 +2758,7 @@ input[type=text]:focus {
   </div>
   <div class="plan-card prem">
     <div class="ptag tp">PREMIUM</div>
-    <div class="plan-price"><span style="color:var(--a)" id="plan-price-usd">$4</span> <em>/ разово</em> <span id="plan-price-tag" style="font-size:.57rem;font-family:var(--mono);padding:2px 7px;border-radius:4px;background:rgba(247,147,26,.12);color:var(--a);vertical-align:middle;margin-left:4px">🟡 сеть</span></div>
+    <div class="plan-price"><span style="color:var(--a)" id="plan-price-usd">$4</span> <em>/ разово</em> <span id="plan-price-tag" style="display:inline-flex;align-items:center;gap:4px;font-size:.57rem;font-family:var(--mono);padding:2px 8px;border-radius:4px;background:rgba(247,147,26,.12);color:var(--a);vertical-align:middle;margin-left:4px"><span class="net-heart calm sm" id="price-tag-dot"><svg width="12" height="12" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g class="h-flame"><path d="M9 19 Q7 15 9.5 11 Q10.5 15 12 11 Q13.5 15 14.5 11 Q17 15 15 19" fill="#ff6b00" opacity=".85"/></g><path class="h-body" d="M12 20.5C12 20.5 2.5 14 2.5 8C2.5 5.2 4.7 3 7.5 3C9.1 3 10.6 3.8 12 5.2C13.4 3.8 14.9 3 16.5 3C19.3 3 21.5 5.2 21.5 8C21.5 14 12 20.5 12 20.5Z"/><g class="h-ice" stroke="#cff0ff" stroke-width="1" stroke-linecap="round" fill="none"><line x1="12" y1="5.5" x2="12" y2="8.5"/><line x1="10.4" y1="6.3" x2="13.6" y2="7.7"/><line x1="10.4" y1="7.7" x2="13.6" y2="6.3"/></g></svg></span><span id="price-tag-text">сеть</span></span></div>
     <div class="plan-desc">Серверный API: 5 CORS-узлов + 8 пул-акселераторов топ-10 2026. Реальные ответы от каждого пула. 6 волн до 4 часов.</div>
     <ul class="fl">
       <li><span class="fi ok">✓</span><strong>7 CORS-узлов</strong> — blockstream · Blockchair · BlockCypher · btcscan · mempool</li>
@@ -3106,7 +3168,7 @@ input[type=text]:focus {
       <div style="font-family:var(--mono);font-size:.6rem;color:var(--m);margin-top:3px" id="modal-price-usdt">≈ … USDT</div>
     </div>
     <div style="text-align:right">
-      <div id="modal-price-badge" style="font-family:var(--mono);font-size:.65rem;padding:4px 10px;border-radius:20px;background:rgba(247,147,26,.12);color:var(--a);margin-bottom:6px">🟡 загрузка…</div>
+      <div id="modal-price-badge" style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:.65rem;padding:5px 12px;border-radius:20px;background:rgba(247,147,26,.12);color:var(--a);margin-bottom:6px"><span class="net-heart calm sm" id="modal-heart-dot"><svg width="13" height="13" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g class="h-flame"><path d="M9 19 Q7 15 9.5 11 Q10.5 15 12 11 Q13.5 15 14.5 11 Q17 15 15 19" fill="#ff6b00" opacity=".85"/><path d="M10.5 20 Q9 17 10.5 14 Q11.5 17 12 14 Q12.5 17 13.5 14 Q15 17 13.5 20" fill="#ffe066" opacity=".7"/></g><path class="h-body" d="M12 20.5C12 20.5 2.5 14 2.5 8C2.5 5.2 4.7 3 7.5 3C9.1 3 10.6 3.8 12 5.2C13.4 3.8 14.9 3 16.5 3C19.3 3 21.5 5.2 21.5 8C21.5 14 12 20.5 12 20.5Z"/><g class="h-ice" stroke="#cff0ff" stroke-width="1" stroke-linecap="round" fill="none"><line x1="12" y1="5.5" x2="12" y2="8.5"/><line x1="10.4" y1="6.3" x2="13.6" y2="7.7"/><line x1="10.4" y1="7.7" x2="13.6" y2="6.3"/><line x1="7" y1="9.5" x2="7" y2="11.5"/><line x1="6" y1="10.1" x2="8" y2="10.9"/></g></svg></span><span id="modal-badge-text">загрузка…</span></div>
       <div style="font-family:var(--mono);font-size:.57rem;color:var(--m);line-height:1.5">Цена меняется<br>с загрузкой сети</div>
     </div>
   </div>
@@ -5008,18 +5070,22 @@ async function go() {
 
         if (plan === 'premium') {
           rowsEl.innerHTML =
-            fmt(byName['blockstream.info']?.ok,  'blockstream.info (CORS ✓)',       byName['blockstream.info']?.ms) +
-            fmt(byName['blockchair']?.ok,         'Blockchair (CORS ✓)',             byName['blockchair']?.ms) +
-            fmt(byName['blockcypher']?.ok,        'BlockCypher',                     byName['blockcypher']?.ms) +
-            fmt(byName['bitaps']?.ok,             'Bitaps broadcast',                byName['bitaps']?.ms) +
-            fmt(byName['mempool.space']?.ok,      'mempool.space',                   byName['mempool.space']?.ms) +
-            fmt(byName['ViaBTC_accelerator']?.ok, 'ViaBTC Accelerator ⭐ топ-1',    byName['ViaBTC_accelerator']?.ms) +
-            fmt(byName['fujn.com']?.ok,           'Fujn Accelerator — топ-10 2026', byName['fujn.com']?.ms) +
-            fmt(byName['bitaccelerate']?.ok,      'BitAccelerate — 80% хешрейта',   byName['bitaccelerate']?.ms) +
-            fmt(byName['CloverPool']?.ok,         'CloverPool (ex BTC.com)',         byName['CloverPool']?.ms) +
-            fmt(byName['AntPool']?.ok,            'AntPool (Bitmain) ⭐',            byName['AntPool']?.ms) +
-            fmt(byName['F2Pool']?.ok,             'F2Pool ⭐ топ-3',                 byName['F2Pool']?.ms) +
-            fmt(byName['360btc']?.ok,             '360BTC Accelerator',              byName['360btc']?.ms);
+            fmt(byName['blockstream.info']?.ok, 'blockstream.info · CORS ✓',       byName['blockstream.info']?.ms) +
+            fmt(byName['blockchair']?.ok,        'Blockchair · CORS ✓',             byName['blockchair']?.ms) +
+            fmt(byName['blockcypher']?.ok,       'BlockCypher · CORS ✓',            byName['blockcypher']?.ms) +
+            fmt(byName['bitaps.com']?.ok,        'Bitaps broadcast',                byName['bitaps.com']?.ms) +
+            fmt(byName['mempool.space']?.ok,     'mempool.space · broadcast',       byName['mempool.space']?.ms) +
+            fmt(byName['btcscan.org']?.ok,       'btcscan.org · relay',             byName['btcscan.org']?.ms) +
+            fmt(byName['blockchain.info']?.ok,   'blockchain.info · broadcast',     byName['blockchain.info']?.ms) +
+            fmt(byName['ViaBTC']?.ok,            'ViaBTC Accelerator ⭐ топ-1',     byName['ViaBTC']?.ms) +
+            fmt(byName['AntPool']?.ok,           'AntPool (Bitmain) ⭐',            byName['AntPool']?.ms) +
+            fmt(byName['SpiderPool']?.ok,        'SpiderPool ★ топ-5 2026',         byName['SpiderPool']?.ms) +
+            fmt(byName['BitFuFu']?.ok,           'BitFuFu ★ Bitmain Cloud 2026',   byName['BitFuFu']?.ms) +
+            fmt(byName['CloverPool']?.ok,        'CloverPool (ex BTC.com)',         byName['CloverPool']?.ms) +
+            fmt(byName['mempoolAccel']?.ok,      'mempool.space Accelerator API',   byName['mempoolAccel']?.ms) +
+            fmt(byName['BitAccelerate']?.ok,     'BitAccelerate · 80% хешрейта',   byName['BitAccelerate']?.ms) +
+            fmt(byName['360btc']?.ok,            '360BTC Accelerator',              byName['360btc']?.ms) +
+            fmt(byName['fujn.com']?.ok,          'Fujn Accelerator · топ-10 2026', byName['fujn.com']?.ms);
         } else {
           rowsEl.innerHTML =
             fmt(byName['blockstream.info']?.ok, 'blockstream.info (CORS ✓)', byName['blockstream.info']?.ms) +
@@ -5931,19 +5997,18 @@ async function updateFeeMeter() {
     if (!rFee.ok || !rMem.ok) return;
     const fees = await rFee.json();
     const mem  = await rMem.json();
-    const dot  = document.getElementById('fee-dot');
     const txt  = document.getElementById('fee-meter-text');
-    if (!dot || !txt) return;
+    if (!txt) return;
     const fast   = fees.fastestFee || fees.halfHourFee || 0;
     const stuck  = mem.count || 0;
     if (fast <= 5 && stuck < 15000) {
-      dot.style.background = 'var(--g)';
+      if (window._TurboPrice) window._TurboPrice._setNet('calm', 'спокойно', 'var(--g)', 'rgba(0,232,122,.13)');
       txt.innerHTML = '🟢 <strong style="color:var(--g)">Сеть свободна</strong> — хорошее время. Комиссия от <strong style="color:var(--t)">' + fast + ' sat/vB</strong>';
     } else if (fast <= 25 && stuck < 50000) {
-      dot.style.background = '#ffd166';
+      if (window._TurboPrice) window._TurboPrice._setNet('mid', 'умеренно', '#ffd166', 'rgba(255,209,102,.13)');
       txt.innerHTML = '🟡 <strong style="color:#ffd166">Умеренная нагрузка</strong> — ' + stuck.toLocaleString('ru') + ' TX в очереди · ' + fast + ' sat/vB. Ускорение поможет.';
     } else {
-      dot.style.background = 'var(--err)';
+      if (window._TurboPrice) window._TurboPrice._setNet('busy', 'перегруз', 'var(--err)', 'rgba(255,51,85,.13)');
       txt.innerHTML = '🔴 <strong style="color:var(--err)">Высокая нагрузка</strong> — ' + stuck.toLocaleString('ru') + ' TX в очереди · ' + fast + ' sat/vB. <strong style="color:var(--a)">Рекомендуем Premium.</strong>';
     }
   } catch(e) {}
@@ -6634,6 +6699,25 @@ function _startHistoryConfPolling() {
     return null;
   }
 
+  // Обновляет все пульсирующие сердца сети
+  function _setNetState(level, text, color, bg) {
+    ['net-pulse-dot','fee-dot','price-tag-dot','modal-heart-dot'].forEach(function(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const hasSm = el.classList.contains('sm');
+      el.className = 'net-heart ' + level + (hasSm ? ' sm' : '');
+    });
+    const tagText = document.getElementById('price-tag-text');
+    if (tagText) tagText.textContent = text;
+    const tagEl = document.getElementById('plan-price-tag');
+    if (tagEl) { tagEl.style.background = bg; tagEl.style.color = color; }
+    // Модальный бейдж — только текст, сердце уже в DOM
+    const badgeText = document.getElementById('modal-badge-text');
+    if (badgeText) badgeText.textContent = text;
+    const modalBadge = document.getElementById('modal-price-badge');
+    if (modalBadge) { modalBadge.style.background = bg; modalBadge.style.color = color; }
+  }
+
   function applyPrice(p) {
     if (!p) return;
     const usd = p.usd;
@@ -6658,13 +6742,10 @@ function _startHistoryConfPolling() {
     const priceEl = document.getElementById('plan-price-usd');
     if (priceEl) priceEl.textContent = '$' + usd;
 
-    // ── Тег состояния сети рядом с ценой в карточке ──
-    const tagEl = document.getElementById('plan-price-tag');
-    if (tagEl) {
-      tagEl.textContent = emoji + ' ' + text;
-      tagEl.style.background = bgColor;
-      tagEl.style.color = accentColor;
-    }
+    // ── Пульс + тег состояния сети (все точки сразу) ──
+    const level = isLow ? 'calm' : isMid ? 'mid' : 'busy';
+    const netText = text || (isLow ? 'спокойно' : isMid ? 'умеренно' : 'перегруз');
+    _setNetState(level, netText, accentColor, bgColor);
 
     // ── Кнопка "Купить Premium" ──
     const btnEl = document.getElementById('plan-btn-price');
@@ -6690,11 +6771,6 @@ function _startHistoryConfPolling() {
     if (modalUsd)  modalUsd.textContent  = '$' + usd;
     if (modalBtc)  modalBtc.textContent  = btcVal ? '≈ ' + btcVal.toFixed(6) + ' BTC' : '≈ … BTC';
     if (modalUsdt) modalUsdt.textContent = '≈ ' + usd + ' USDT';
-    if (modalBadge) {
-      modalBadge.textContent = emoji + ' ' + text;
-      modalBadge.style.background = bgColor;
-      modalBadge.style.color = accentColor;
-    }
 
     // ── Прямая сумма в поле BTC ──
     const amtEl = document.getElementById('direct-amount');
@@ -6719,7 +6795,7 @@ function _startHistoryConfPolling() {
     setInterval(loadPrice, 180000);
   }
 
-  window._TurboPrice = { load: loadPrice, apply: applyPrice };
+  window._TurboPrice = { load: loadPrice, apply: applyPrice, _setNet: _setNetState };
   console.log('[TurboTX v5.1] Dynamic price loaded ✓');
 })();
 </script>
