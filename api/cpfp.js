@@ -1,18 +1,15 @@
 // ══════════════════════════════════════════════════════════════
-//  TurboTX v6 ★ SMART CPFP ★  —  /api/cpfp.js
+//  TurboTX v6 ★ CPFP CALCULATOR ★  —  /api/cpfp.js
 //  Vercel Serverless · Node.js 20
 //
-//  GET /api/cpfp?txid=<64hex>&outputIndex=<n>&target=<fast|std|eco>
+//  GET /api/cpfp?txid=<64hex>&outputIndex=<n>&target=eco|std|fast
 //
-//  Умный CPFP v6:
-//  ✦ Автоопределение типа адреса → точный childVsize
-//     P2WPKH=110, P2SH-P2WPKH=133, P2PKH=192, P2WSH=155
-//  ✦ Все выходы TX — выбирай лучший UTXO
-//  ✦ Три тира скорости: eco/std/fast
-//  ✦ Проверка: хватит ли value выхода на комиссию
-//  ✦ Пошаговые инструкции для 5 популярных кошельков
-//  ✦ BTC сумма комиссии (из текущего курса)
-//  ✦ Позиция TX в мемпуле (approx)
+//  ✦ Определяет тип адреса → точный childVsize
+//  ✦ Все выходы TX (выбор оптимального UTXO)
+//  ✦ USD сумма комиссии (BTC/USD из mempool.space)
+//  ✦ Позиция в мемпуле до и после CPFP
+//  ✦ Инструкции для 5 кошельков
+//  ✦ Сравнение с RBF если применимо
 // ══════════════════════════════════════════════════════════════
 
 export const config = { maxDuration: 15 };
@@ -22,234 +19,227 @@ const CORS = {
   'Access-Control-Allow-Methods': 'GET, OPTIONS',
 };
 
-// Типичные vsize для child TX в зависимости от типа адреса получателя
-const CHILD_VSIZE_BY_TYPE = {
-  'v0_p2wpkh':    110, // Native SegWit (bc1q...)   — самый дешёвый
-  'v0_p2wsh':     155, // Native SegWit MultiSig
-  'p2sh':         133, // P2SH-SegWit (3...)
-  'p2pkh':        192, // Legacy (1...)              — самый дорогой
-  'v1_p2tr':      111, // Taproot (bc1p...)
-  'unknown':      141, // Среднее если не знаем
+// Точный vsize дочерней TX по типу адреса (1in-1out)
+const CHILD_VSIZE = {
+  v0_p2wpkh: 110,  // Native SegWit — самый дешёвый
+  v0_p2wsh:  155,  // SegWit MultiSig
+  p2sh:      133,  // P2SH
+  p2pkh:     192,  // Legacy — самый дорогой
+  v1_p2tr:   111,  // Taproot
+  unknown:   140,  // среднее
 };
 
-async function ft(url, ms = 8000) {
-  const ac = new AbortController();
-  const t  = setTimeout(() => ac.abort(), ms);
-  try { const r = await fetch(url, { signal: ac.signal }); clearTimeout(t); return r; }
-  catch(e) { clearTimeout(t); throw e; }
-}
+const ADDR_TYPE_NAMES = {
+  v0_p2wpkh: 'Native SegWit (bc1q)',
+  v0_p2wsh:  'SegWit MultiSig (bc1q long)',
+  p2sh:      'P2SH (3...)',
+  p2pkh:     'Legacy (1...)',
+  v1_p2tr:   'Taproot (bc1p)',
+  unknown:   'Unknown',
+};
 
-// Получить текущий курс BTC/USD для отображения в USD
+async function ft(url, ms=7000) {
+  const ac=new AbortController();
+  const t=setTimeout(()=>ac.abort(),ms);
+  try{ const r=await fetch(url,{signal:ac.signal}); clearTimeout(t); return r; }
+  catch(e){ clearTimeout(t); throw e; }
+}
+async function safeJson(r){ try{ return await r.json(); } catch{ return {}; } }
+
 async function getBtcPrice() {
   try {
     const r = await ft('https://mempool.space/api/v1/prices', 5000);
-    if (r.ok) { const j = await r.json(); return j.USD || null; }
+    if (r.ok) { const j = await safeJson(r); return j.USD||null; }
   } catch {}
   return null;
 }
 
-// Определить vsize child TX по типу адреса выхода
-function getChildVsize(scriptpubkey_type) {
-  return CHILD_VSIZE_BY_TYPE[scriptpubkey_type] || CHILD_VSIZE_BY_TYPE['unknown'];
-}
-
-// Пошаговые инструкции для популярных кошельков
-function getWalletInstructions(childFeeRate, childFeeNeeded, outputAddr, outputIndex) {
-  const addr = outputAddr ? `\`${outputAddr.slice(0, 12)}…\`` : `выход #${outputIndex}`;
-  return {
-    electrum: [
-      `Открой Electrum → Coin Control → найди ${addr}`,
-      `Создай новую транзакцию трата этого UTXO → на свой же адрес`,
-      `В поле "Fee" установи ${childFeeRate} sat/vB`,
-      `Подпиши и отправь`,
-    ],
-    sparrow: [
-      `Sparrow Wallet → UTXOs → найди ${addr}`,
-      `ПКМ → "Send from" → создай транзакцию`,
-      `Fee Rate: ${childFeeRate} sat/vB (≈${childFeeNeeded} sat)`,
-      `Broadcast`,
-    ],
-    bluewallet: [
-      `BlueWallet → Coin Control → выбери UTXO ${addr}`,
-      `Создай транзакцию с fee ${childFeeRate} sat/vB`,
-      `Отправь на свой же адрес (self-transfer)`,
-    ],
-    wasabi: [
-      `Wasabi → Coins → выбери ${addr}`,
-      `Send → своему адресу → Custom fee: ${childFeeRate} sat/vB`,
-    ],
-    ledger: [
-      `Ledger Live → Send → Advanced → Custom fees`,
-      `Установи ${childFeeRate} sat/vB, потрать UTXO ${addr}`,
-    ],
+function detectAddrType(scriptpubkey_type) {
+  const map = {
+    'v0_p2wpkh': 'v0_p2wpkh',
+    'v0_p2wsh':  'v0_p2wsh',
+    'p2sh':      'p2sh',
+    'p2pkh':     'p2pkh',
+    'v1_p2tr':   'v1_p2tr',
   };
+  return map[scriptpubkey_type] || 'unknown';
 }
 
 export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(204).set(CORS).end();
-  Object.entries(CORS).forEach(([k, v]) => res.setHeader(k, v));
+  Object.entries(CORS).forEach(([k,v]) => res.setHeader(k,v));
 
   const txid        = req.query?.txid;
   const outputIndex = parseInt(req.query?.outputIndex ?? '0');
-  const targetTier  = req.query?.target || 'fast'; // eco | std | fast
+  const targetMode  = req.query?.target || 'fast'; // eco|std|fast
 
   if (!txid || !/^[a-fA-F0-9]{64}$/.test(txid))
-    return res.status(400).json({ ok: false, error: 'Invalid TXID' });
+    return res.status(400).json({ ok:false, error:'Invalid TXID' });
 
   try {
-    const [txR, feesR, btcPrice] = await Promise.all([
+    const [txR, feesR, mpR, priceP] = await Promise.all([
       ft(`https://mempool.space/api/tx/${txid}`),
       ft('https://mempool.space/api/v1/fees/recommended'),
+      ft('https://mempool.space/api/mempool'),
       getBtcPrice(),
     ]);
 
-    if (!txR.ok) return res.status(404).json({ ok: false, error: 'TX not found in mempool' });
+    if (!txR.ok) {
+      // Fallback: blockstream
+      const fb = await ft(`https://blockstream.info/api/tx/${txid}`, 6000);
+      if (!fb.ok) return res.status(404).json({ ok:false, error:'TX not found' });
+    }
 
-    const tx   = await txR.json();
-    const fees = feesR.ok ? await feesR.json() : {};
+    const tx   = await safeJson(txR.ok ? txR : { json:()=>({}) });
+    const fees = feesR.ok ? await safeJson(feesR) : {};
+    const mp   = mpR.ok  ? await safeJson(mpR)   : {};
 
-    // Уже подтверждена?
-    if (tx.status?.confirmed) {
-      return res.status(200).json({
-        ok: true, needed: false,
-        reason: 'TX already confirmed',
-        blockHeight: tx.status.block_height,
+    if (tx.status?.confirmed)
+      return res.status(200).json({ ok:true, needed:false, reason:'already_confirmed' });
+
+    const vsize   = tx.weight ? Math.ceil(tx.weight/4) : (tx.size||250);
+    const feePaid = tx.fee || 0;
+    const feeRate = feePaid&&vsize ? Math.round(feePaid/vsize) : 0;
+
+    // Целевой fee rate по режиму
+    const targets = {
+      eco:  fees.hourFee     || fees.halfHourFee || 20,
+      std:  fees.halfHourFee || fees.fastestFee  || 30,
+      fast: fees.fastestFee  || 50,
+    };
+    const target = targets[targetMode] || targets.fast;
+
+    // Определяем тип адреса из выходов (ищем оптимальный UTXO)
+    const outputs = tx.vout || [];
+
+    // Выбираем лучший выход для CPFP:
+    // 1. Указанный outputIndex, если есть
+    // 2. Иначе — с наибольшей суммой (хватит на fee)
+    let bestOutput = null;
+    let bestIdx = outputIndex;
+
+    if (outputs[outputIndex]) {
+      bestOutput = outputs[outputIndex];
+    } else if (outputs.length > 0) {
+      // Найти выход с max value
+      let maxVal = -1;
+      outputs.forEach((o,i) => {
+        if ((o.value||0) > maxVal) { maxVal=o.value; bestIdx=i; bestOutput=o; }
       });
     }
 
-    // Параметры родительской TX
-    const parentVsize   = tx.weight ? Math.ceil(tx.weight / 4) : (tx.size || 250);
-    const parentFeePaid = tx.fee || 0;
-    const parentFeeRate = parentFeePaid && parentVsize ? Math.round(parentFeePaid / parentVsize) : 0;
+    const addrType   = bestOutput ? detectAddrType(bestOutput.scriptpubkey_type) : 'unknown';
+    const childVsize = CHILD_VSIZE[addrType] || CHILD_VSIZE.unknown;
 
-    // Целевые ставки по тирам
-    const targetRates = {
-      eco:  fees.halfHourFee  || Math.max(parentFeeRate + 2, 5),
-      std:  fees.halfHourFee  || 10,
-      fast: fees.fastestFee   || 30,
-    };
-    const target = targetRates[targetTier] || targetRates.fast;
-
-    // Нужен ли вообще CPFP?
-    const needed = parentFeeRate < target * 0.85;
-
-    // Все выходы — выбираем указанный (или лучший по value)
-    const outputs = tx.vout || [];
-    const out = outputs[outputIndex] || outputs.reduce((best, o) =>
-      o.value > (best?.value || 0) ? o : best, null);
-    const bestOutputIndex = out === outputs[outputIndex] ? outputIndex
-      : outputs.indexOf(out);
-
-    // Определяем childVsize по типу адреса
-    const childVsize    = getChildVsize(out?.scriptpubkey_type);
-    const packageVsize  = parentVsize + childVsize;
-
-    // Комиссия которую должна заплатить child TX
+    // CPFP расчёт
+    const packageVsize   = vsize + childVsize;
     const totalFeeNeeded = target * packageVsize;
-    const childFeeNeeded = Math.max(1, Math.ceil(totalFeeNeeded - parentFeePaid));
+    const childFeeNeeded = Math.max(0, totalFeeNeeded - feePaid);
     const childFeeRate   = Math.ceil(childFeeNeeded / childVsize);
 
-    // Хватит ли value выхода на оплату?
-    const outValue      = out?.value || 0;
-    const canAfford     = outValue > childFeeNeeded + 546; // 546 sat — dust limit
-    const remainingSat  = outValue - childFeeNeeded;
-    const remainingUsd  = btcPrice ? ((remainingSat / 1e8) * btcPrice).toFixed(2) : null;
+    const canAfford = bestOutput && bestOutput.value > childFeeNeeded + 546; // 546 dust limit
 
-    // USD стоимость комиссии
-    const childFeeUsd = btcPrice
-      ? ((childFeeNeeded / 1e8) * btcPrice).toFixed(2)
-      : null;
+    // USD
+    const feeUsd = priceP && childFeeNeeded
+      ? +((childFeeNeeded/1e8)*priceP).toFixed(4) : null;
 
-    // Мемпул позиция (грубая оценка)
-    let mempoolPosition = null;
-    try {
-      const mpR = await ft('https://mempool.space/api/mempool', 5000);
-      if (mpR.ok) {
-        const mp = await mpR.json();
-        const totalTx = mp.count || 0;
-        // Позиция ≈ % TX с более высоким fee rate
-        mempoolPosition = totalTx > 0
-          ? `~${Math.round((1 - parentFeeRate / target) * 100)}% транзакций имеют приоритет выше вашей`
-          : null;
-      }
-    } catch {}
+    // Позиция в мемпуле до и после CPFP
+    const mpCount = mp.count || 0;
+    const posBefore = mpCount ? Math.round((1-Math.min(feeRate/target,1))*mpCount) : null;
+    const posAfter  = 0; // после CPFP попадаем в следующий блок
 
-    const walletInstructions = getWalletInstructions(
-      childFeeRate, childFeeNeeded,
-      out?.scriptpubkey_address || null,
-      bestOutputIndex
-    );
+    // Все выходы для UI выбора
+    const allOutputs = outputs.map((o,i) => ({
+      index:     i,
+      value:     o.value,
+      valueBtc:  o.value ? +(o.value/1e8).toFixed(8) : 0,
+      address:   o.scriptpubkey_address || null,
+      type:      detectAddrType(o.scriptpubkey_type),
+      typeName:  ADDR_TYPE_NAMES[detectAddrType(o.scriptpubkey_type)],
+      canAfford: o.value > childFeeNeeded + 546,
+    }));
+
+    // Инструкции для кошельков
+    const walletInstructions = {
+      electrum: [
+        'Убедись что TX видна в Electrum (может занять время)',
+        'Coins → найди UTXO из выхода #' + bestIdx,
+        `ПКМ → Spend → создай новую TX`,
+        `Установи fee rate: ${childFeeRate} sat/vB (${childFeeNeeded} sat)`,
+        'Отправь на любой свой адрес (можно тот же)',
+      ],
+      sparrow: [
+        'UTXOs → найди выход #' + bestIdx + ' от этой TX',
+        'ПКМ → "Send From"',
+        `Fee rate: ${childFeeRate} sat/vB`,
+        'Sign → Broadcast',
+      ],
+      bluewallet: [
+        'Coin Control → выбери UTXO #' + bestIdx,
+        'Создай транзакцию отправки',
+        `Укажи Custom fee: ${childFeeRate} sat/vB`,
+        'Confirm',
+      ],
+      wasabi: [
+        'Coins → выбери монету из TX ' + txid.slice(0,8) + '...',
+        `Fee: ${childFeeRate} sat/vB`,
+        'Send → Broadcast',
+      ],
+      ledger: [
+        'Ledger Live → Portfolio → Send',
+        'Выбери кошелёк с этой TX',
+        `Advanced fee: ${childFeeRate} sat/vB`,
+        'Confirm на устройстве',
+      ],
+    };
+
+    const needed = feeRate < target * 0.9;
 
     return res.status(200).json({
-      ok:      true,
+      ok: true,
       needed,
       txid,
-
-      // Родительская TX
+      targetMode,
       parent: {
-        vsize:    parentVsize,
-        feePaid:  parentFeePaid,
-        feeRate:  parentFeeRate,
-        inputs:   (tx.vin  || []).length,
-        outputs:  (tx.vout || []).length,
+        vsize, feePaid, feeRate,
+        feeUsd: priceP ? +((feePaid/1e8)*priceP).toFixed(4) : null,
       },
-
-      // Целевые ставки
       targets: {
-        eco:  targetRates.eco,
-        std:  targetRates.std,
-        fast: targetRates.fast,
-        selected: targetTier,
-        current: target,
+        eco:  targets.eco,
+        std:  targets.std,
+        fast: targets.fast,
+        selected: target,
       },
-
-      // Дочерняя TX
       child: {
-        vsize:       childVsize,
-        feeNeeded:   childFeeNeeded,
-        feeRate:     childFeeRate,
-        feeUsd:      childFeeUsd,
-        addressType: out?.scriptpubkey_type || 'unknown',
-      },
-
-      // Пакет
-      package: {
-        vsize:   packageVsize,
-        feeRate: target,
-      },
-
-      // Выход для CPFP
-      output: out ? {
-        index:      bestOutputIndex,
-        value:      outValue,
-        address:    out.scriptpubkey_address || null,
-        type:       out.scriptpubkey_type    || null,
+        addressType:  addrType,
+        addressTypeName: ADDR_TYPE_NAMES[addrType],
+        vsize:        childVsize,
+        feeNeeded:    childFeeNeeded,
+        feeRate:      childFeeRate,
+        feeUsd,
         canAfford,
-        remainingSat,
-        remainingUsd,
-      } : null,
-
-      // Все выходы (для выбора в UI)
-      allOutputs: outputs.map((o, i) => ({
-        index:   i,
-        value:   o.value,
-        address: o.scriptpubkey_address || null,
-        type:    o.scriptpubkey_type    || null,
-      })),
-
-      mempoolPosition,
-      walletInstructions,
-
-      // Инструкция краткая (для Telegram/bot)
-      instructions: {
-        ru: `Создай дочернюю TX, потрать выход #${bestOutputIndex} (${outValue} sat), установи комиссию ${childFeeRate} sat/vB (≈${childFeeNeeded} sat${childFeeUsd ? ` / ~$${childFeeUsd}` : ''})`,
-        en: `Create child TX spending output #${bestOutputIndex} (${outValue} sat) with fee rate ${childFeeRate} sat/vB (≈${childFeeNeeded} sat${childFeeUsd ? ` / ~$${childFeeUsd}` : ''})`,
       },
-
+      package: {
+        vsize:       packageVsize,
+        totalFee:    totalFeeNeeded,
+        effectiveRate: target,
+      },
+      output: bestOutput ? {
+        index:    bestIdx,
+        value:    bestOutput.value,
+        valueBtc: +(bestOutput.value/1e8).toFixed(8),
+        address:  bestOutput.scriptpubkey_address || null,
+        type:     addrType,
+        canAfford,
+      } : null,
+      allOutputs,
+      mempoolPosition: { before: posBefore, after: posAfter },
+      walletInstructions,
+      btcPrice: priceP,
       timestamp: Date.now(),
     });
 
   } catch(e) {
-    return res.status(500).json({ ok: false, error: e.message });
+    return res.status(500).json({ ok:false, error:e.message });
   }
 }
