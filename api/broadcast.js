@@ -311,6 +311,28 @@ function buildChannels(txid, hex) {
       }
     },
 
+    // SpiderPool — топ-5 по хешрейту 2026, новый прямой акселератор
+    { name: 'SpiderPool', tier: 'pool', enabled: true,
+      call: async () => {
+        const r = await ft(`https://spiderpool.com/accelerator?txid=${txid}`, {
+          method: 'GET',
+          headers: { 'User-Agent': UA }
+        }, 12000);
+        return { ok: r.ok, status: r.status };
+      }
+    },
+
+    // BitFuFu — облачный майнинг Bitmain 2026, прямой API акселератора
+    { name: 'BitFuFu', tier: 'pool', enabled: true,
+      call: async () => {
+        const r = await ft(`https://www.bitfufu.com/txaccelerator?txid=${txid}`, {
+          method: 'GET',
+          headers: { 'User-Agent': UA }
+        }, 12000);
+        return { ok: r.ok, status: r.status };
+      }
+    },
+
   ];
 }
 
