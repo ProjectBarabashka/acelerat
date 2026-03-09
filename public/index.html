@@ -669,21 +669,40 @@ input[type=text], input[type=email], textarea {
   font-family: var(--mono); font-size: .62rem; color: var(--m2);
 }
 .hashrate-fill-wrap {
-  flex: 1; height: 3px;
+  flex: 1; height: 4px;
   background: rgba(255,255,255,.06);
   border-radius: 4px; overflow: hidden;
 }
 .hashrate-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--a), var(--accent3));
   border-radius: 4px;
-  transition: width 1s ease;
+  width: 0%;
+  transition: width 1.2s cubic-bezier(.4,0,.2,1);
+  background: linear-gradient(90deg,
+    #f7931a 0%,
+    #ffcc00 20%,
+    #00e87a 40%,
+    #00c3ff 60%,
+    #7c5cfc 80%,
+    #f7931a 100%
+  );
+  background-size: 200% 100%;
+  animation: rainbowShift 3s linear infinite;
+}
+@keyframes rainbowShift {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
 }
 
-/* Subtle improvement to plan card PREMIUM badge text */
-.plan-card.prem::after {
-  content: 'ВЫБОР 2026';
+/* Counter max state — золотой */
+#sc.maxed {
+  color: var(--g) !important;
+  text-shadow: 0 0 18px rgba(0,232,122,.35);
 }
+/* Чуть меньше padding у stat-card */
+.stat-card { padding: 18px 14px; }
+/* Убираем лишнюю высоту у stat-lbl */
+.stat-lbl { margin-top: 4px; line-height: 1.3; }
 
 /* Кнопки — минимальный размер тапа */
 .acc-btn, .pbtn, .chk-btn {
@@ -2201,28 +2220,33 @@ input[type=text]:focus {
 </section>
 
 <!-- MEMPOOL ALERT BAR -->
-<div id="mempool-bar" style="display:flex;align-items:center;justify-content:center;gap:10px;padding:10px 16px;margin-bottom:20px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);font-family:var(--mono);font-size:.68rem;color:var(--m2);flex-wrap:wrap">
-  <span style="width:6px;height:6px;border-radius:50%;background:var(--g);flex-shrink:0;animation:livepulse 2s infinite"></span>
-  <span>Застряло в мемпуле:</span>
-  <span id="tk-stuck" style="font-weight:700;font-size:.82rem;color:var(--t)">—</span>
-  <span>TX</span>
-  <span id="tk-stuck-badge" style="margin-left:6px;padding:2px 10px;border-radius:20px;font-size:.6rem">·</span>
-  <span style="margin-left:8px;color:rgba(255,255,255,.15)">|</span>
-  <span style="margin-left:4px">Быстро:</span>
-  <span id="tk-nextfee" class="ticker-val ok" style="font-weight:700;color:var(--t)">—</span>
-  <span>sat/vB</span>
-  <span style="color:rgba(255,255,255,.1)">·</span>
-  <span>мин:</span>
-  <span id="tk-minfee" class="ticker-val ok" style="font-weight:700;color:var(--t)">—</span>
-  <span>sat/vB</span>
-  <span style="color:rgba(255,255,255,.1)">·</span>
-  <span>мемпул:</span>
-  <span id="tk-size" class="ticker-val ok" style="font-weight:700;color:var(--t)">—</span>
-  <span>МБ</span>
-  <span style="color:rgba(255,255,255,.1)">·</span>
-  <span>хешрейт:</span>
-  <span id="tk-hashrate" style="font-weight:700;color:var(--a)">—</span>
-  <span>EH/s</span>
+<div id="mempool-bar" style="display:flex;align-items:center;justify-content:center;gap:14px;padding:9px 16px;margin-bottom:20px;background:rgba(255,255,255,.018);border:1px solid rgba(255,255,255,.055);border-radius:var(--r);font-family:var(--mono);font-size:.66rem;color:var(--m2);flex-wrap:wrap">
+  <span style="display:flex;align-items:center;gap:5px">
+    <span style="width:5px;height:5px;border-radius:50%;background:var(--g);flex-shrink:0;animation:livepulse 2s infinite"></span>
+    <span style="color:var(--m)">мемпул</span>
+    <strong id="tk-stuck" style="color:var(--t)">—</strong>
+    <span id="tk-stuck-badge" style="padding:1px 7px;border-radius:20px;font-size:.58rem"></span>
+  </span>
+  <span style="color:rgba(255,255,255,.1)">|</span>
+  <span style="display:flex;align-items:center;gap:4px">
+    <span style="color:var(--m)">fast</span>
+    <strong id="tk-nextfee" class="ticker-val ok" style="color:var(--t)">—</strong>
+    <span>sat/vB</span>
+  </span>
+  <span style="color:rgba(255,255,255,.1)">|</span>
+  <span style="display:flex;align-items:center;gap:4px">
+    <span style="color:var(--m)">размер</span>
+    <strong id="tk-size" class="ticker-val ok" style="color:var(--t)">—</strong>
+    <span>МБ</span>
+  </span>
+  <span style="color:rgba(255,255,255,.1)">|</span>
+  <span style="display:flex;align-items:center;gap:4px">
+    <span style="color:var(--a)">⚡</span>
+    <strong id="tk-hashrate" style="color:var(--a)">—</strong>
+    <span style="color:var(--m)">EH/s</span>
+  </span>
+  <!-- скрытый элемент для совместимости -->
+  <span id="tk-minfee" style="display:none">—</span>
 </div>
 
 <!-- STATS -->
@@ -2432,10 +2456,7 @@ input[type=text]:focus {
       </svg>
     </span>
     <span class="stat-num" id="pools-online" style="color:var(--g);opacity:.3;animation:skeletonPulse 1.6s ease-in-out infinite">—</span>
-    <div class="stat-lbl">API узлов онлайн</div>
-    <div style="font-family:var(--mono);font-size:.52rem;color:#ffd166;margin-top:3px">
-      p2p: <span id="p2p-count" style="font-weight:700;color:#ffd166">—</span>
-    </div>
+    <div class="stat-lbl">API узлов онлайн · p2p: <span id="p2p-count" style="font-weight:700;color:#ffd166">—</span></div>
   </a>
 </div>
 
@@ -2678,13 +2699,12 @@ input[type=text]:focus {
     <div class="plan-price"><span style="color:var(--a)" id="plan-price-usd">$4</span> <em>/ разово</em> <span id="plan-price-tag" style="font-size:.57rem;font-family:var(--mono);padding:2px 7px;border-radius:4px;background:rgba(247,147,26,.12);color:var(--a);vertical-align:middle;margin-left:4px">🟡 сеть</span></div>
     <div class="plan-desc">Серверный API: 5 CORS-узлов + 8 пул-акселераторов топ-10 2026. Реальные ответы от каждого пула. 6 волн до 4 часов.</div>
     <ul class="fl">
-      <li><span class="fi ok">✓</span><strong>5 CORS-узлов</strong> — blockstream · Blockchair · BlockCypher · Bitaps · mempool.space</li>
-      <li><span class="fi ok">✓</span><strong>8 пул-акселераторов 2026</strong> — ViaBTC ⭐ · AntPool ⭐ · F2Pool ⭐ · Fujn · BitAccelerate · CloverPool · 360BTC</li>
-      <li><span class="fi ok">✓</span><strong>Серверный API</strong> — видим реальный ответ от каждого пула</li>
+      <li><span class="fi ok">✓</span><strong>7 CORS-узлов</strong> — blockstream · Blockchair · BlockCypher · btcscan · mempool</li>
+      <li><span class="fi ok">✓</span><strong>10 пул-акселераторов</strong> — ViaBTC ⭐ · AntPool · SpiderPool ★ · CloverPool · BitFuFu ★ · BitAccelerate · 360BTC · fujn.com</li>
+      <li><span class="fi ok">✓</span><strong>Серверный API</strong> — реальный ответ от каждого пула</li>
       <li><span class="fi ok">✓</span><strong>6 волн</strong>: 0 → 15 → 30 → 60 → 120 → 240 мин ⚡</li>
-      <li><span class="fi ok">✓</span>Динамическая цена — дешевле когда сеть спокойна</li>
-      <li><span class="fi ok">✓</span>Пакет до 20 TX · Трекер подтверждений</li>
-      <li><span class="fi ok">✓</span>Возврат если не подтвердилась за 6 ч</li>
+      <li><span class="fi ok">✓</span>Цена $3–18 — дешевле когда сеть спокойна</li>
+      <li><span class="fi ok">✓</span>Пакет до 20 TX · Возврат за 6 ч если не помогло</li>
     </ul>
 
     <button class="pbtn pbp" onclick="openM()"><span style="display:inline-flex;align-items:center;gap:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Купить Premium — <span id="plan-btn-price">$4</span></span></button>
@@ -3651,21 +3671,48 @@ if (p2pEl) { p2pEl.textContent = POOLS_P2P.length; p2pEl.style.opacity="1"; p2pE
 
 // ── GLOBAL COUNTER (Firebase) ──────────────────────────────────
 const COUNTER_KEY = 'turbotx_acc_count';
-let cnt = parseInt(localStorage.getItem(COUNTER_KEY) || '0'); // растёт с каждым реальным ускорением
-// Не показываем localStorage значение — ждём Firebase (skeleton уже в HTML)
+const COUNTER_MAX = 999999;
+let cnt = parseInt(localStorage.getItem(COUNTER_KEY) || '0');
+
+// Плавная анимация счётчика от from до to
+function _animCounterTo(from, to, duration) {
+  to = Math.min(to, COUNTER_MAX);
+  if (from === to) return;
+  const el = document.getElementById('sc');
+  if (!el) return;
+  const start = performance.now();
+  const diff = to - from;
+  function tick(now) {
+    const t = Math.min((now - start) / duration, 1);
+    // easeOutExpo
+    const ease = t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
+    const cur = Math.round(from + diff * ease);
+    el.textContent = cur.toLocaleString('ru');
+    el.style.opacity = '1';
+    el.style.animation = 'none';
+    if (t < 1) requestAnimationFrame(tick);
+    else {
+      cnt = to;
+      localStorage.setItem(COUNTER_KEY, to);
+      if (to >= COUNTER_MAX) {
+        el.textContent = '999\u202F999';
+        el.classList.add('maxed');
+      }
+    }
+  }
+  requestAnimationFrame(tick);
+}
 
 function _setCounterUI(val) {
-  cnt = val;
-  localStorage.setItem(COUNTER_KEY, val);
+  const capped = Math.min(val, COUNTER_MAX);
+  const from = cnt || 0;
+  cnt = capped;
+  localStorage.setItem(COUNTER_KEY, capped);
+  // Анимируем от текущего к новому
   const el = document.getElementById('sc');
-  if (el) {
-    el.style.opacity = '';
-    el.style.animation = '';
-    el.textContent = val.toLocaleString('ru');
-  }
-  // Синхронизируем счётчик вкладки "последние ускорения"
+  if (el) _animCounterTo(from, capped, from === 0 ? 1800 : 600);
   const cc = document.getElementById('confirmed-count');
-  if (cc && val > 0) cc.textContent = val.toLocaleString('ru');
+  if (cc && capped > 0) cc.textContent = capped.toLocaleString('ru');
 }
 
 async function bumpCounter() {
@@ -3674,13 +3721,13 @@ async function bumpCounter() {
     try {
       const r1 = await fetch(url, { cache: 'no-store' });
       const cur = r1.ok ? await r1.json() : null;
-      const nv = (typeof cur === 'number' ? cur : 0) + 1;
+      const nv = Math.min((typeof cur === 'number' ? cur : 0) + 1, COUNTER_MAX);
       const r2 = await fetch(url, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(nv)
       });
-      if (r2.ok) { _setCounterUI(nv); _animateCounter(); return; }
+      if (r2.ok) { _setCounterUI(nv); return; }
       if (r2.status === 403 || r2.status === 412) {
         await new Promise(r => setTimeout(r, 100 + Math.random() * 200));
         continue;
@@ -3688,14 +3735,11 @@ async function bumpCounter() {
       break;
     } catch(e) { break; }
   }
-  _setCounterUI(cnt + 1); _animateCounter();
+  _setCounterUI(cnt + 1);
 }
 
 function _animateCounter() {
-  const el = document.getElementById('sc');
-  if (!el) return;
-  el.style.transform = 'scale(1.18)'; el.style.color = 'var(--g)';
-  setTimeout(() => { el.style.transform = ''; el.style.color = 'var(--a)'; }, 500);
+  // Совместимость — анимация в _setCounterUI
 }
 
 
@@ -6634,9 +6678,9 @@ function _startHistoryConfPolling() {
     const heroEl = document.getElementById('hero-price-badge');
     if (heroEl) heroEl.textContent = '$' + usd;
 
-    // ── Таблица сравнения ──
+    // ── Таблица сравнения — показываем диапазон + текущая цена ──
     const compEl = document.getElementById('comp-price-cell');
-    if (compEl) compEl.innerHTML = '<strong>$' + usd + '</strong> сейчас ' + emoji;
+    if (compEl) compEl.innerHTML = '<strong>$3–18</strong> <span style="color:var(--m);font-size:.85em">(сейчас ' + emoji + ' $' + usd + ')</span>';
 
     // ── Модальный динамический блок ──
     const modalUsd  = document.getElementById('modal-price-usd');
