@@ -211,156 +211,6 @@
 }
 </script>
 
-<!-- FAQPage Schema — вопросы/ответы в Google -->
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {
-      "@type": "Question",
-      "name": "Как ускорить застрявшую Bitcoin транзакцию?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Введите TXID вашей транзакции в форму на TurboTX и нажмите Ускорить. Мы отправим транзакцию в 22 канала: Foundry USA, AntPool, MARA Pool, ViaBTC, SpiderPool, Luxor и другие. Бесплатное ускорение занимает 1-3 часа, Premium — 10-20 минут."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Что делать если Bitcoin транзакция не подтверждается?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Если BTC транзакция не подтверждается больше часа — используйте TurboTX ускоритель транзакций. Скопируйте TXID транзакции из кошелька и вставьте на turbotx.acelerat.vercel.app для бесплатного ускорения. Можно также использовать CPFP или RBF методы с помощью наших калькуляторов."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Сколько стоит ускорить BTC транзакцию?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Базовое ускорение Bitcoin транзакции на TurboTX — полностью бесплатно. Premium ускорение с приоритетом во все 15+ пулов и ViaBTC/BTC.com API стоит от $4 в BTC или USDT TRC-20. Есть гарантия возврата денег в течение 6 часов."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Что такое BTC transaction accelerator?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Bitcoin transaction accelerator (ускоритель BTC транзакций) — это сервис, который повторно отправляет (rebroadcast) вашу неподтверждённую транзакцию напрямую в майнинг-пулы, минуя переполненный mempool. TurboTX — лучший бесплатный bitcoin accelerator, работающий с 15+ пулами."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Как работает CPFP и RBF для ускорения Bitcoin?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "CPFP (Child-Pays-for-Parent) — создание новой дочерней транзакции с высокой комиссией, которая тянет застрявшую родительскую. RBF (Replace-By-Fee) — замена транзакции на новую с более высокой комиссией. TurboTX предоставляет бесплатные калькуляторы CPFP и RBF для всех популярных кошельков: Bitcoin Core, Electrum, Sparrow, Ledger, Trezor."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Есть ли гарантия возврата денег?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Да. Если Premium-ускорение не подтвердило транзакцию в течение 6 часов — возвращаем оплату полностью. Для возврата напишите в поддержку @Sup_TurboTX в Telegram с TXID и номером платежа."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Какие майнинг-пулы поддерживает TurboTX?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "TurboTX v5.3 отправляет транзакции в 22 канала: AntPool, ViaBTC, SpiderPool (топ-5 хешрейт 2026), Foundry USA, CloverPool, BitFuFu, MARA Pool, BitAccelerate и другие. Premium использует прямые API ViaBTC, AntPool, SpiderPool, CloverPool и мемпул-акселератор."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Безопасно ли использовать TurboTX?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Да, TurboTX полностью безопасен. Для ускорения нужен только TXID транзакции — публичный идентификатор из блокчейна. Мы никогда не запрашиваем приватные ключи, seed-фразы или доступ к кошельку."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Как долго подтверждается транзакция после ускорения?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Бесплатное ускорение TurboTX обычно даёт подтверждение за 1-3 часа. Premium ускорение через ViaBTC API + BTC.com API + 15 пулов — 10-20 минут. Время зависит от загруженности сети Bitcoin."
-      }
-    }
-  ]
-}
-</script>
-
-<!-- HowTo Schema — шаги прямо в Google -->
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "HowTo",
-  "name": "Как ускорить застрявшую Bitcoin транзакцию через TurboTX",
-  "description": "Пошаговая инструкция как ускорить неподтверждённую BTC транзакцию бесплатно за 3 минуты",
-  "image": "https://acelerat.vercel.app/og-image.png",
-  "totalTime": "PT3M",
-  "estimatedCost": {
-    "@type": "MonetaryAmount",
-    "currency": "USD",
-    "value": "0"
-  },
-  "tool": [
-    { "@type": "HowToTool", "name": "TXID транзакции" },
-    { "@type": "HowToTool", "name": "TurboTX — acelerat.vercel.app" }
-  ],
-  "step": [
-    {
-      "@type": "HowToStep",
-      "position": "1",
-      "name": "Найдите TXID транзакции",
-      "text": "Откройте ваш Bitcoin кошелёк (Electrum, Trust Wallet, Ledger, etc.) и скопируйте TXID (Transaction ID) застрявшей транзакции — это строка из 64 символов.",
-      "image": "https://acelerat.vercel.app/og-image.png"
-    },
-    {
-      "@type": "HowToStep",
-      "position": "2",
-      "name": "Вставьте TXID на TurboTX",
-      "text": "Перейдите на acelerat.vercel.app, вставьте скопированный TXID в поле ввода и нажмите кнопку «Ускорить».",
-      "image": "https://acelerat.vercel.app/og-image.png"
-    },
-    {
-      "@type": "HowToStep",
-      "position": "3",
-      "name": "Выберите план ускорения",
-      "text": "Бесплатный план отправляет транзакцию в 22 канала (1-3 часа). Premium использует прямые API Foundry USA, AntPool, MARA, ViaBTC и 11 других пулов для подтверждения за 10-20 минут.",
-      "image": "https://acelerat.vercel.app/og-image.png"
-    },
-    {
-      "@type": "HowToStep",
-      "position": "4",
-      "name": "Готово — отслеживайте статус",
-      "text": "TurboTX начнёт rebroadcast вашей транзакции. Отслеживайте статус подтверждения прямо на сайте или в Telegram канале @TurboTXAcel.",
-      "image": "https://acelerat.vercel.app/og-image.png"
-    }
-  ]
-}
-</script>
-
-<!-- Organization Schema -->
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  "name": "TurboTX",
-  "url": "https://acelerat.vercel.app/",
-  "description": "Сервис ускорения Bitcoin транзакций. Telegram-канал с советами и новостями.",
-  "sameAs": [
-    "https://t.me/TurboTXAcel",
-    "https://t.me/TurboTXcoment",
-    "https://t.me/Sup_TurboTX",
-    "https://github.com/ProjectBarabashka/T_U_R_B_O_T_X"
-  ]
-}
-</script>
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
@@ -1168,6 +1018,8 @@ input[type=text]:focus { border-color: rgba(247,147,26,.5) !important; box-shado
     </div>
   </a>
   <div class="nav-right">
+    <a href="javascript:void(0)" class="nav-link" onclick="document.getElementById('about').scrollIntoView({behavior:'smooth'});return false;" style="display:inline-flex;align-items:center;gap:5px">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>О нас</a>
     <a href="javascript:void(0)" class="nav-link" onclick="document.getElementById('status').scrollIntoView({behavior:'smooth'});return false;">Статус</a>
     <a href="javascript:void(0)" class="nav-link" onclick="document.getElementById('cpfp').scrollIntoView({behavior:'smooth'});return false;">CPFP</a>
     <a href="javascript:void(0)" class="nav-link" onclick="document.getElementById('rbf').scrollIntoView({behavior:'smooth'});return false;">RBF</a>
@@ -1244,26 +1096,63 @@ input[type=text]:focus { border-color: rgba(247,147,26,.5) !important; box-shado
     <span class="stat-card-icon" style="display:inline-block;position:relative;width:32px;height:36px;vertical-align:middle">
       <svg id="lightning-svg" width="32" height="36" viewBox="0 0 32 36" fill="none" xmlns="http://www.w3.org/2000/svg" style="overflow:visible">
         <style>
-          #bolt-main { animation: boltStrike 2.8s ease-in-out infinite; transform-origin: 16px 4px; filter: drop-shadow(0 0 4px #f7931a) drop-shadow(0 0 10px #ffe066); }
+          #bolt-main {
+            animation: boltStrike 2.8s ease-in-out infinite;
+            transform-origin: 16px 4px;
+            filter: drop-shadow(0 0 4px #f7931a) drop-shadow(0 0 10px #ffe066);
+          }
           @keyframes boltStrike {
             0%   { opacity:0; transform: scaleY(0) scaleX(0.7); filter: drop-shadow(0 0 2px #f7931a); }
             8%   { opacity:1; transform: scaleY(1) scaleX(1);   filter: drop-shadow(0 0 8px #fff) drop-shadow(0 0 18px #ffe066) drop-shadow(0 0 30px #f7931a); }
             18%  { opacity:1; transform: scaleY(1) scaleX(1);   filter: drop-shadow(0 0 5px #fff) drop-shadow(0 0 12px #ffe066); }
             38%  { opacity:.85; transform: scaleY(1) scaleX(1); filter: drop-shadow(0 0 3px #f7931a); }
-            55%  { opacity:0; } 100% { opacity:0; transform: scaleY(0) scaleX(0.7); }
+            55%  { opacity:0; transform: scaleY(1) scaleX(1); }
+            100% { opacity:0; transform: scaleY(0) scaleX(0.7); }
           }
           #bolt-flash { animation: flashImpact 2.8s ease-in-out infinite; }
-          @keyframes flashImpact { 0%,6%{opacity:0;r:0} 9%{opacity:0.9;r:8} 18%{opacity:0.5;r:11} 32%{opacity:0;r:14} 100%{opacity:0;r:0} }
+          @keyframes flashImpact {
+            0%,6%  { opacity:0; r:0; }
+            9%     { opacity:0.9; r:8; }
+            18%    { opacity:0.5; r:11; }
+            32%    { opacity:0; r:14; }
+            100%   { opacity:0; r:0; }
+          }
           #spark-l { animation: sparkLeft 2.8s ease-in-out infinite; transform-origin: 12px 30px; }
-          @keyframes sparkLeft { 0%,7%{opacity:0;transform:translate(0,0)} 10%{opacity:1;transform:translate(-4px,-3px) rotate(-35deg)} 22%{opacity:0;transform:translate(-9px,-1px) rotate(-50deg)} 100%{opacity:0} }
+          @keyframes sparkLeft {
+            0%,7%  { opacity:0; transform: translate(0,0) rotate(0deg); }
+            10%    { opacity:1; transform: translate(-4px,-3px) rotate(-35deg); }
+            22%    { opacity:0; transform: translate(-9px,-1px) rotate(-50deg); }
+            100%   { opacity:0; transform: translate(0,0); }
+          }
           #spark-r { animation: sparkRight 2.8s ease-in-out infinite; transform-origin: 20px 30px; }
-          @keyframes sparkRight { 0%,7%{opacity:0;transform:translate(0,0)} 10%{opacity:1;transform:translate(4px,-4px) rotate(30deg)} 22%{opacity:0;transform:translate(8px,-1px) rotate(48deg)} 100%{opacity:0} }
+          @keyframes sparkRight {
+            0%,7%  { opacity:0; transform: translate(0,0) rotate(0deg); }
+            10%    { opacity:1; transform: translate(4px,-4px) rotate(30deg); }
+            22%    { opacity:0; transform: translate(8px,-1px) rotate(48deg); }
+            100%   { opacity:0; transform: translate(0,0); }
+          }
           #spark-u { animation: sparkUp 2.8s ease-in-out infinite; }
-          @keyframes sparkUp { 0%,7%{opacity:0;transform:translate(0,0)} 10%{opacity:0.9;transform:translate(1px,-7px)} 20%{opacity:0;transform:translate(2px,-12px)} 100%{opacity:0} }
+          @keyframes sparkUp {
+            0%,7%  { opacity:0; transform: translate(0,0); }
+            10%    { opacity:0.9; transform: translate(1px,-7px); }
+            20%    { opacity:0; transform: translate(2px,-12px); }
+            100%   { opacity:0; }
+          }
           #ground-line { animation: groundGlow 2.8s ease-in-out infinite; }
-          @keyframes groundGlow { 0%,6%{opacity:0;stroke-width:1} 9%{opacity:1;stroke-width:3;filter:drop-shadow(0 0 4px #f7931a)} 25%{opacity:0.4;stroke-width:1.5} 40%{opacity:0} 100%{opacity:0} }
+          @keyframes groundGlow {
+            0%,6%  { opacity:0; stroke-width:1; }
+            9%     { opacity:1; stroke-width:3; filter: drop-shadow(0 0 4px #f7931a); }
+            25%    { opacity:0.4; stroke-width:1.5; }
+            40%    { opacity:0; }
+            100%   { opacity:0; }
+          }
           #shockwave { animation: shockwaveAnim 2.8s ease-in-out infinite; transform-origin: 16px 31px; }
-          @keyframes shockwaveAnim { 0%,7%{opacity:0;transform:scale(0)} 11%{opacity:0.7;transform:scale(0.4)} 30%{opacity:0;transform:scale(1.2)} 100%{opacity:0;transform:scale(0)} }
+          @keyframes shockwaveAnim {
+            0%,7%  { opacity:0; transform: scale(0); }
+            11%    { opacity:0.7; transform: scale(0.4); }
+            30%    { opacity:0; transform: scale(1.2); }
+            100%   { opacity:0; transform: scale(0); }
+          }
         </style>
         <line x1="4" y1="31" x2="28" y2="31" stroke="#6b4f1a" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
         <ellipse id="shockwave" cx="16" cy="31" rx="9" ry="3" stroke="#f7931a" stroke-width="1.2" fill="none"/>
@@ -1276,7 +1165,12 @@ input[type=text]:focus { border-color: rgba(247,147,26,.5) !important; box-shado
         <line id="spark-l" x1="12" y1="30" x2="8"  y2="26" stroke="#ffe066" stroke-width="1.5" stroke-linecap="round"/>
         <line id="spark-r" x1="20" y1="30" x2="24" y2="25" stroke="#ffe066" stroke-width="1.5" stroke-linecap="round"/>
         <line id="spark-u" x1="16" y1="30" x2="17" y2="24" stroke="#fff"    stroke-width="1"   stroke-linecap="round"/>
-        <defs><linearGradient id="boltGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#fff" stop-opacity="0.9"/><stop offset="100%" stop-color="#f7931a" stop-opacity="0"/></linearGradient></defs>
+        <defs>
+          <linearGradient id="boltGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stop-color="#fff" stop-opacity="0.9"/>
+            <stop offset="100%" stop-color="#f7931a" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
       </svg>
     </span>
     <span class="stat-num" id="sc">—</span>
@@ -1295,31 +1189,62 @@ input[type=text]:focus { border-color: rgba(247,147,26,.5) !important; box-shado
           #wind1 { animation: windPass 2.2s ease-in-out infinite; }
           #wind2 { animation: windPass 2.2s ease-in-out 0.32s infinite; }
           #wind3 { animation: windPass 2.2s ease-in-out 0.64s infinite; }
-          @keyframes windPass { 0%{stroke-dashoffset:36;opacity:0} 12%{opacity:0.7} 55%{opacity:0.55;stroke-dashoffset:0} 80%{opacity:0;stroke-dashoffset:-10} 100%{stroke-dashoffset:-10;opacity:0} }
-          #sakura-petal { animation: sakuraDrift 2.2s ease-in-out infinite; transform-origin: 19px 18px; }
-          @keyframes sakuraDrift { 0%{transform:translate(-6px,2px) rotate(-18deg);opacity:0.3} 15%{opacity:1} 40%{transform:translate(2px,-3px) rotate(8deg);opacity:1} 65%{transform:translate(8px,4px) rotate(22deg);opacity:1} 85%{transform:translate(13px,9px) rotate(35deg);opacity:0.5} 100%{transform:translate(16px,13px) rotate(45deg);opacity:0} }
-          #sakura-inner { animation: petalWobble 2.2s ease-in-out infinite; transform-origin: 19px 18px; }
-          @keyframes petalWobble { 0%,100%{transform:rotate(0deg) scaleX(1)} 30%{transform:rotate(-6deg) scaleX(0.92)} 60%{transform:rotate(5deg) scaleX(1.06)} }
+          @keyframes windPass {
+            0%   { stroke-dashoffset: 36; opacity: 0; }
+            12%  { opacity: 0.7; }
+            55%  { opacity: 0.55; stroke-dashoffset: 0; }
+            80%  { opacity: 0; stroke-dashoffset: -10; }
+            100% { stroke-dashoffset: -10; opacity: 0; }
+          }
+          #sakura-petal {
+            animation: sakuraDrift 2.2s ease-in-out infinite;
+            transform-origin: 19px 18px;
+          }
+          @keyframes sakuraDrift {
+            0%   { transform: translate(-6px, 2px) rotate(-18deg); opacity:0.3; }
+            15%  { opacity:1; }
+            40%  { transform: translate(2px, -3px) rotate(8deg);   opacity:1; }
+            65%  { transform: translate(8px, 4px)  rotate(22deg);  opacity:1; }
+            85%  { transform: translate(13px, 9px) rotate(35deg);  opacity:0.5; }
+            100% { transform: translate(16px, 13px) rotate(45deg); opacity:0; }
+          }
+          #sakura-inner {
+            animation: petalWobble 2.2s ease-in-out infinite;
+            transform-origin: 19px 18px;
+          }
+          @keyframes petalWobble {
+            0%,100% { transform: rotate(0deg) scaleX(1); }
+            30%     { transform: rotate(-6deg) scaleX(0.92); }
+            60%     { transform: rotate(5deg)  scaleX(1.06); }
+          }
         </style>
         <path id="wind1" class="wind-line" stroke-width="1.3" stroke-dasharray="22 8" d="M2 12 Q12 10 24 13 Q30 14 36 12"/>
         <path id="wind2" class="wind-line" stroke-width="1"   stroke-dasharray="18 10" d="M2 18 Q10 16 20 19 Q28 21 36 18"/>
         <path id="wind3" class="wind-line" stroke-width="0.8" stroke-dasharray="14 12" d="M2 23 Q11 22 22 24 Q29 25 36 23"/>
-        <g id="sakura-petal"><g id="sakura-inner">
-          <ellipse cx="19" cy="13" rx="3.8" ry="6" fill="url(#sakGrad)" transform="rotate(0   19 18)"/>
-          <ellipse cx="19" cy="13" rx="3.8" ry="6" fill="url(#sakGrad)" transform="rotate(72  19 18)"/>
-          <ellipse cx="19" cy="13" rx="3.8" ry="6" fill="url(#sakGrad)" transform="rotate(144 19 18)"/>
-          <ellipse cx="19" cy="13" rx="3.8" ry="6" fill="url(#sakGrad)" transform="rotate(216 19 18)"/>
-          <ellipse cx="19" cy="13" rx="3.8" ry="6" fill="url(#sakGrad)" transform="rotate(288 19 18)"/>
-          <circle cx="19" cy="18" r="3" fill="#fce7f3"/>
-          <circle cx="19" cy="18" r="1.5" fill="#fbcfe8"/>
-          <circle cx="19" cy="15.5" r="0.5" fill="#f472b6"/>
-          <circle cx="21.2" cy="16.8" r="0.5" fill="#f472b6"/>
-          <circle cx="20.5" cy="19.4" r="0.5" fill="#f472b6"/>
-          <circle cx="17.5" cy="19.4" r="0.5" fill="#f472b6"/>
-          <circle cx="16.8" cy="16.8" r="0.5" fill="#f472b6"/>
-          <line x1="19" y1="21" x2="19" y2="25" stroke="#f9a8d4" stroke-width="0.9" stroke-linecap="round"/>
-        </g></g>
-        <defs><radialGradient id="sakGrad" cx="50%" cy="20%" r="70%"><stop offset="0%" stop-color="#fdf2f8"/><stop offset="50%" stop-color="#fbcfe8"/><stop offset="100%" stop-color="#f9a8d4"/></radialGradient></defs>
+        <g id="sakura-petal">
+          <g id="sakura-inner">
+            <ellipse cx="19" cy="13" rx="3.8" ry="6" fill="url(#sakGrad)" transform="rotate(0   19 18)"/>
+            <ellipse cx="19" cy="13" rx="3.8" ry="6" fill="url(#sakGrad)" transform="rotate(72  19 18)"/>
+            <ellipse cx="19" cy="13" rx="3.8" ry="6" fill="url(#sakGrad)" transform="rotate(144 19 18)"/>
+            <ellipse cx="19" cy="13" rx="3.8" ry="6" fill="url(#sakGrad)" transform="rotate(216 19 18)"/>
+            <ellipse cx="19" cy="13" rx="3.8" ry="6" fill="url(#sakGrad)" transform="rotate(288 19 18)"/>
+            <circle cx="19" cy="18" r="3"   fill="#fce7f3"/>
+            <circle cx="19" cy="18" r="1.5" fill="#fbcfe8"/>
+            <circle cx="19" cy="15.5" r="0.5" fill="#f472b6"/>
+            <circle cx="21.2" cy="16.8" r="0.5" fill="#f472b6"/>
+            <circle cx="20.5" cy="19.4" r="0.5" fill="#f472b6"/>
+            <circle cx="17.5" cy="19.4" r="0.5" fill="#f472b6"/>
+            <circle cx="16.8" cy="16.8" r="0.5" fill="#f472b6"/>
+            <line x1="19" y1="21" x2="19" y2="25" stroke="#f9a8d4" stroke-width="0.9" stroke-linecap="round"/>
+          </g>
+        </g>
+        <defs>
+          <radialGradient id="sakGrad" cx="50%" cy="20%" r="70%">
+            <stop offset="0%"   stop-color="#fdf2f8"/>
+            <stop offset="50%"  stop-color="#fbcfe8"/>
+            <stop offset="100%" stop-color="#f9a8d4"/>
+          </radialGradient>
+        </defs>
       </svg>
     </span>
     <span class="stat-num" id="pools-online" style="color:var(--g);opacity:.3;animation:skeletonPulse 1.6s ease-in-out infinite">—</span>
@@ -1331,20 +1256,62 @@ input[type=text]:focus { border-color: rgba(247,147,26,.5) !important; box-shado
 <div class="card" id="accelerate">
   <div class="card-title"><span style="display:inline-flex;align-items:center;gap:8px"><span style="display:inline-block;position:relative;width:22px;height:24px;vertical-align:middle;flex-shrink:0"><svg id="bolt2-svg" width="22" height="24" viewBox="0 0 32 36" fill="none" xmlns="http://www.w3.org/2000/svg" style="overflow:visible">
         <style>
-          #bolt2-main { animation: bolt2Strike 2.8s ease-in-out infinite; transform-origin: 16px 4px; }
-          @keyframes bolt2Strike { 0%{opacity:0;transform:scaleY(0) scaleX(0.7)} 8%{opacity:1;transform:scaleY(1) scaleX(1);filter:drop-shadow(0 0 8px #fff) drop-shadow(0 0 18px #ffe066) drop-shadow(0 0 30px #f7931a)} 18%{opacity:1;filter:drop-shadow(0 0 5px #fff) drop-shadow(0 0 12px #ffe066)} 38%{opacity:.85} 55%{opacity:0} 100%{opacity:0;transform:scaleY(0) scaleX(0.7)} }
+          #bolt2-main {
+            animation: bolt2Strike 2.8s ease-in-out infinite;
+            transform-origin: 16px 4px;
+          }
+          @keyframes bolt2Strike {
+            0%   { opacity:0; transform: scaleY(0) scaleX(0.7); filter: drop-shadow(0 0 2px #f7931a); }
+            8%   { opacity:1; transform: scaleY(1) scaleX(1);   filter: drop-shadow(0 0 8px #fff) drop-shadow(0 0 18px #ffe066) drop-shadow(0 0 30px #f7931a); }
+            18%  { opacity:1; transform: scaleY(1) scaleX(1);   filter: drop-shadow(0 0 5px #fff) drop-shadow(0 0 12px #ffe066); }
+            38%  { opacity:.85; transform: scaleY(1) scaleX(1); filter: drop-shadow(0 0 3px #f7931a); }
+            55%  { opacity:0; transform: scaleY(1) scaleX(1); }
+            100% { opacity:0; transform: scaleY(0) scaleX(0.7); }
+          }
           #bolt2-flash { animation: bolt2Flash 2.8s ease-in-out infinite; }
-          @keyframes bolt2Flash { 0%,6%{opacity:0;r:0} 9%{opacity:0.9;r:8} 18%{opacity:0.5;r:11} 32%{opacity:0;r:14} 100%{opacity:0;r:0} }
+          @keyframes bolt2Flash {
+            0%,6%  { opacity:0; r:0; }
+            9%     { opacity:0.9; r:8; }
+            18%    { opacity:0.5; r:11; }
+            32%    { opacity:0; r:14; }
+            100%   { opacity:0; r:0; }
+          }
           #bolt2-spark-l { animation: bolt2SparkL 2.8s ease-in-out infinite; transform-origin: 12px 30px; }
-          @keyframes bolt2SparkL { 0%,7%{opacity:0;transform:translate(0,0)} 10%{opacity:1;transform:translate(-4px,-3px) rotate(-35deg)} 22%{opacity:0;transform:translate(-9px,-1px) rotate(-50deg)} 100%{opacity:0} }
+          @keyframes bolt2SparkL {
+            0%,7%  { opacity:0; transform: translate(0,0) rotate(0deg); }
+            10%    { opacity:1; transform: translate(-4px,-3px) rotate(-35deg); }
+            22%    { opacity:0; transform: translate(-9px,-1px) rotate(-50deg); }
+            100%   { opacity:0; transform: translate(0,0); }
+          }
           #bolt2-spark-r { animation: bolt2SparkR 2.8s ease-in-out infinite; transform-origin: 20px 30px; }
-          @keyframes bolt2SparkR { 0%,7%{opacity:0;transform:translate(0,0)} 10%{opacity:1;transform:translate(4px,-4px) rotate(30deg)} 22%{opacity:0;transform:translate(8px,-1px) rotate(48deg)} 100%{opacity:0} }
+          @keyframes bolt2SparkR {
+            0%,7%  { opacity:0; transform: translate(0,0) rotate(0deg); }
+            10%    { opacity:1; transform: translate(4px,-4px) rotate(30deg); }
+            22%    { opacity:0; transform: translate(8px,-1px) rotate(48deg); }
+            100%   { opacity:0; transform: translate(0,0); }
+          }
           #bolt2-spark-u { animation: bolt2SparkU 2.8s ease-in-out infinite; }
-          @keyframes bolt2SparkU { 0%,7%{opacity:0;transform:translate(0,0)} 10%{opacity:0.9;transform:translate(1px,-7px)} 20%{opacity:0;transform:translate(2px,-12px)} 100%{opacity:0} }
+          @keyframes bolt2SparkU {
+            0%,7%  { opacity:0; transform: translate(0,0); }
+            10%    { opacity:0.9; transform: translate(1px,-7px); }
+            20%    { opacity:0; transform: translate(2px,-12px); }
+            100%   { opacity:0; }
+          }
           #bolt2-ground { animation: bolt2Ground 2.8s ease-in-out infinite; }
-          @keyframes bolt2Ground { 0%,6%{opacity:0;stroke-width:1} 9%{opacity:1;stroke-width:3;filter:drop-shadow(0 0 4px #f7931a)} 25%{opacity:0.4;stroke-width:1.5} 40%{opacity:0} 100%{opacity:0} }
+          @keyframes bolt2Ground {
+            0%,6%  { opacity:0; stroke-width:1; }
+            9%     { opacity:1; stroke-width:3; filter: drop-shadow(0 0 4px #f7931a); }
+            25%    { opacity:0.4; stroke-width:1.5; }
+            40%    { opacity:0; }
+            100%   { opacity:0; }
+          }
           #bolt2-shock { animation: bolt2Shock 2.8s ease-in-out infinite; transform-origin: 16px 31px; }
-          @keyframes bolt2Shock { 0%,7%{opacity:0;transform:scale(0)} 11%{opacity:0.7;transform:scale(0.4)} 30%{opacity:0;transform:scale(1.2)} 100%{opacity:0;transform:scale(0)} }
+          @keyframes bolt2Shock {
+            0%,7%  { opacity:0; transform: scale(0); }
+            11%    { opacity:0.7; transform: scale(0.4); }
+            30%    { opacity:0; transform: scale(1.2); }
+            100%   { opacity:0; transform: scale(0); }
+          }
         </style>
         <line x1="4" y1="31" x2="28" y2="31" stroke="#6b4f1a" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
         <ellipse id="bolt2-shock" cx="16" cy="31" rx="9" ry="3" stroke="#f7931a" stroke-width="1.2" fill="none"/>
@@ -1357,7 +1324,12 @@ input[type=text]:focus { border-color: rgba(247,147,26,.5) !important; box-shado
         <line id="bolt2-spark-l" x1="12" y1="30" x2="8"  y2="26" stroke="#ffe066" stroke-width="1.5" stroke-linecap="round"/>
         <line id="bolt2-spark-r" x1="20" y1="30" x2="24" y2="25" stroke="#ffe066" stroke-width="1.5" stroke-linecap="round"/>
         <line id="bolt2-spark-u" x1="16" y1="30" x2="17" y2="24" stroke="#fff"    stroke-width="1"   stroke-linecap="round"/>
-        <defs><linearGradient id="bolt2Grad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#fff" stop-opacity="0.9"/><stop offset="100%" stop-color="#f7931a" stop-opacity="0"/></linearGradient></defs>
+        <defs>
+          <linearGradient id="bolt2Grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stop-color="#fff" stop-opacity="0.9"/>
+            <stop offset="100%" stop-color="#f7931a" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
       </svg></span>Ускорить транзакцию</span></div>
   <div class="card-sub">Вставьте TXID из кошелька — мы займёмся остальным</div>
 
@@ -1457,7 +1429,29 @@ input[type=text]:focus { border-color: rgba(247,147,26,.5) !important; box-shado
 <div class="card" id="status"><div class="card-title"><span style="display:inline-flex;align-items:center;gap:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Проверить статус TX</span></div><div class="card-sub">Проверка подтверждений в реальном времени через mempool.space</div><div class="fg"><label>TXID</label><input type="text" id="stxid" placeholder="64 hex символа..." maxlength="64"></div><button class="chk-btn" onclick="chk()"><span style="display:inline-flex;align-items:center;gap:10px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>ПРОВЕРИТЬ СТАТУС</span></button><div class="status-res" id="sr"></div></div>
 
 <!-- CPFP CALCULATOR -->
-<div class="card" id="cpfp"><div class="card-title"><span style="display:inline-flex;align-items:center;gap:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> CPFP Калькулятор</span></div><div class="card-sub">Child-Pays-for-Parent — разгони застрявшую транзакцию дочерней TX без Premium</div><div class="fg"><label>TXID застрявшей (родительской) транзакции</label><input type="text" id="cpfp-parent" placeholder="64 hex символа..." maxlength="64" oninput="onCpfpInput()"></div><div class="fg" id="cpfp-target-wrap" style="display:none"><label>Целевая скорость подтверждения <span id="cpfp-fee-label" style="color:var(--a)">— sat/vB</span></label><div class="range-wrap"><input type="range" id="cpfp-speed" min="1" max="3" value="2" step="1" oninput="calcCpfp()" style="--pct:50%"><div class="range-labels"><span>Медленно (~1ч)</span><span>Стандарт (~30м)</span><span>Быстро (~15м)</span></div></div></div><button class="chk-btn" id="cpfp-btn" onclick="calcCpfp()" style="margin-top:4px"><span style="display:inline-flex;align-items:center;gap:10px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> РАССЧИТАТЬ CPFP</span></button><div class="cpfp-result" id="cpfp-result">...</div></div>
+<div class="card" id="cpfp"><div class="card-title"><span style="display:inline-flex;align-items:center;gap:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> CPFP Калькулятор</span></div><div class="card-sub">Child-Pays-for-Parent — разгони застрявшую транзакцию дочерней TX без Premium</div><div class="fg"><label>TXID застрявшей (родительской) транзакции</label><input type="text" id="cpfp-parent" placeholder="64 hex символа..." maxlength="64" oninput="onCpfpInput()"></div><div class="fg" id="cpfp-target-wrap" style="display:none"><label>Целевая скорость подтверждения <span id="cpfp-fee-label" style="color:var(--a)">— sat/vB</span></label><div class="range-wrap"><input type="range" id="cpfp-speed" min="1" max="3" value="2" step="1" oninput="calcCpfp()" style="--pct:50%"><div class="range-labels"><span>Медленно (~1ч)</span><span>Стандарт (~30м)</span><span>Быстро (~15м)</span></div></div></div><button class="chk-btn" id="cpfp-btn" onclick="calcCpfp()" style="margin-top:4px"><span style="display:inline-flex;align-items:center;gap:10px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> РАССЧИТАТЬ CPFP</span></button><div class="cpfp-result" id="cpfp-result">
+    <div style="font-family:var(--mono);font-size:.6rem;color:var(--m);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px">Результат CPFP расчёта</div>
+    <div class="cpfp-row"><span class="cpfp-key">Размер родит. TX</span><span class="cpfp-val" id="cpfp-parent-size">—</span></div>
+    <div class="cpfp-row"><span class="cpfp-key">Комиссия родит. TX</span><span class="cpfp-val" id="cpfp-parent-fee">—</span></div>
+    <div class="cpfp-row"><span class="cpfp-key">Ставка родит. TX</span><span class="cpfp-val warn" id="cpfp-parent-rate">—</span></div>
+    <div class="cpfp-row"><span class="cpfp-key">Целевая ставка пакета</span><span class="cpfp-val" id="cpfp-target-rate">—</span></div>
+    <div class="cpfp-row"><span class="cpfp-key">Мин. комиссия дочерней TX</span><span class="cpfp-val" id="cpfp-child-fee">—</span></div>
+    <div class="cpfp-row" style="background:rgba(0,232,122,.04);border-radius:6px;padding:8px 6px;margin-top:4px">
+      <span class="cpfp-key" style="font-weight:700;color:var(--t)">Итого к оплате за дочернюю TX</span>
+      <span class="cpfp-val" style="font-size:.82rem" id="cpfp-final">—</span>
+    </div>
+    <div style="background:rgba(247,147,26,.06);border:1px solid rgba(247,147,26,.18);border-radius:var(--r);padding:12px;margin-top:12px;font-family:var(--mono);font-size:.68rem;color:var(--m2);line-height:1.7" id="cpfp-instruction">
+      Создайте новую транзакцию использующую неподтверждённый UTXO из застрявшей TX.<br>
+      Установите комиссию <strong style="color:var(--a)" id="cpfp-fee-btc">—</strong> сатошей.<br>
+      Майнеры примут обе транзакции как пакет.
+    </div>
+    <button class="cpfp-copy" onclick="copyCpfpInfo()">
+      <span style="display:inline-flex;align-items:center;gap:8px;justify-content:center">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Скопировать параметры CPFP
+      </span>
+    </button>
+  </div>
 
 <!-- RBF CALCULATOR -->
 <section id="rbf" style="margin-bottom:28px">
@@ -1467,28 +1461,47 @@ input[type=text]:focus { border-color: rgba(247,147,26,.5) !important; box-shado
     RBF Калькулятор
   </span></div>
   <div class="card-sub">Replace-By-Fee — замени комиссию застрявшей транзакции прямо в кошельке</div>
+
   <div class="fg" style="margin-top:20px">
     <label>TXID транзакции для замены комиссии</label>
-    <input type="text" id="rbf-txid" placeholder="a1b2c3d4... (64 hex символа)" maxlength="64" oninput="rbfOnInput()" style="width:100%;box-sizing:border-box">
+    <input type="text" id="rbf-txid" placeholder="a1b2c3d4... (64 hex символа)" maxlength="64"
+      oninput="rbfOnInput()" style="width:100%;box-sizing:border-box">
   </div>
+
   <div id="rbf-status-block" style="display:none;margin:14px 0 0">
     <div id="rbf-support-badge" style="display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:8px;font-family:var(--mono);font-size:.72rem;font-weight:700;margin-bottom:14px"></div>
   </div>
+
   <div id="rbf-target-wrap" style="display:none;margin-top:18px">
     <label style="font-size:.65rem;letter-spacing:2px;color:var(--m);text-transform:uppercase;font-family:var(--mono);display:block;margin-bottom:10px">Целевая скорость</label>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px">
-      <div class="popt on" id="rbf-spd-eco" onclick="rbfPickSpeed(this,'eco')"><div style="font-size:.65rem;color:var(--m);font-family:var(--mono)">Эконом</div><div style="font-weight:700;color:var(--t)" id="rbf-fee-eco">— sat/vB</div><div style="font-size:.6rem;color:var(--m)">~1 час</div></div>
-      <div class="popt" id="rbf-spd-std" onclick="rbfPickSpeed(this,'std')"><div style="font-size:.65rem;color:var(--m);font-family:var(--mono)">Стандарт</div><div style="font-weight:700;color:var(--t)" id="rbf-fee-std">— sat/vB</div><div style="font-size:.6rem;color:var(--m)">~30 мин</div></div>
-      <div class="popt" id="rbf-spd-fast" onclick="rbfPickSpeed(this,'fast')"><div style="font-size:.65rem;color:var(--m);font-family:var(--mono)">Быстро</div><div style="font-weight:700;color:var(--t)" id="rbf-fee-fast">— sat/vB</div><div style="font-size:.6rem;color:var(--m)">~10 мин</div></div>
+      <div class="popt on" id="rbf-spd-eco" onclick="rbfPickSpeed(this,'eco')">
+        <div style="font-size:.65rem;color:var(--m);font-family:var(--mono)">Эконом</div>
+        <div style="font-weight:700;color:var(--t)" id="rbf-fee-eco">— sat/vB</div>
+        <div style="font-size:.6rem;color:var(--m)">~1 час</div>
+      </div>
+      <div class="popt" id="rbf-spd-std" onclick="rbfPickSpeed(this,'std')">
+        <div style="font-size:.65rem;color:var(--m);font-family:var(--mono)">Стандарт</div>
+        <div style="font-weight:700;color:var(--t)" id="rbf-fee-std">— sat/vB</div>
+        <div style="font-size:.6rem;color:var(--m)">~30 мин</div>
+      </div>
+      <div class="popt" id="rbf-spd-fast" onclick="rbfPickSpeed(this,'fast')">
+        <div style="font-size:.65rem;color:var(--m);font-family:var(--mono)">Быстро</div>
+        <div style="font-weight:700;color:var(--t)" id="rbf-fee-fast">— sat/vB</div>
+        <div style="font-size:.6rem;color:var(--m)">~10 мин</div>
+      </div>
     </div>
   </div>
+
   <div id="rbf-live-fees" style="display:none;margin-bottom:12px;padding:8px 12px;background:rgba(0,232,122,.04);border:1px solid rgba(0,232,122,.12);border-radius:8px;font-family:var(--mono);font-size:.65rem;color:var(--m2);align-items:center;gap:6px;line-height:1.6"></div>
+
   <button class="acc-btn" id="rbf-btn" onclick="calcRbf()" style="margin-top:4px" disabled>
     <span style="display:inline-flex;align-items:center;gap:10px">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M3 6l9-3 9 3M3 18l9 3 9-3"/></svg>
       РАССЧИТАТЬ RBF + АВТО-КОМИССИЯ
     </span>
   </button>
+
   <div id="rbf-result" style="display:none;margin-top:22px">
     <div id="rbf-result-header" style="margin-bottom:16px"></div>
     <div id="rbf-metrics" style="margin-bottom:18px"></div>
@@ -1496,21 +1509,22 @@ input[type=text]:focus { border-color: rgba(247,147,26,.5) !important; box-shado
     <div id="rbf-no-support-msg" style="display:none;background:rgba(255,147,0,.06);border:1px solid rgba(255,147,0,.25);border-radius:10px;padding:14px 16px;margin-top:16px">
       <div style="font-family:var(--mono);font-size:.75rem;font-weight:700;color:#ff9320;margin-bottom:8px">⚠ Транзакция не поддерживает RBF</div>
       <div style="font-family:var(--mono);font-size:.7rem;color:var(--m);line-height:1.7">
-        Эта транзакция была отправлена без флага RBF.<br>
+        Эта транзакция была отправлена без флага RBF (все inputs имеют sequence = 0xFFFFFFFF).<br>
         <strong style="color:var(--t)">Что можно сделать:</strong><br>
-        → Используйте <a href="javascript:void(0)" onclick="document.getElementById('cpfp').scrollIntoView({behavior:'smooth'})" style="color:var(--a)">CPFP калькулятор</a><br>
+        → Используйте <a href="javascript:void(0)" onclick="document.getElementById('cpfp').scrollIntoView({behavior:'smooth'})" style="color:var(--a)">CPFP калькулятор</a> — создайте дочернюю TX с высокой комиссией<br>
         → Используйте <a href="javascript:void(0)" onclick="document.getElementById('accelerate').scrollIntoView({behavior:'smooth'})" style="color:var(--a)">Rebroadcast ускоритель</a> — отправим в 22 канала<br>
         → Подождите — транзакция может подтвердиться при снижении нагрузки на сеть
       </div>
     </div>
   </div>
+
   <details style="margin-top:22px">
     <summary style="font-family:var(--mono);font-size:.7rem;color:var(--m);cursor:pointer;user-select:none;padding:8px 0;list-style:none;display:flex;align-items:center;gap:6px">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
       Что такое RBF и когда использовать?
     </summary>
     <div style="font-family:var(--mono);font-size:.7rem;color:var(--m);line-height:1.8;padding:12px 0 4px;border-top:1px solid var(--b);margin-top:8px">
-      <strong style="color:var(--t)">RBF (Replace-By-Fee)</strong> — стандарт BIP-125, позволяющий заменить неподтверждённую транзакцию на новую с более высокой комиссией.<br><br>
+      <strong style="color:var(--t)">RBF (Replace-By-Fee)</strong> — стандарт BIP-125, позволяющий заменить неподтверждённую транзакцию на новую с более высокой комиссией. Майнеры предпочтут более выгодную версию.<br><br>
       <strong style="color:var(--t)">Когда RBF лучше CPFP:</strong> если вы сами отправитель и хотите полностью заменить TX.<br><br>
       <strong style="color:var(--t)">Когда RBF не работает:</strong> если транзакция отправлена без флага RBF — тогда используйте CPFP или наш rebroadcast ускоритель.<br><br>
       <strong style="color:var(--t)">Важно:</strong> RBF требует подписи приватным ключом — делается только в вашем кошельке, мы лишь рассчитываем параметры.
@@ -1524,7 +1538,15 @@ input[type=text]:focus { border-color: rgba(247,147,26,.5) !important; box-shado
   <div class="sh">TurboTX vs конкуренты</div>
   <div style="background:var(--s);border:1px solid var(--b);border-radius:12px;overflow:hidden">
     <table class="comp-table">
-      <thead><tr style="background:rgba(0,0,0,.2)"><th>Параметр</th><th class="us comp-us-col">TurboTX v5.3</th><th>ViaBTC</th><th>CloverPool</th><th>BitAccelerate</th></tr></thead>
+      <thead>
+        <tr style="background:rgba(0,0,0,.2)">
+          <th>Параметр</th>
+          <th class="us comp-us-col">TurboTX v5.3</th>
+          <th>ViaBTC</th>
+          <th>CloverPool</th>
+          <th>BitAccelerate</th>
+        </tr>
+      </thead>
       <tbody>
         <tr><td class="comp-row-label">Бесплатный план</td><td class="us comp-us-col">✓ 100/день</td><td class="maybe">20/час</td><td class="no">—</td><td class="no">—</td></tr>
         <tr><td class="comp-row-label">Кол-во каналов</td><td class="us comp-us-col">22 канала · сервер ⚡</td><td class="maybe">1 пул (ViaBTC)</td><td class="maybe">1 пул (CloverPool)</td><td class="maybe">~20 нод (клиент)</td></tr>
@@ -1614,16 +1636,199 @@ input[type=text]:focus { border-color: rgba(247,147,26,.5) !important; box-shado
   </div>
 </section>
 
+<!-- ══════════════════════════════════════════════════════════
+     О НАС — юридическая защита + прозрачность
+     ══════════════════════════════════════════════════════════ -->
+<section id="about" style="margin-bottom:40px;scroll-margin-top:80px">
+<div style="background:var(--s);border:1px solid var(--b);border-radius:20px;padding:36px;position:relative;overflow:hidden">
+
+  <!-- Декоративный фон -->
+  <div style="position:absolute;top:-40px;right:-40px;width:180px;height:180px;background:radial-gradient(circle,rgba(247,147,26,.07),transparent 70%);pointer-events:none"></div>
+  <div style="position:absolute;bottom:-30px;left:-30px;width:140px;height:140px;background:radial-gradient(circle,rgba(0,232,122,.05),transparent 70%);pointer-events:none"></div>
+
+  <!-- Заголовок -->
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:28px">
+    <div style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,rgba(247,147,26,.2),rgba(247,147,26,.05));border:1px solid rgba(247,147,26,.3);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--a)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    </div>
+    <div>
+      <h2 style="font-size:1.15rem;font-weight:800;margin:0 0 4px;letter-spacing:-.3px">О сервисе TurboTX</h2>
+      <div style="font-family:var(--mono);font-size:.65rem;color:var(--m);letter-spacing:.5px">Прозрачность · Законность · Безопасность</div>
+    </div>
+    <div style="margin-left:auto;font-family:var(--mono);font-size:.58rem;color:var(--m);background:rgba(0,232,122,.08);border:1px solid rgba(0,232,122,.2);border-radius:6px;padding:4px 10px;white-space:nowrap">✓ Легальный сервис</div>
+  </div>
+
+  <!-- Основной текст -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px">
+
+    <div style="background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:18px 20px">
+      <div style="font-size:.7rem;font-weight:700;color:var(--t);margin-bottom:10px;display:flex;align-items:center;gap:7px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--a)" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Что такое TurboTX
+      </div>
+      <div style="font-family:var(--mono);font-size:.68rem;color:var(--m2);line-height:1.85">
+        TurboTX — это <strong style="color:var(--t)">публичный rebroadcast-сервис</strong> для Bitcoin. Мы повторно рассылаем вашу уже существующую транзакцию в майнинг-пулы через их открытые API.<br><br>
+        Мы не создаём новые транзакции, не подписываем их и не имеем доступа к вашим средствам. Всё что мы делаем — отправляем ваш <strong style="color:var(--t)">публичный TXID</strong> в очередь пулов.
+      </div>
+    </div>
+
+    <div style="background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:18px 20px">
+      <div style="font-size:.7rem;font-weight:700;color:var(--t);margin-bottom:10px;display:flex;align-items:center;gap:7px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--g)" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Чем мы НЕ являемся
+      </div>
+      <div style="font-family:var(--mono);font-size:.68rem;color:var(--m2);line-height:1.85">
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:flex-start;gap:7px"><span style="color:var(--err);font-weight:700;flex-shrink:0">✗</span><span><strong style="color:var(--t)">Не майнинг-пул</strong> — мы не добываем Bitcoin и не влияем на консенсус сети</span></div>
+          <div style="display:flex;align-items:flex-start;gap:7px"><span style="color:var(--err);font-weight:700;flex-shrink:0">✗</span><span><strong style="color:var(--t)">Не кастодиальный сервис</strong> — не храним и не трогаем ваши средства</span></div>
+          <div style="display:flex;align-items:flex-start;gap:7px"><span style="color:var(--err);font-weight:700;flex-shrink:0">✗</span><span><strong style="color:var(--t)">Не финансовый посредник</strong> — платёж за сервис, не за перевод</span></div>
+          <div style="display:flex;align-items:flex-start;gap:7px"><span style="color:var(--err);font-weight:700;flex-shrink:0">✗</span><span><strong style="color:var(--t)">Не mixer / tumbler</strong> — не анонимизируем и не смешиваем транзакции</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Правовой блок -->
+  <div style="background:rgba(247,147,26,.04);border:1px solid rgba(247,147,26,.15);border-radius:12px;padding:18px 20px;margin-bottom:20px">
+    <div style="font-size:.7rem;font-weight:700;color:var(--a);margin-bottom:10px;display:flex;align-items:center;gap:7px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--a)" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Правовая основа
+    </div>
+    <div style="font-family:var(--mono);font-size:.67rem;color:var(--m2);line-height:1.85;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div>
+        <strong style="color:var(--t)">Rebroadcast — публичная практика.</strong> Повторная рассылка транзакций в сети Bitcoin является стандартной технической практикой, аналогичной сервисам ViaBTC Accelerator, BTC.com Accelerator и mempool.space. Ни один из них не является регулируемым финансовым учреждением в контексте данной функции.
+      </div>
+      <div>
+        <strong style="color:var(--t)">Только публичные данные.</strong> TurboTX обрабатывает исключительно публичную информацию блокчейна (TXID), доступную любому участнику сети. Сервис не обрабатывает персональные данные, не требует идентификации пользователей и не попадает под действие законодательства об AML/KYC в отношении данной функции.
+      </div>
+    </div>
+  </div>
+
+  <!-- Технические гарантии -->
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
+    <div style="text-align:center;padding:14px;background:rgba(0,232,122,.04);border:1px solid rgba(0,232,122,.12);border-radius:10px">
+      <div style="font-size:1.4rem;margin-bottom:4px">🔐</div>
+      <div style="font-family:var(--mono);font-size:.6rem;font-weight:700;color:var(--t);margin-bottom:4px">Без приватных ключей</div>
+      <div style="font-family:var(--mono);font-size:.58rem;color:var(--m);line-height:1.5">Только TXID — публичный идентификатор</div>
+    </div>
+    <div style="text-align:center;padding:14px;background:rgba(0,232,122,.04);border:1px solid rgba(0,232,122,.12);border-radius:10px">
+      <div style="font-size:1.4rem;margin-bottom:4px">📡</div>
+      <div style="font-family:var(--mono);font-size:.6rem;font-weight:700;color:var(--t);margin-bottom:4px">Открытый протокол</div>
+      <div style="font-family:var(--mono);font-size:.58rem;color:var(--m);line-height:1.5">Используем публичные API пулов</div>
+    </div>
+    <div style="text-align:center;padding:14px;background:rgba(0,232,122,.04);border:1px solid rgba(0,232,122,.12);border-radius:10px">
+      <div style="font-size:1.4rem;margin-bottom:4px">↩️</div>
+      <div style="font-family:var(--mono);font-size:.6rem;font-weight:700;color:var(--t);margin-bottom:4px">Гарантия возврата</div>
+      <div style="font-family:var(--mono);font-size:.58rem;color:var(--m);line-height:1.5">6 часов — вернём оплату если не помогло</div>
+    </div>
+  </div>
+
+  <!-- Дисклеймер мелким шрифтом -->
+  <div style="font-family:var(--mono);font-size:.58rem;color:var(--m);opacity:.7;line-height:1.8;border-top:1px solid rgba(255,255,255,.05);padding-top:16px">
+    <strong style="color:var(--m2)">Дисклеймер:</strong> TurboTX предоставляет исключительно технический сервис rebroadcast публичных Bitcoin-транзакций. Сервис не гарантирует подтверждение транзакции сетью Bitcoin, поскольку это зависит от решения независимых майнинг-пулов. Оплата взимается за использование технической инфраструктуры сервиса. TurboTX не является платёжной системой, обменником, биржей или лицензированным финансовым учреждением. Использование сервиса означает принятие данных условий. © 2026 TurboTX. Все права защищены.
+  </div>
+
+</div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     ПЛАВАЮЩАЯ ЮРИДИЧЕСКАЯ КАРТОЧКА (сбоку)
+     ══════════════════════════════════════════════════════════ -->
+<div id="legal-bubble" style="position:fixed;bottom:130px;right:max(12px,calc(50% - 510px - 56px));z-index:8800;display:flex;flex-direction:column;align-items:flex-end;gap:0">
+
+  <!-- Кружок-кнопка -->
+  <button id="legal-btn" onclick="toggleLegalCard()" title="О сервисе и правовая информация"
+    style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,rgba(30,30,40,.95),rgba(20,20,30,.98));border:1px solid rgba(247,147,26,.35);box-shadow:0 4px 20px rgba(0,0,0,.5),0 0 0 0 rgba(247,147,26,.3);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;animation:legalPulse 3s ease-in-out infinite"
+    onmouseover="this.style.borderColor='rgba(247,147,26,.7)';this.style.boxShadow='0 4px 24px rgba(247,147,26,.25),0 0 0 3px rgba(247,147,26,.1)'"
+    onmouseout="this.style.borderColor='rgba(247,147,26,.35)';this.style.boxShadow='0 4px 20px rgba(0,0,0,.5),0 0 0 0 rgba(247,147,26,.3)'">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--a)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+  </button>
+
+  <!-- Карточка (скрыта по умолчанию) -->
+  <div id="legal-card" style="display:none;margin-top:8px;width:300px;background:rgba(14,14,22,.97);border:1px solid rgba(247,147,26,.25);border-radius:16px;padding:18px;box-shadow:0 8px 40px rgba(0,0,0,.6);animation:fadeup .2s ease">
+
+    <!-- Шапка карточки -->
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,.06)">
+      <div style="width:36px;height:36px;border-radius:10px;background:rgba(247,147,26,.12);border:1px solid rgba(247,147,26,.25);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--a)" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <div>
+        <div style="font-weight:800;font-size:.82rem;color:var(--t)">TurboTX</div>
+        <div style="font-family:var(--mono);font-size:.57rem;color:var(--g)">✓ Легальный технический сервис</div>
+      </div>
+      <button onclick="toggleLegalCard()" style="margin-left:auto;background:none;border:none;cursor:pointer;color:var(--m);font-size:1rem;line-height:1;padding:2px 6px" onmouseover="this.style.color='var(--t)'" onmouseout="this.style.color='var(--m)'">✕</button>
+    </div>
+
+    <!-- Содержимое -->
+    <div style="font-family:var(--mono);font-size:.64rem;color:var(--m2);line-height:1.75;display:flex;flex-direction:column;gap:10px">
+
+      <div style="display:flex;align-items:flex-start;gap:8px">
+        <span style="font-size:.9rem;flex-shrink:0">📡</span>
+        <span><strong style="color:var(--t)">Rebroadcast сервис.</strong> Мы повторно рассылаем вашу транзакцию в 22 майнинг-пула через их публичные API. Это стандартная практика в экосистеме Bitcoin.</span>
+      </div>
+
+      <div style="display:flex;align-items:flex-start;gap:8px">
+        <span style="font-size:.9rem;flex-shrink:0">🔐</span>
+        <span><strong style="color:var(--t)">Без доступа к средствам.</strong> Только TXID — публичный номер транзакции. Без приватных ключей, seed-фраз и паролей.</span>
+      </div>
+
+      <div style="display:flex;align-items:flex-start;gap:8px">
+        <span style="font-size:.9rem;flex-shrink:0">🚫</span>
+        <span><strong style="color:var(--t)">Не майнинг-пул, не биржа, не mixer.</strong> Технический инструмент для ускорения уже отправленных транзакций.</span>
+      </div>
+
+      <div style="display:flex;align-items:flex-start;gap:8px">
+        <span style="font-size:.9rem;flex-shrink:0">↩️</span>
+        <span><strong style="color:var(--t)">Гарантия возврата 6 ч.</strong> Если Premium не помог — вернём оплату.</span>
+      </div>
+
+      <div style="margin-top:4px;padding-top:10px;border-top:1px solid rgba(255,255,255,.05);font-size:.58rem;color:var(--m);line-height:1.6">
+        Аналог: ViaBTC Accelerator, BTC.com Accelerator, mempool.space Accelerator — все используют тот же принцип rebroadcast.
+      </div>
+    </div>
+
+    <!-- Кнопка перехода к секции -->
+    <button onclick="document.getElementById('about').scrollIntoView({behavior:'smooth'});toggleLegalCard()"
+      style="width:100%;margin-top:14px;padding:9px;background:rgba(247,147,26,.1);border:1px solid rgba(247,147,26,.25);border-radius:8px;color:var(--a);font-family:var(--mono);font-size:.63rem;cursor:pointer;transition:all .18s;letter-spacing:.5px"
+      onmouseover="this.style.background='rgba(247,147,26,.18)'" onmouseout="this.style.background='rgba(247,147,26,.1)'">
+      Подробнее об услуге →
+    </button>
+  </div>
+
+</div>
+
+<style>
+@keyframes legalPulse {
+  0%,100% { box-shadow: 0 4px 20px rgba(0,0,0,.5), 0 0 0 0 rgba(247,147,26,.25); }
+  50%      { box-shadow: 0 4px 20px rgba(0,0,0,.5), 0 0 0 6px rgba(247,147,26,.0); }
+}
+#legal-card { transform-origin: bottom right; }
+@media(max-width:600px){
+  #legal-bubble { bottom:100px; right:10px; }
+  #legal-card { width:calc(100vw - 32px); right:0; }
+}
+@media(min-width:1100px){
+  #legal-bubble { right:calc(50% - 530px); }
+}
+/* About секция адаптив */
+#about .grid-2 { grid-template-columns:1fr 1fr; }
+@media(max-width:640px){
+  #about [style*="grid-template-columns:1fr 1fr"] { grid-template-columns:1fr !important; }
+  #about [style*="grid-template-columns:repeat(3"] { grid-template-columns:1fr !important; }
+}
+</style>
+
 <footer>
   <div style="margin-bottom:4px;letter-spacing:2px">TURBOTX</div>
   <div style="font-size:.58rem;color:var(--m);opacity:.6">© 2026 — Сервис ускорения BTC-транзакций через rebroadcast в майнинг-пулы</div>
   <div class="fl2">
+    <a href="javascript:void(0)" onclick="document.getElementById('about').scrollIntoView({behavior:'smooth'})">О сервисе</a>
     <a href="https://mempool.space" target="_blank">mempool.space</a>
     <a href="https://viaBTC.com" target="_blank">ViaBTC</a>
-    <a href="https://btc.com" target="_blank">BTC.com</a>
     <a href="https://t.me/TurboTXAcel" target="_blank">TG Канал / @TurboTXAcel</a>
     <a href="https://t.me/Sup_TurboTX" target="_blank">TG Поддержка / @Sup_TurboTX</a>
-    <a id="em-link-ft" href="#">Email</a>
+    <a id="em-link-ft" href="mailto:pollytrazlo@gmail.com">Email</a>
   </div>
 </footer>
 
@@ -2023,6 +2228,10 @@ async function bumpCounter() {
 }
 
 // ── LIVE STATS FROM MEMPOOL ───────────────────────────────────
+function _animateCounter() {
+  // Совместимость — анимация в _setCounterUI
+}
+
 async function fetchWithTimeout(url, ms) {
   ms = ms || 6000;
   const ctrl = new AbortController();
@@ -4003,44 +4212,65 @@ function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 // ── MEMPOOL TICKER ────────────────────────────────────────────
 async function fetchMempoolStats() {
+  // ── FEES (mempool.space → blockstream fallback) ────────────
+  let fees = null;
   try {
-    const [rFees, rMem] = await Promise.all([
-      fetch('https://mempool.space/api/v1/fees/recommended'),
-      fetch('https://mempool.space/api/mempool')
-    ]);
-    if (rFees.ok) {
-      const fees = await rFees.json();
-      const next = fees.fastestFee || fees.halfHourFee;
-      const min = fees.minimumFee || fees.hourFee;
-      const tkNext = document.getElementById('tk-nextfee');
-      const tkMin = document.getElementById('tk-minfee');
-      if (tkNext) {
-        tkNext.textContent = next;
-        tkNext.className = 'ticker-val ' + (next > 50 ? 'hot' : next > 20 ? 'warm' : 'ok');
-      }
-      if (tkMin) {
-        tkMin.textContent = min;
-        tkMin.className = 'ticker-val ' + (min > 10 ? 'warm' : 'ok');
-      }
-    }
-    if (rMem.ok) {
-      const mem = await rMem.json();
-      const stuck = mem.count;
-      const sizeMB = (mem.vsize / 1000000).toFixed(1);
-      const tkStuck = document.getElementById('tk-stuck');
-      const tkSize = document.getElementById('tk-size');
-      if (tkStuck) {
-        tkStuck.textContent = stuck.toLocaleString('ru');
-        tkStuck.className = 'ticker-val ' + (stuck > 50000 ? 'hot' : stuck > 20000 ? 'warm' : 'ok');
-
-      }
-      if (tkSize) tkSize.textContent = sizeMB;
-    }
+    const r = await fetch('https://mempool.space/api/v1/fees/recommended');
+    if (r.ok) fees = await r.json();
   } catch(e) {}
+  if (!fees) {
+    try {
+      const r = await fetch('https://blockstream.info/api/fee-estimates');
+      if (r.ok) {
+        const d = await r.json();
+        fees = { fastestFee: Math.round(d['1']||d['2']||20), halfHourFee: Math.round(d['3']||10), hourFee: Math.round(d['6']||5), minimumFee: Math.round(d['144']||1) };
+      }
+    } catch(e) {}
+  }
+  if (fees) {
+    const next = fees.fastestFee || fees.halfHourFee || 1;
+    const tkNext = document.getElementById('tk-nextfee');
+    if (tkNext) {
+      tkNext.textContent = next;
+      tkNext.className = 'ticker-val ' + (next > 50 ? 'hot' : next > 20 ? 'warm' : 'ok');
+    }
+    // Синхронизация fee-meter-text
+    const fmtEl = document.getElementById('fee-meter-text');
+    if (fmtEl) fmtEl.innerHTML = 'Комиссия сети: <strong style="color:var(--a)">' + next + '</strong> sat/vB · очередь <strong style="color:var(--a)" id="mempool-tx-count">—</strong> TX';
+  }
+
+  // ── MEMPOOL SIZE (count + vsize) ───────────────────────────
+  let mem = null;
+  try {
+    const r = await fetch('https://mempool.space/api/mempool');
+    if (r.ok) mem = await r.json();
+  } catch(e) {}
+  if (mem) {
+    const stuck  = mem.count || 0;
+    const sizeMB = ((mem.vsize || 0) / 1_000_000).toFixed(1);
+    const tkStuck = document.getElementById('tk-stuck');
+    const tkSize  = document.getElementById('tk-size');
+    const mpCount = document.getElementById('mempool-tx-count');
+    if (tkStuck) {
+      tkStuck.textContent = stuck.toLocaleString('ru');
+      tkStuck.className = 'ticker-val ' + (stuck > 50000 ? 'hot' : stuck > 20000 ? 'warm' : 'ok');
+    }
+    if (tkSize) {
+      const mb = parseFloat(sizeMB);
+      tkSize.textContent = sizeMB;
+      tkSize.className = 'ticker-val ' + (mb > 200 ? 'hot' : mb > 100 ? 'warm' : 'ok');
+    }
+    if (mpCount) mpCount.textContent = stuck.toLocaleString('ru');
+  }
 }
 
-fetchMempoolStats();
-setInterval(fetchMempoolStats, 30000);
+// Запуск: ждём DOM если нужно, потом каждые 30 сек
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => { fetchMempoolStats(); setInterval(fetchMempoolStats, 30000); });
+} else {
+  fetchMempoolStats();
+  setInterval(fetchMempoolStats, 30000);
+}
 
 // ── HASHRATE TICKER ──────────────────────────
 async function fetchHashrate() {
@@ -4293,6 +4523,26 @@ function _renderLangFlags() {
   ).join('');
 }
 
+// ── LEGAL CARD ────────────────────────────────────────────────
+function toggleLegalCard() {
+  const card = document.getElementById('legal-card');
+  if (!card) return;
+  const isOpen = card.style.display !== 'none';
+  card.style.display = isOpen ? 'none' : 'block';
+  const btn = document.getElementById('legal-btn');
+  if (btn) btn.style.borderColor = isOpen ? 'rgba(247,147,26,.35)' : 'rgba(247,147,26,.7)';
+}
+// Закрываем при клике вне карточки
+document.addEventListener('click', function(e) {
+  const bubble = document.getElementById('legal-bubble');
+  const card = document.getElementById('legal-card');
+  if (bubble && card && card.style.display !== 'none' && !bubble.contains(e.target)) {
+    card.style.display = 'none';
+    const btn = document.getElementById('legal-btn');
+    if (btn) btn.style.borderColor = 'rgba(247,147,26,.35)';
+  }
+});
+
 function toggleLangFlags() {
   _langFlagsOpen = !_langFlagsOpen;
   const wrap = document.getElementById('lang-flags');
@@ -4412,27 +4662,10 @@ function _gtSetLang(langCode) {
 }
 </script>
 
-<div id="float-support">
-  <div id="lang-flags"></div>
-  <div id="lang-btn" onclick="toggleLangFlags()" data-tip="Язык / Language">
-    <span id="lang-current-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span>
-  </div>
-  <a class="fs-icon fs-tg" href="https://t.me/TurboTXAcel" target="_blank" rel="noopener" data-tip="@TurboTXAcel" aria-label="Telegram">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248-1.97 9.281c-.144.658-.537.817-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.243-.213-.053-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.135-.953l11.571-4.462c.536-.194 1.005.131.833.941z"/></svg>
-  </a>
-  <a class="fs-icon fs-sp" href="https://t.me/Sup_TurboTX" target="_blank" rel="noopener" data-tip="Support" aria-label="Support">
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-  </a>
-  <a class="fs-icon fs-gh" href="https://github.com/ProjectBarabashka/T_U_R_B_O_T_X" target="_blank" rel="noopener" data-tip="GitHub" aria-label="GitHub">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
-  </a>
-  <a class="fs-icon fs-em" id="float-em-link" href="#" data-tip="Email" aria-label="Email">
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-  </a>
-</div>
-<script src="/client-api.js"></script>
+</div><!-- /.w -->
 
 <script>
+
 // ── УМНАЯ ДИАГНОСТИКА TXID ─────────────────────────────────────
 let _diagTimer = null;
 async function onTxidDiag(v) {
@@ -4469,6 +4702,7 @@ async function onTxidDiag(v) {
       const size = tx.weight ? Math.ceil(tx.weight / 4) : (tx.size || 250);
       const feePaid = tx.fee || 0;
       const feeRate = size > 0 ? (feePaid / size).toFixed(1) : 0;
+      const minFee = fees ? fees.minimumFee : null;
       const fastFee = fees ? fees.fastestFee : null;
       const economyFee = fees ? fees.economyFee : null;
 
@@ -4536,6 +4770,7 @@ function updateHistoryConfs(txid, confs) {
     const idx = h.findIndex(x => x.txid === txid);
     if (idx === -1) return;
     h[idx].confs = confs;
+    // confirmed=true сохраняем для обратной совместимости, но точки показываем всегда
     if (confs >= 1) h[idx].confirmed = true;
     localStorage.setItem('tx_history', JSON.stringify(h));
     _renderHistoryItem(txid, confs);
@@ -4556,7 +4791,7 @@ function _renderHistoryItem(txid, confs) {
       confs >= 2 ? 'var(--g)' : 'rgba(255,255,255,.15)',
       confs >= 3 ? 'var(--g)' : 'rgba(255,255,255,.15)'
     ];
-    dw.innerHTML = colors.map(c => '<span style="width:7px;height:7px;border-radius:50%;background:'+c+';display:inline-block;flex-shrink:0;transition:background .4s"></span>').join('');
+    dw.innerHTML = colors.map((c,i) => '<span style="width:7px;height:7px;border-radius:50%;background:'+c+';display:inline-block;flex-shrink:0;transition:background .4s"></span>').join('');
   }
   const statusText = confs === 0 ? 'ожидание...' : confs < 3 ? confs+' / 3' : '✓ '+confs+' подтв.';
   const statusColor = confs >= 3 ? 'var(--g)' : confs >= 1 ? '#ffd166' : 'var(--m)';
@@ -4565,9 +4800,10 @@ function _renderHistoryItem(txid, confs) {
 }
 
 const HIST_PER_PAGE = 5;
-let _histPage = 0;
+let _histPage = 0; // текущая страница (0-based)
 
 function _histDotColors(confs) {
+  // 0=серая(пульс), 1=жёлтая, 2+=зелёная
   return [
     confs >= 1 ? (confs >= 2 ? 'var(--g)' : '#ffd166') : 'rgba(255,255,255,.15)',
     confs >= 2 ? 'var(--g)' : 'rgba(255,255,255,.15)',
@@ -4592,15 +4828,16 @@ function renderHistory(page) {
 
     const itemsHTML = pageItems.map(item => {
       const safeTxid = sanitizeTxid(item.txid || '');
-      const short = safeTxid.slice(0,8) + '...' + safeTxid.slice(-6);
+    const short = safeTxid.slice(0,8) + '...' + safeTxid.slice(-6);
       const ago = Math.round((Date.now() - item.ts) / 60000);
       const agoStr = ago < 1 ? 'только что' : ago < 60 ? ago+' мин' : ago < 1440 ? Math.floor(ago/60)+' ч' : Math.floor(ago/1440)+' дн';
       const isPrem = item.plan === 'premium';
       const confs = item.confs || 0;
+      // При confs===0 — спиннер. При 1+ — точки с цветами
       const dc = _histDotColors(confs);
       const dotsHTML = confs === 0
         ? `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="2.5" stroke-linecap="round" style="animation:spin 1.1s linear infinite;transform-origin:center;flex-shrink:0"><path d="M21 12a9 9 0 1 1-6.219-8.56" stroke="var(--a)" stroke-width="2.5"/><path d="M21 12a9 9 0 0 0-9-9" stroke="rgba(255,255,255,.1)" stroke-width="2.5"/></svg>`
-        : dc.map(c => `<span style="width:7px;height:7px;border-radius:50%;background:${c};display:inline-block;flex-shrink:0;transition:background .4s"></span>`).join('');
+        : dc.map((c,i) => `<span style="width:7px;height:7px;border-radius:50%;background:${c};display:inline-block;flex-shrink:0;transition:background .4s"></span>`).join('');
       const statusText = confs === 0 ? 'ожидание...' : confs < 3 ? confs+' / 3' : `✓ ${confs} подтв.`;
       const statusColor = confs >= 3 ? 'var(--g)' : confs >= 1 ? '#ffd166' : 'var(--m)';
       return `<div id="hist-${safeTxid}" style="background:rgba(255,255,255,.015);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:10px 12px;transition:border-color .15s"
@@ -4615,11 +4852,15 @@ function renderHistory(page) {
       </div>`;
     }).join('');
 
+    // Пагинация
     let pagHTML = '';
     if (totalPages > 1) {
       const btns = Array.from({length: totalPages}, (_, i) => {
         const isActive = i === _histPage;
-        return `<button onclick="renderHistory(${i})" style="min-width:28px;height:26px;padding:0 7px;border-radius:6px;font-family:var(--mono);font-size:.6rem;cursor:pointer;transition:all .15s;background:${isActive?'rgba(247,147,26,.15)':'rgba(255,255,255,.04)'};border:1px solid ${isActive?'rgba(247,147,26,.4)':'rgba(255,255,255,.08)'};color:${isActive?'var(--a)':'var(--m2)'}">${i+1}</button>`;
+        return `<button onclick="renderHistory(${i})" style="min-width:28px;height:26px;padding:0 7px;border-radius:6px;font-family:var(--mono);font-size:.6rem;cursor:pointer;transition:all .15s;
+          background:${isActive?'rgba(247,147,26,.15)':'rgba(255,255,255,.04)'};
+          border:1px solid ${isActive?'rgba(247,147,26,.4)':'rgba(255,255,255,.08)'};
+          color:${isActive?'var(--a)':'var(--m2)'}">${i+1}</button>`;
       }).join('');
       pagHTML = `<div style="display:flex;align-items:center;gap:5px;margin-top:8px;justify-content:center">
         <button onclick="renderHistory(_histPage-1)" ${_histPage===0?'disabled':''} style="width:26px;height:26px;border-radius:6px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:var(--m2);cursor:pointer;font-size:.7rem;transition:all .15s;${_histPage===0?'opacity:.3;cursor:not-allowed':''}">‹</button>
@@ -4633,6 +4874,7 @@ function renderHistory(page) {
   } catch(e) {}
 }
 
+// Инициализируем историю при загрузке и запускаем поллинг подтверждений
 document.addEventListener('DOMContentLoaded', function() {
   renderHistory();
   _startHistoryConfPolling();
@@ -4640,12 +4882,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
 let _histPoller = null;
 
+// Поллинг подтверждений для "Ваши ускорения" — синхронизирует точки с реальным статусом
 function _startHistoryConfPolling() {
   if (_histPoller) { clearInterval(_histPoller); _histPoller = null; }
   async function _poll() {
     try {
       const h = JSON.parse(localStorage.getItem('tx_history') || '[]');
-      if (!h.length) return;
+      if (!h.length) return; // история пуста — ждём следующего тика
+      // Опрашиваем ВСЕ транзакции — не останавливаемся никогда
       let tip = 0;
       try {
         const rt = await fetchWithTimeout('https://mempool.space/api/blocks/tip/height', 5000);
@@ -4660,12 +4904,12 @@ function _startHistoryConfPolling() {
           if (s.confirmed) confs = tip > 0 ? Math.max(1, tip - (s.block_height || tip) + 1) : 1;
           updateHistoryConfs(item.txid, confs);
         } catch(e) {}
-        await new Promise(r => setTimeout(r, 200));
+        await new Promise(r => setTimeout(r, 200)); // небольшая пауза между запросами
       }
     } catch(e) {}
   }
   _poll();
-  _histPoller = setInterval(_poll, 30000);
+  _histPoller = setInterval(_poll, 30000); // каждые 30 сек навсегда
 }
 
 (function(){
@@ -4680,6 +4924,26 @@ function _startHistoryConfPolling() {
   if(f){f.href='mail'+'to:'+e; f.setAttribute('data-tip',e);}
 })();
 </script>
+
+<div id="float-support">
+  <div id="lang-flags"></div>
+  <div id="lang-btn" onclick="toggleLangFlags()" data-tip="Язык / Language">
+    <span id="lang-current-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span>
+  </div>
+  <a class="fs-icon fs-tg" href="https://t.me/TurboTXAcel" target="_blank" rel="noopener" data-tip="@TurboTXAcel" aria-label="Telegram">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248-1.97 9.281c-.144.658-.537.817-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.243-.213-.053-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.135-.953l11.571-4.462c.536-.194 1.005.131.833.941z"/></svg>
+  </a>
+  <a class="fs-icon fs-sp" href="https://t.me/Sup_TurboTX" target="_blank" rel="noopener" data-tip="Support" aria-label="Support">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+  </a>
+  <a class="fs-icon fs-gh" href="https://github.com/ProjectBarabashka/T_U_R_B_O_T_X" target="_blank" rel="noopener" data-tip="GitHub" aria-label="GitHub">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+  </a>
+  <a class="fs-icon fs-em" id="float-em-link" href="#" data-tip="Email" aria-label="Email">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+  </a>
+</div>
+<script src="/client-api.js"></script>
 
 <!-- DYNAMIC PRICE -->
 <script>
