@@ -78,8 +78,8 @@
 <link rel="dns-prefetch" href="https://blockchain.info">
 <link rel="dns-prefetch" href="https://fonts.googleapis.com">
 
-<!-- FAVICON — анимированная SVG сакура (вращение 8с) -->
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='16' fill='%230d0d14'/><g transform='translate(16,16)'><animateTransform attributeName='transform' type='rotate' from='0' to='360' dur='8s' repeatCount='indefinite' additive='sum'/><ellipse rx='3.5' ry='6.5' fill='%23fce7f3' stroke='%23f9a8d4' stroke-width='0.4' transform='rotate(0) translate(0,-5)'/><ellipse rx='3.5' ry='6.5' fill='%23fbcfe8' stroke='%23f9a8d4' stroke-width='0.4' transform='rotate(72) translate(0,-5)'/><ellipse rx='3.5' ry='6.5' fill='%23fce7f3' stroke='%23f9a8d4' stroke-width='0.4' transform='rotate(144) translate(0,-5)'/><ellipse rx='3.5' ry='6.5' fill='%23fbcfe8' stroke='%23f9a8d4' stroke-width='0.4' transform='rotate(216) translate(0,-5)'/><ellipse rx='3.5' ry='6.5' fill='%23fce7f3' stroke='%23f9a8d4' stroke-width='0.4' transform='rotate(288) translate(0,-5)'/><circle r='3' fill='%23fdf2f8'/><circle r='1.5' fill='%23fbcfe8'/><circle cx='1.8' cy='-1.3' r='0.6' fill='%23f472b6'/><circle cx='-1.8' cy='-1.3' r='0.6' fill='%23f472b6'/><circle cx='0' cy='2.1' r='0.6' fill='%23f472b6'/></g></svg>">
+<!-- FAVICON -->
+<link rel="icon" type="image/png" id="fav" href="">
 
 <!-- OPEN GRAPH — соцсети, Telegram, WhatsApp -->
 <meta property="og:type"              content="website">
@@ -5230,5 +5230,89 @@ console.log('[TurboTX] Server API connected ✓');
 </div>
 
 
+<script>
+(function(){
+  var cv=document.createElement('canvas');cv.width=32;cv.height=32;
+  var cx=cv.getContext('2d');
+  var fav=document.getElementById('fav');
+  var t=0;
+  var DUR=90; // кадров на цикл
+
+  // 5 лепестков: угол, цвет, направление взрыва
+  var petals=[
+    {a:0,   c:'#fce7f3', s:'#f9a8d4'},
+    {a:72,  c:'#fbcfe8', s:'#f9a8d4'},
+    {a:144, c:'#fce7f3', s:'#f9a8d4'},
+    {a:216, c:'#fbcfe8', s:'#f9a8d4'},
+    {a:288, c:'#fce7f3', s:'#f9a8d4'},
+  ];
+
+  function ease(x){ return x<0.5?2*x*x:1-Math.pow(-2*x+2,2)/2; }
+
+  function draw(){
+    cx.clearRect(0,0,32,32);
+    // Фон — чёрный круг
+    cx.beginPath();cx.arc(16,16,16,0,Math.PI*2);
+    cx.fillStyle='#0d0d14';cx.fill();
+    cx.save();cx.translate(16,16);
+
+    // Прогресс цикла 0→1→0
+    // p: 0..1 только во время анимации, пауза в конце
+    var p=Math.min(t/DUR,1);
+    // взрыв: 0→0.4 разлёт, 0.4→0.6 висим, 0.6→1 собираемся
+    var explode;
+    if(p<0.4) explode=ease(p/0.4);
+    else if(p<0.6) explode=1;
+    else explode=ease(1-(p-0.6)/0.4);
+
+    var maxDist=9; // макс расстояние разлёта
+
+    petals.forEach(function(pe,i){
+      var rad=pe.a*Math.PI/180;
+      // базовая позиция лепестка
+      var bx=Math.sin(rad)*5;
+      var by=-Math.cos(rad)*5;
+      // направление взрыва — от центра
+      var ex=bx/5*maxDist*explode;
+      var ey=by/5*maxDist*explode;
+      // спин лепестка при взрыве
+      var spin=rad + explode*Math.PI*(i%2?1:-1)*1.5;
+
+      cx.save();
+      cx.translate(bx+ex, by+ey);
+      cx.rotate(spin);
+      // прозрачность: при полном разлёте чуть прозрачнее
+      cx.globalAlpha=1-explode*0.3;
+      cx.beginPath();cx.ellipse(0,0,3.5,6.5,0,0,Math.PI*2);
+      cx.fillStyle=pe.c;cx.fill();
+      cx.strokeStyle=pe.s;cx.lineWidth=0.5;cx.stroke();
+      cx.globalAlpha=1;
+      cx.restore();
+    });
+
+    // Центр — пульсирует при взрыве
+    var cr=3+explode*4;
+    // вспышка
+    if(explode>0.05){
+      cx.beginPath();cx.arc(0,0,cr*1.8,0,Math.PI*2);
+      cx.fillStyle='rgba(244,114,182,'+(explode*0.3)+')';cx.fill();
+    }
+    cx.beginPath();cx.arc(0,0,cr*0.7,0,Math.PI*2);
+    cx.fillStyle='#fdf2f8';cx.fill();
+    cx.beginPath();cx.arc(0,0,cr*0.4,0,Math.PI*2);
+    cx.fillStyle='#f472b6';cx.fill();
+
+    cx.restore();
+
+    // пауза 80 кадров в собранном виде, потом 90 кадров взрыв
+    t++;
+    if(t>DUR+80) t=0;
+
+    fav.href=cv.toDataURL();
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+</script>
 </body>
 </html>
