@@ -1092,7 +1092,84 @@ input[type=text]:focus { border-color: rgba(247,147,26,.5) !important; box-shado
 <div class="stats">
   <a href="javascript:void(0)" class="stat-card" style="text-decoration:none" onclick="document.getElementById('live-feed-wrap').scrollIntoView({behavior:'smooth'});return false;">
     <span class="stat-card-icon" style="display:inline-block;position:relative;width:32px;height:36px;vertical-align:middle">
-      <svg id="lightning-svg" width="32" height="36" viewBox="0 0 32 36" fill="none" xmlns="http://www.w3.org/2000/svg" style="overflow:visible">...</svg>
+      <svg id="lightning-svg" width="32" height="36" viewBox="0 0 32 36" fill="none" xmlns="http://www.w3.org/2000/svg" style="overflow:visible">
+        <style>
+          #bolt-main {
+            animation: boltStrike 2.8s ease-in-out infinite;
+            transform-origin: 16px 4px;
+            filter: drop-shadow(0 0 4px #f7931a) drop-shadow(0 0 10px #ffe066);
+          }
+          @keyframes boltStrike {
+            0%   { opacity:0; transform: scaleY(0) scaleX(0.7); filter: drop-shadow(0 0 2px #f7931a); }
+            8%   { opacity:1; transform: scaleY(1) scaleX(1);   filter: drop-shadow(0 0 8px #fff) drop-shadow(0 0 18px #ffe066) drop-shadow(0 0 30px #f7931a); }
+            18%  { opacity:1; transform: scaleY(1) scaleX(1);   filter: drop-shadow(0 0 5px #fff) drop-shadow(0 0 12px #ffe066); }
+            38%  { opacity:.85; transform: scaleY(1) scaleX(1); filter: drop-shadow(0 0 3px #f7931a); }
+            55%  { opacity:0; transform: scaleY(1) scaleX(1); }
+            100% { opacity:0; transform: scaleY(0) scaleX(0.7); }
+          }
+          #bolt-flash { animation: flashImpact 2.8s ease-in-out infinite; }
+          @keyframes flashImpact {
+            0%,6%  { opacity:0; r:0; }
+            9%     { opacity:0.9; r:8; }
+            18%    { opacity:0.5; r:11; }
+            32%    { opacity:0; r:14; }
+            100%   { opacity:0; r:0; }
+          }
+          #spark-l { animation: sparkLeft 2.8s ease-in-out infinite; transform-origin: 12px 30px; }
+          @keyframes sparkLeft {
+            0%,7%  { opacity:0; transform: translate(0,0) rotate(0deg); }
+            10%    { opacity:1; transform: translate(-4px,-3px) rotate(-35deg); }
+            22%    { opacity:0; transform: translate(-9px,-1px) rotate(-50deg); }
+            100%   { opacity:0; transform: translate(0,0); }
+          }
+          #spark-r { animation: sparkRight 2.8s ease-in-out infinite; transform-origin: 20px 30px; }
+          @keyframes sparkRight {
+            0%,7%  { opacity:0; transform: translate(0,0) rotate(0deg); }
+            10%    { opacity:1; transform: translate(4px,-4px) rotate(30deg); }
+            22%    { opacity:0; transform: translate(8px,-1px) rotate(48deg); }
+            100%   { opacity:0; transform: translate(0,0); }
+          }
+          #spark-u { animation: sparkUp 2.8s ease-in-out infinite; }
+          @keyframes sparkUp {
+            0%,7%  { opacity:0; transform: translate(0,0); }
+            10%    { opacity:0.9; transform: translate(1px,-7px); }
+            20%    { opacity:0; transform: translate(2px,-12px); }
+            100%   { opacity:0; }
+          }
+          #ground-line { animation: groundGlow 2.8s ease-in-out infinite; }
+          @keyframes groundGlow {
+            0%,6%  { opacity:0; stroke-width:1; }
+            9%     { opacity:1; stroke-width:3; filter: drop-shadow(0 0 4px #f7931a); }
+            25%    { opacity:0.4; stroke-width:1.5; }
+            40%    { opacity:0; }
+            100%   { opacity:0; }
+          }
+          #shockwave { animation: shockwaveAnim 2.8s ease-in-out infinite; transform-origin: 16px 31px; }
+          @keyframes shockwaveAnim {
+            0%,7%  { opacity:0; transform: scale(0); }
+            11%    { opacity:0.7; transform: scale(0.4); }
+            30%    { opacity:0; transform: scale(1.2); }
+            100%   { opacity:0; transform: scale(0); }
+          }
+        </style>
+        <line x1="4" y1="31" x2="28" y2="31" stroke="#6b4f1a" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+        <ellipse id="shockwave" cx="16" cy="31" rx="9" ry="3" stroke="#f7931a" stroke-width="1.2" fill="none"/>
+        <line id="ground-line" x1="10" y1="31" x2="22" y2="31" stroke="#ffe066" stroke-width="2" stroke-linecap="round"/>
+        <circle id="bolt-flash" cx="16" cy="31" r="0" fill="#fff9"/>
+        <g id="bolt-main">
+          <polygon points="19,3 10,18 15.5,18 13,33 22,16 16.5,16" fill="#f7931a"/>
+          <polygon points="19,3 10,18 15.5,18 13,33 22,16 16.5,16" fill="url(#boltGrad)" opacity="0.6"/>
+        </g>
+        <line id="spark-l" x1="12" y1="30" x2="8"  y2="26" stroke="#ffe066" stroke-width="1.5" stroke-linecap="round"/>
+        <line id="spark-r" x1="20" y1="30" x2="24" y2="25" stroke="#ffe066" stroke-width="1.5" stroke-linecap="round"/>
+        <line id="spark-u" x1="16" y1="30" x2="17" y2="24" stroke="#fff"    stroke-width="1"   stroke-linecap="round"/>
+        <defs>
+          <linearGradient id="boltGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stop-color="#fff" stop-opacity="0.9"/>
+            <stop offset="100%" stop-color="#f7931a" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+      </svg>
     </span>
     <span class="stat-num" id="sc">—</span>
     <div class="stat-lbl">Ускорено TX</div>
@@ -1104,7 +1181,69 @@ input[type=text]:focus { border-color: rgba(247,147,26,.5) !important; box-shado
   </a>
   <a href="javascript:void(0)" class="stat-card" style="text-decoration:none" onclick="document.getElementById('pools').scrollIntoView({behavior:'smooth'});return false;">
     <span class="stat-card-icon" style="display:inline-block;position:relative;width:38px;height:34px;vertical-align:middle">
-      <svg id="sakura-svg" width="38" height="34" viewBox="0 0 38 34" fill="none" xmlns="http://www.w3.org/2000/svg" style="overflow:visible">...</svg>
+      <svg id="sakura-svg" width="38" height="34" viewBox="0 0 38 34" fill="none" xmlns="http://www.w3.org/2000/svg" style="overflow:visible">
+        <style>
+          .wind-line { stroke:rgba(255,255,255,0.55); stroke-linecap:round; fill:none; }
+          #wind1 { animation: windPass 2.2s ease-in-out infinite; }
+          #wind2 { animation: windPass 2.2s ease-in-out 0.32s infinite; }
+          #wind3 { animation: windPass 2.2s ease-in-out 0.64s infinite; }
+          @keyframes windPass {
+            0%   { stroke-dashoffset: 36; opacity: 0; }
+            12%  { opacity: 0.7; }
+            55%  { opacity: 0.55; stroke-dashoffset: 0; }
+            80%  { opacity: 0; stroke-dashoffset: -10; }
+            100% { stroke-dashoffset: -10; opacity: 0; }
+          }
+          #sakura-petal {
+            animation: sakuraDrift 2.2s ease-in-out infinite;
+            transform-origin: 19px 18px;
+          }
+          @keyframes sakuraDrift {
+            0%   { transform: translate(-6px, 2px) rotate(-18deg); opacity:0.3; }
+            15%  { opacity:1; }
+            40%  { transform: translate(2px, -3px) rotate(8deg);   opacity:1; }
+            65%  { transform: translate(8px, 4px)  rotate(22deg);  opacity:1; }
+            85%  { transform: translate(13px, 9px) rotate(35deg);  opacity:0.5; }
+            100% { transform: translate(16px, 13px) rotate(45deg); opacity:0; }
+          }
+          #sakura-inner {
+            animation: petalWobble 2.2s ease-in-out infinite;
+            transform-origin: 19px 18px;
+          }
+          @keyframes petalWobble {
+            0%,100% { transform: rotate(0deg) scaleX(1); }
+            30%     { transform: rotate(-6deg) scaleX(0.92); }
+            60%     { transform: rotate(5deg)  scaleX(1.06); }
+          }
+        </style>
+        <path id="wind1" class="wind-line" stroke-width="1.3" stroke-dasharray="22 8" d="M2 12 Q12 10 24 13 Q30 14 36 12"/>
+        <path id="wind2" class="wind-line" stroke-width="1"   stroke-dasharray="18 10" d="M2 18 Q10 16 20 19 Q28 21 36 18"/>
+        <path id="wind3" class="wind-line" stroke-width="0.8" stroke-dasharray="14 12" d="M2 23 Q11 22 22 24 Q29 25 36 23"/>
+        <g id="sakura-petal">
+          <g id="sakura-inner">
+            <ellipse cx="19" cy="13" rx="3.8" ry="6" fill="url(#sakGrad)" transform="rotate(0   19 18)"/>
+            <ellipse cx="19" cy="13" rx="3.8" ry="6" fill="url(#sakGrad)" transform="rotate(72  19 18)"/>
+            <ellipse cx="19" cy="13" rx="3.8" ry="6" fill="url(#sakGrad)" transform="rotate(144 19 18)"/>
+            <ellipse cx="19" cy="13" rx="3.8" ry="6" fill="url(#sakGrad)" transform="rotate(216 19 18)"/>
+            <ellipse cx="19" cy="13" rx="3.8" ry="6" fill="url(#sakGrad)" transform="rotate(288 19 18)"/>
+            <circle cx="19" cy="18" r="3"   fill="#fce7f3"/>
+            <circle cx="19" cy="18" r="1.5" fill="#fbcfe8"/>
+            <circle cx="19" cy="15.5" r="0.5" fill="#f472b6"/>
+            <circle cx="21.2" cy="16.8" r="0.5" fill="#f472b6"/>
+            <circle cx="20.5" cy="19.4" r="0.5" fill="#f472b6"/>
+            <circle cx="17.5" cy="19.4" r="0.5" fill="#f472b6"/>
+            <circle cx="16.8" cy="16.8" r="0.5" fill="#f472b6"/>
+            <line x1="19" y1="21" x2="19" y2="25" stroke="#f9a8d4" stroke-width="0.9" stroke-linecap="round"/>
+          </g>
+        </g>
+        <defs>
+          <radialGradient id="sakGrad" cx="50%" cy="20%" r="70%">
+            <stop offset="0%"   stop-color="#fdf2f8"/>
+            <stop offset="50%"  stop-color="#fbcfe8"/>
+            <stop offset="100%" stop-color="#f9a8d4"/>
+          </radialGradient>
+        </defs>
+      </svg>
     </span>
     <span class="stat-num" id="pools-online" style="color:var(--g);opacity:.3;animation:skeletonPulse 1.6s ease-in-out infinite">—</span>
     <div class="stat-lbl">API узлов онлайн · p2p: <span id="p2p-count" style="font-weight:700;color:#ffd166">—</span></div>
@@ -1113,12 +1252,88 @@ input[type=text]:focus { border-color: rgba(247,147,26,.5) !important; box-shado
 
 <!-- ACCELERATE FORM -->
 <div class="card" id="accelerate">
-  <div class="card-title"><span style="display:inline-flex;align-items:center;gap:8px"><span style="display:inline-block;position:relative;width:22px;height:24px;vertical-align:middle;flex-shrink:0"><svg id="bolt2-svg" width="22" height="24" viewBox="0 0 32 36" fill="none" xmlns="http://www.w3.org/2000/svg" style="overflow:visible">...</svg></span>Ускорить транзакцию</span></div>
+  <div class="card-title"><span style="display:inline-flex;align-items:center;gap:8px"><span style="display:inline-block;position:relative;width:22px;height:24px;vertical-align:middle;flex-shrink:0"><svg id="bolt2-svg" width="22" height="24" viewBox="0 0 32 36" fill="none" xmlns="http://www.w3.org/2000/svg" style="overflow:visible">
+        <style>
+          #bolt2-main {
+            animation: bolt2Strike 2.8s ease-in-out infinite;
+            transform-origin: 16px 4px;
+          }
+          @keyframes bolt2Strike {
+            0%   { opacity:0; transform: scaleY(0) scaleX(0.7); filter: drop-shadow(0 0 2px #f7931a); }
+            8%   { opacity:1; transform: scaleY(1) scaleX(1);   filter: drop-shadow(0 0 8px #fff) drop-shadow(0 0 18px #ffe066) drop-shadow(0 0 30px #f7931a); }
+            18%  { opacity:1; transform: scaleY(1) scaleX(1);   filter: drop-shadow(0 0 5px #fff) drop-shadow(0 0 12px #ffe066); }
+            38%  { opacity:.85; transform: scaleY(1) scaleX(1); filter: drop-shadow(0 0 3px #f7931a); }
+            55%  { opacity:0; transform: scaleY(1) scaleX(1); }
+            100% { opacity:0; transform: scaleY(0) scaleX(0.7); }
+          }
+          #bolt2-flash { animation: bolt2Flash 2.8s ease-in-out infinite; }
+          @keyframes bolt2Flash {
+            0%,6%  { opacity:0; r:0; }
+            9%     { opacity:0.9; r:8; }
+            18%    { opacity:0.5; r:11; }
+            32%    { opacity:0; r:14; }
+            100%   { opacity:0; r:0; }
+          }
+          #bolt2-spark-l { animation: bolt2SparkL 2.8s ease-in-out infinite; transform-origin: 12px 30px; }
+          @keyframes bolt2SparkL {
+            0%,7%  { opacity:0; transform: translate(0,0) rotate(0deg); }
+            10%    { opacity:1; transform: translate(-4px,-3px) rotate(-35deg); }
+            22%    { opacity:0; transform: translate(-9px,-1px) rotate(-50deg); }
+            100%   { opacity:0; transform: translate(0,0); }
+          }
+          #bolt2-spark-r { animation: bolt2SparkR 2.8s ease-in-out infinite; transform-origin: 20px 30px; }
+          @keyframes bolt2SparkR {
+            0%,7%  { opacity:0; transform: translate(0,0) rotate(0deg); }
+            10%    { opacity:1; transform: translate(4px,-4px) rotate(30deg); }
+            22%    { opacity:0; transform: translate(8px,-1px) rotate(48deg); }
+            100%   { opacity:0; transform: translate(0,0); }
+          }
+          #bolt2-spark-u { animation: bolt2SparkU 2.8s ease-in-out infinite; }
+          @keyframes bolt2SparkU {
+            0%,7%  { opacity:0; transform: translate(0,0); }
+            10%    { opacity:0.9; transform: translate(1px,-7px); }
+            20%    { opacity:0; transform: translate(2px,-12px); }
+            100%   { opacity:0; }
+          }
+          #bolt2-ground { animation: bolt2Ground 2.8s ease-in-out infinite; }
+          @keyframes bolt2Ground {
+            0%,6%  { opacity:0; stroke-width:1; }
+            9%     { opacity:1; stroke-width:3; filter: drop-shadow(0 0 4px #f7931a); }
+            25%    { opacity:0.4; stroke-width:1.5; }
+            40%    { opacity:0; }
+            100%   { opacity:0; }
+          }
+          #bolt2-shock { animation: bolt2Shock 2.8s ease-in-out infinite; transform-origin: 16px 31px; }
+          @keyframes bolt2Shock {
+            0%,7%  { opacity:0; transform: scale(0); }
+            11%    { opacity:0.7; transform: scale(0.4); }
+            30%    { opacity:0; transform: scale(1.2); }
+            100%   { opacity:0; transform: scale(0); }
+          }
+        </style>
+        <line x1="4" y1="31" x2="28" y2="31" stroke="#6b4f1a" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+        <ellipse id="bolt2-shock" cx="16" cy="31" rx="9" ry="3" stroke="#f7931a" stroke-width="1.2" fill="none"/>
+        <line id="bolt2-ground" x1="10" y1="31" x2="22" y2="31" stroke="#ffe066" stroke-width="2" stroke-linecap="round"/>
+        <circle id="bolt2-flash" cx="16" cy="31" r="0" fill="#fff9"/>
+        <g id="bolt2-main">
+          <polygon points="19,3 10,18 15.5,18 13,33 22,16 16.5,16" fill="#f7931a"/>
+          <polygon points="19,3 10,18 15.5,18 13,33 22,16 16.5,16" fill="url(#bolt2Grad)" opacity="0.6"/>
+        </g>
+        <line id="bolt2-spark-l" x1="12" y1="30" x2="8"  y2="26" stroke="#ffe066" stroke-width="1.5" stroke-linecap="round"/>
+        <line id="bolt2-spark-r" x1="20" y1="30" x2="24" y2="25" stroke="#ffe066" stroke-width="1.5" stroke-linecap="round"/>
+        <line id="bolt2-spark-u" x1="16" y1="30" x2="17" y2="24" stroke="#fff"    stroke-width="1"   stroke-linecap="round"/>
+        <defs>
+          <linearGradient id="bolt2Grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stop-color="#fff" stop-opacity="0.9"/>
+            <stop offset="100%" stop-color="#f7931a" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+      </svg></span>Ускорить транзакцию</span></div>
   <div class="card-sub">Вставьте TXID из кошелька — мы займёмся остальным</div>
 
   <!-- FEE HEALTH METER (только фактические цифры, без оценочных фраз) -->
   <div id="fee-meter" style="display:flex;align-items:center;gap:10px;padding:10px 14px;margin-bottom:14px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:var(--r);font-family:var(--mono);font-size:.65rem;color:var(--m2)">
-    <span class="net-heart calm" id="fee-dot"><svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">...</svg></span>
+    <span class="net-heart calm" id="fee-dot"><svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g class="h-flame"><path d="M9 19 Q7 15 9.5 11 Q10.5 15 12 11 Q13.5 15 14.5 11 Q17 15 15 19" fill="#ff6b00" opacity=".85"/><path d="M10.5 20 Q9 17 10.5 14 Q11.5 17 12 14 Q12.5 17 13.5 14 Q15 17 13.5 20" fill="#ffe066" opacity=".7"/></g><path class="h-body" d="M12 20.5C12 20.5 2.5 14 2.5 8C2.5 5.2 4.7 3 7.5 3C9.1 3 10.6 3.8 12 5.2C13.4 3.8 14.9 3 16.5 3C19.3 3 21.5 5.2 21.5 8C21.5 14 12 20.5 12 20.5Z"/><g class="h-ice" stroke="#cff0ff" stroke-width=".9" stroke-linecap="round" fill="none"><line x1="12" y1="5.5" x2="12" y2="8.5"/><line x1="10.4" y1="6.3" x2="13.6" y2="7.7"/><line x1="10.4" y1="7.7" x2="13.6" y2="6.3"/><line x1="7" y1="9.5" x2="7" y2="11.5"/><line x1="6" y1="10.1" x2="8" y2="10.9"/><line x1="17" y1="9.5" x2="17" y2="11.5"/><line x1="16" y1="10.1" x2="18" y2="10.9"/></g></svg></span>
     <span id="fee-meter-text">Комиссия сети: <strong style="color:var(--a)">—</strong> sat/vB · очередь <strong style="color:var(--a)">—</strong> TX</span>
   </div>
 
