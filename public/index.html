@@ -2250,7 +2250,7 @@ let _fbReady = false;
 
 async function _testFirebase() {
   try {
-    const r = await fetch(`${FIREBASE_DB}/.json?shallow=true`, { cache: 'no-store' });
+    const r = await fetch(`${FIREBASE_DB}/.json?shallow=true`, { cache: 'no-store', signal: AbortSignal.timeout(5000) });
     if (r.ok || r.status === 204) { _fbReady = true; return true; }
     if (r.status === 401 || r.status === 403) {
       console.warn('[TurboTX] Firebase: база найдена, но правила доступа закрыты.\nОткройте в консоли Firebase: Realtime Database → Правила → { ".read": true, ".write": true }');
@@ -2269,7 +2269,7 @@ function todayStr() {
 
 async function getGlobalUsed() {
   try {
-    const r = await fetch(`${FIREBASE_DB}/daily/${todayStr()}/used.json`, { cache: 'no-store' });
+    const r = await fetch(`${FIREBASE_DB}/daily/${todayStr()}/used.json`, { cache: 'no-store', signal: AbortSignal.timeout(5000) });
     if (r.ok) {
       const val = await r.json();
       if (val === null) return 0;
@@ -2414,7 +2414,7 @@ async function fbQueueRemove(txid) {
 async function syncGlobalQueue() {
   if (!_fbReady) return;
   try {
-    const r = await fetch(`${FIREBASE_DB}/queue.json`, { cache: 'no-store' });
+    const r = await fetch(`${FIREBASE_DB}/queue.json`, { cache: 'no-store', signal: AbortSignal.timeout(5000) });
     if (!r.ok) return;
     const data = await r.json();
 
@@ -2480,7 +2480,7 @@ async function syncGlobalFeed() {
     if (lf.length) renderFeedFromData(lf);
   } catch(e) {}
   try {
-    const r = await fetch(`${FIREBASE_DB}/feed.json`, { cache: 'no-store' });
+    const r = await fetch(`${FIREBASE_DB}/feed.json`, { cache: 'no-store', signal: AbortSignal.timeout(5000) });
     if (!r.ok) return;
     const raw = await r.json();
     if (!raw || typeof raw !== 'object') return;
@@ -2507,7 +2507,7 @@ async function syncGlobalFeed() {
 async function syncCounterFromFirebase() {
   if (!_fbReady) return;
   try {
-    const r = await fetch(`${FIREBASE_DB}/stats/total.json`, { cache: 'no-store' });
+    const r = await fetch(`${FIREBASE_DB}/stats/total.json`, { cache: 'no-store', signal: AbortSignal.timeout(5000) });
     if (r.ok) {
       const v = await r.json();
       if (typeof v === 'number' && v >= 0) {
@@ -3809,7 +3809,7 @@ async function applyPromo() {
     res.textContent = '⏳ Проверяем код...';
     let usedCount = 0;
     try {
-      const r = await fetch(FIREBASE_DB + '/promos/' + promoId + '/used.json', { cache: 'no-store' });
+      const r = await fetch(FIREBASE_DB + '/promos/' + promoId + '/used.json', { cache: 'no-store', signal: AbortSignal.timeout(5000) });
       if (r.ok) {
         const val = await r.json();
         usedCount = (typeof val === 'number' && val >= 0) ? val : 0;
