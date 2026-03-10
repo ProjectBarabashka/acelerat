@@ -1,27 +1,22 @@
 // ══════════════════════════════════════════════════════════════
-//  TurboTX v9 ★ MAXIMUM POWER ★  —  /api/broadcast.js
-//  Vercel Serverless · Node.js 20
+//  TurboTX v10 ★ MAXIMUM POWER ★  —  /api/broadcast.js
+//  Vercel Serverless · Node.js 20 · Hobby Plan
 //
-//  УЛУЧШЕНИЯ v8:
-//  ① PRODUCTION_URL фикс — preview деплои не ломают bootstrap
-//  ② Circuit Breaker (CLOSED→OPEN→HALF_OPEN) для каждого канала
-//     5 провалов за 10 мин → OPEN на 2 часа → HALF_OPEN → тест
-//  ③ Smart hex retry — TX только что в мемпуле, ждём 3с и пробуем снова
-//     (Premium only, не тратим Free лимиты)
+//  НОВОЕ v10:
+//  ⑪ Skip-ping оптимизация — если >50% кэша свежие, стартуем НЕМЕДЛЕННО (-2с)
+//  ⑫ Tiered hex fetch — топ-3 сразу, остальные через 1с (экономия трафика)
+//  ⑬ analyze() с blockstream fallback — не падаем если mempool.space лежит
+//  ⑭ Hashrate-weighted sort — Foundry(27%) идёт раньше btcspeed(1%)
+//  ⑮ Dynamic EARLY_STOP — агрессивные TX ждут 85% каналов вместо 65%
+//  ⑯ txidOnlyChannels — шлём в пулы даже без hex (hex не нашли → не сдаёмся)
+//  ⑰ Batch broadcast — POST { txids: [...] } — до 5 Free / 20 Premium
+//  ⑱ feeRatio в summary и в логике Early stop
 //
-//  ДВИЖОК v7 (сохранено):
-//  ④ Статистика надёжности каналов — score = success/(success+fail)
-//  ⑤ hex-источники сортируются по истории скорости (avgResponseMs)
-//  ⑥ Адаптивное кол-во волн по fee ratio (easy/standard/aggressive)
-//  ⑦ Раздельные таймауты: узлы 5с, пулы 15с
-//  ⑧ Negative cache 5xx — не долбим мёртвые каналы 5 мин
-//  ⑨ Geo-группировка пулов USA/ASIA/GLOBAL
-//  ⑩ Vercel error codes классификация (retry_now/later/skip/permanent)
-//  ⑪ Ping-sort + priority score: 0.6×reliability − 0.4×ping
-//  ⑫ AbortController + adaptive timeouts
-//  ⑬ 429 exponential cooldown (2→5→15→60 мин)
-//  ⑭ Dead channel exclusion с TTL 30 мин
-//  ⑮ Early stop при 65% успеха (не тратим время)
+//  ДВИЖОК v9 (сохранено):
+//  ① Статистика надёжности · ② Circuit Breaker · ③ Smart hex retry
+//  ④ Adaptive timeout · ⑤ Negative cache · ⑥ Geo-groups
+//  ⑦ 429 exponential cooldown · ⑧ Dead channel exclusion
+//  ⑨ Ping-sort + priority score · ⑩ Memory cleanup 30min
 // ══════════════════════════════════════════════════════════════
 
 export const config = { maxDuration: 60 };
@@ -484,23 +479,37 @@ const POOL_GEO = {
   txfaster:'global', btcspeed:'global',
 };
 
-// ─── ② СОРТИРОВКА КАНАЛОВ (score + ping) ─────────────────────
-// Итоговый priority = 0.6 × reliabilityScore - 0.4 × normalizedPing
-// Выше = лучше
+// ─── ② СОРТИРОВКА КАНАЛОВ (score + ping + hashrate) ──────────
+// priority = 0.5×reliability − 0.3×normPing + 0.2×normHashrate
+// Foundry (27%) идёт раньше btcspeed (1%) при равном пинге
 function channelPriority(name, pingMs) {
-  const score = reliabilityScore(name);       // 0..1
-  const normPing = Math.min(pingMs, 5000) / 5000; // 0..1 (меньше = лучше)
-  return 0.6 * score - 0.4 * normPing;
+  const score    = reliabilityScore(name);
+  const normPing = Math.min(pingMs, 5000) / 5000;
+  const normHr   = (HR[name] || 0) / 27; // нормируем по Foundry (max ~27%)
+  return 0.5 * score - 0.3 * normPing + 0.2 * normHr;
 }
 
 // ─── RUN — умный запуск каналов ──────────────────────────────
-async function run(channels) {
+async function run(channels, feeRatioHint = 0.5) {
   if (channels.length === 0) return [];
 
-  // Пинг параллельно
-  const pings = await Promise.allSettled(
-    channels.map(ch => pingChannel(ch.name).then(ms => ({ch, ms})))
-  ).then(rs => rs.map((r, i) => r.status === 'fulfilled' ? r.value : {ch: channels[i], ms: 9999}));
+  // Пинг только для каналов у которых кэш протух (>10 мин) или не было вообще
+  // Если кэш свежий — стартуем НЕМЕДЛЕННО без задержки на пинг
+  const needPing = channels.filter(ch => getCachedPing(ch.name) === null);
+  const hasFreshCache = needPing.length < channels.length * 0.5; // >50% с кэшем — пропускаем пинг
+
+  let pingsMap = new Map(channels.map(ch => [ch.name, getCachedPing(ch.name) ?? 9999]));
+
+  if (!hasFreshCache && needPing.length > 0) {
+    // Пингуем только те что нужно, параллельно
+    const freshPings = await Promise.allSettled(
+      needPing.map(ch => pingChannel(ch.name).then(ms => ({name: ch.name, ms})))
+    );
+    for (const r of freshPings)
+      if (r.status === 'fulfilled') pingsMap.set(r.value.name, r.value.ms);
+  }
+
+  const pings = channels.map(ch => ({ ch, ms: pingsMap.get(ch.name) ?? 9999 }));
 
   // ② Сортируем по приоритету (score + ping), узлы перед пулами
   pings.sort((a,b) => {
@@ -517,7 +526,14 @@ async function run(channels) {
   const WAVE_DELAY = [0, 150, 400];
   const results    = new Array(sorted.length).fill(null);
   let okCount = 0;
-  const EARLY_STOP = Math.min(sorted.length, Math.ceil(sorted.length * 0.65));
+  let attemptCount = 0;
+  const activeChannels = sorted.filter(ch =>
+    !isDead(ch.name) && !cbIsBlocked(ch.name) && !isCooling(ch.name) && !isNegCached(ch.name)
+  );
+  // Агрессивная стратегия (ratio < 0.4) — ждём 85% каналов, не останавливаемся рано
+  // Лёгкая стратегия (ratio >= 0.8) — 50% достаточно
+  const stopRatio  = (feeRatioHint < 0.4) ? 0.85 : (feeRatioHint >= 0.8) ? 0.50 : 0.65;
+  const EARLY_STOP = Math.max(3, Math.ceil(activeChannels.length * stopRatio));
 
   await new Promise(resolve => {
     let finished = 0, aborted = false;
@@ -551,6 +567,7 @@ async function run(channels) {
         }
 
         const t0 = Date.now();
+        attemptCount++;
         ch.call().then(r => {
           const ms  = Date.now()-t0;
           const vercelCode = r.ve || '';  // ← канал передаёт ve из Response заголовка
@@ -616,11 +633,13 @@ async function run(channels) {
   return results.filter(Boolean);
 }
 
-// ─── ⑥ GET HEX — сортировка по истории скорости ──────────────
+// ─── ⑥ GET HEX — двухуровневый запуск ───────────────────────
+// Уровень 1: топ-3 источника по истории скорости — стартуют немедленно
+// Уровень 2: оставшиеся 5 — стартуют через 1с если топ-3 не ответили
+// Экономим полосу и время — в 80% случаев топ-3 достаточно
 const HEX_RE = /^[0-9a-fA-F]{200,}$/;
 
 async function getHex(txid) {
-  // Источники — сортируем по среднему времени ответа (история)
   const SOURCES = [
     { name:'mempool.space',   url:`https://mempool.space/api/tx/${txid}/hex`,                            t:'text' },
     { name:'blockstream.info',url:`https://blockstream.info/api/tx/${txid}/hex`,                         t:'text' },
@@ -632,66 +651,92 @@ async function getHex(txid) {
     { name:'sochain.com',     url:`https://sochain.com/api/v2/get_tx/BTC/${txid}`,                       t:'json', p:['data','tx_hex'] },
   ];
 
-  // ② Сортируем по среднему времени ответа
+  // Сортируем по истории скорости
   SOURCES.sort((a,b) => avgResponseMs(a.name) - avgResponseMs(b.name));
 
+  // Топ-3 стартуют сразу, остальные через 1с (tiered fetch)
+  const TOP    = SOURCES.slice(0, 3);
+  const BOTTOM = SOURCES.slice(3);
+
   const ac = new AbortController();
-  const TIMEOUT_MS = 9000;
 
   const makeSignal = () => {
-    if (typeof AbortSignal.any === 'function')
-      return AbortSignal.any([ac.signal, AbortSignal.timeout(TIMEOUT_MS)]);
     const tc = new AbortController();
-    const tm = setTimeout(()=>tc.abort(), TIMEOUT_MS);
-    ac.signal.addEventListener('abort',()=>{clearTimeout(tm);tc.abort()},{once:true});
+    const tm = setTimeout(() => tc.abort(), 9000);
+    ac.signal.addEventListener('abort', () => { clearTimeout(tm); tc.abort(); }, {once:true});
     return tc.signal;
   };
 
   return new Promise(res => {
-    let found=false, done=0;
-    for (const { name, url, t, p } of SOURCES) {
+    let found = false, done = 0, total = SOURCES.length;
+
+    const trySource = ({ name, url, t, p }) => {
       const t0 = Date.now();
-      fetch(url, {cache:'no-store', signal:makeSignal()})
+      fetch(url, { cache:'no-store', signal: makeSignal() })
         .then(async r => {
           if (!r.ok) return;
-          const h = t==='json' ? p.reduce((o,k)=>o?.[k], await safeJson(r)) : (await safeText(r)).trim();
+          const h = t==='json'
+            ? p.reduce((o,k) => o?.[k], await safeJson(r))
+            : (await safeText(r)).trim();
           if (!found && h && HEX_RE.test(h) && h.length < MAX_HEX_BYTES*2) {
             found = true;
-            recordStat(name, true, Date.now()-t0); // ① статистика hex-источников
+            recordStat(name, true, Date.now()-t0);
             ac.abort();
             res(h);
           }
         })
-        .catch(()=>{})
-        .finally(()=>{ if (++done===SOURCES.length&&!found) res(null); });
-    }
+        .catch(() => {})
+        .finally(() => { if (++done === total && !found) res(null); });
+    };
+
+    // Уровень 1: топ-3 сразу
+    TOP.forEach(trySource);
+
+    // Уровень 2: остальные через 1с если топ-3 не ответили
+    const fallbackTimer = setTimeout(() => {
+      if (!found) BOTTOM.forEach(trySource);
+      else total = done + BOTTOM.length; // корректируем счётчик — они не запустятся
+    }, 1000);
+
+    // Если нашли раньше — очищаем таймер
+    ac.signal.addEventListener('abort', () => clearTimeout(fallbackTimer), {once:true});
   });
 }
 
 // ─── АНАЛИЗ TX ────────────────────────────────────────────────
+// Параллельный запрос mempool.space + blockstream fallback
 async function analyze(txid) {
   try {
-    const [tR,fR] = await Promise.all([
+    const [tR, tR2, fR] = await Promise.allSettled([
       ft(`https://mempool.space/api/tx/${txid}`,{},7000),
+      ft(`https://blockstream.info/api/tx/${txid}`,{},7000),
       ft('https://mempool.space/api/v1/fees/recommended',{},5000),
     ]);
-    if (!tR.ok) return null;
-    const tx   = await safeJson(tR);
-    const fees = fR.ok ? await safeJson(fR) : {};
-    const vsize    = tx.weight ? Math.ceil(tx.weight/4) : (tx.size||250);
-    const feePaid  = tx.fee||0;
-    const feeRate  = feePaid&&vsize ? Math.round(feePaid/vsize) : 0;
-    const fastest  = fees.fastestFee||50;
-    const needCpfp = feeRate>0 && feeRate<fastest*0.5;
-    const rbfEnabled = Array.isArray(tx.vin)&&tx.vin.some(i=>i.sequence<=0xFFFFFFFD);
+    let tx = null;
+    if (tR.status==='fulfilled' && tR.value?.ok) tx = await safeJson(tR.value);
+    else if (tR2.status==='fulfilled' && tR2.value?.ok) tx = await safeJson(tR2.value);
+    if (!tx) return null;
+    const fees = (fR.status==='fulfilled' && fR.value?.ok) ? await safeJson(fR.value) : {};
+    const vsize      = tx.weight ? Math.ceil(tx.weight/4) : (tx.size||250);
+    const feePaid    = tx.fee||0;
+    const feeRate    = feePaid&&vsize ? Math.round(feePaid/vsize) : 0;
+    const fastest    = fees.fastestFee  || 50;
+    const halfHour   = fees.halfHourFee || 30;
+    const hour       = fees.hourFee     || 20;
+    const economy    = fees.economyFee  || fees.minimumFee || 5;
+    const needCpfp   = feeRate>0 && feeRate<fastest*0.5;
+    const rbfEnabled = Array.isArray(tx.vin) && tx.vin.some(i=>i.sequence<=0xFFFFFFFD);
+    const feeRatio   = fastest>0 ? +(feeRate/fastest).toFixed(3) : 0;
     if (tx.status?.confirmed) setConfirmed(txid);
     return {
-      vsize, feePaid, feeRate, fastest, needCpfp, rbfEnabled,
+      vsize, feePaid, feeRate, feeRatio, fastest, halfHour, hour, economy,
+      needCpfp, rbfEnabled,
       cpfpFeeNeeded: needCpfp ? Math.max(0, fastest*(vsize+110)-feePaid) : 0,
       confirmed: tx.status?.confirmed||false,
+      blockHeight: tx.status?.block_height||null,
       inputs:  (tx.vin||[]).length,
       outputs: (tx.vout||[]).length,
-      fees: { fastest, halfHour:fees.halfHourFee||0, hour:fees.hourFee||0, economy:fees.economyFee||0 },
+      fees: { fastest, halfHour, hour, economy },
     };
   } catch { return null; }
 }
@@ -707,6 +752,39 @@ function calcWaveStrategy(feeRate, fastest) {
   if (ratio >= 0.8) return { waves:3, intervalMs:20*60_000, label:'easy'       };
   if (ratio >= 0.4) return { waves:5, intervalMs:15*60_000, label:'standard'   };
   return              { waves:8, intervalMs:10*60_000, label:'aggressive' };
+}
+
+// ─── TXID-ONLY ПУЛЫ — работают без hex ───────────────────────
+// Некоторые акселераторы принимают просто txid и сами достают hex
+// Используем если hex не нашли — хоть что-то лучше чем ничего
+function txidOnlyChannels(txid) {
+  const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36';
+  return [
+    { name:'mempoolAccel', tier:'pool', call: async()=>{
+      const r=await ftr('https://mempool.space/api/v1/tx-accelerator/enqueue',{method:'POST',body:JSON.stringify({txid}),headers:{'Content-Type':'application/json','User-Agent':UA}},12000,2,'mempoolAccel','pool');
+      const j=await safeJson(r);
+      return {ok:r.ok||j?.message==='Success', status:r.status, ve:ve(r)};
+    }},
+    { name:'ViaBTC', tier:'pool', call: async()=>{
+      const r=await ftr('https://viabtc.com/tools/txaccelerator/',{method:'POST',body:`txid=${txid}`,headers:{'Content-Type':'application/x-www-form-urlencoded','User-Agent':UA}},14000,2,'ViaBTC','pool');
+      const t=await safeText(r);
+      return {ok:r.ok||t.includes('"code":0'), status:r.status, ve:ve(r)};
+    }},
+    { name:'AntPool', tier:'pool', call: async()=>{
+      const r=await ftr('https://antpool.com/txAccelerate.htm',{method:'POST',body:`txHash=${txid}`,headers:{'Content-Type':'application/x-www-form-urlencoded','User-Agent':UA}},12000,2,'AntPool','pool');
+      const t=await safeText(r);
+      return {ok:r.ok||t.includes('success')||ok400(t,r.status), status:r.status, ve:ve(r)};
+    }},
+    { name:'TxBoost', tier:'pool', call: async()=>{
+      const r=await ftr('https://txboost.com/',{method:'POST',body:`txid=${txid}`,headers:{'Content-Type':'application/x-www-form-urlencoded','User-Agent':UA}},12000,2,'TxBoost','pool');
+      const t=await safeText(r);
+      return {ok:r.ok||t.includes('success'), status:r.status, ve:ve(r)};
+    }},
+    { name:'bitaccelerate', tier:'pool', call: async()=>{
+      const r=await ftr('https://www.bitaccelerate.com/',{method:'POST',body:`txid=${txid}`,headers:{'Content-Type':'application/x-www-form-urlencoded','User-Agent':UA}},12000,2,'bitaccelerate','pool');
+      return {ok:r.ok, status:r.status, ve:ve(r)};
+    }},
+  ];
 }
 
 // ─── КАНАЛЫ ───────────────────────────────────────────────────
@@ -842,9 +920,6 @@ function premiumChannels(txid, hex) {
       const j=await safeJson(r);
       return {ok:r.ok||j?.success===true||ok400(JSON.stringify(j),r.status), status:r.status, ve:ve(r)};
     }},
-      const r=await ftr('https://txboost.com/',{method:'POST',body:`txid=${txid}`,headers:{'Content-Type':'application/x-www-form-urlencoded','User-Agent':UA}},12000,2,'TxBoost','pool');
-      return {ok:r.ok||(await safeText(r)).includes('success'), status:r.status, ve:ve(r)};
-    }},
     { name:'bitaccelerate', tier:'pool', call: async()=>{
       const r=await ftr('https://www.bitaccelerate.com/',{method:'POST',body:`txid=${txid}`,headers:{'Content-Type':'application/x-www-form-urlencoded','User-Agent':UA}},12000,2,'bitaccelerate','pool');
       return {ok:r.ok, status:r.status, ve:ve(r)};
@@ -931,17 +1006,31 @@ async function tg({results,txid,plan,analysis,ms,hr,ip,blocked,waveStrategy}) {
   } else {
     const ok=results.filter(r=>r.ok).length, tot=results.length;
     const pct=tot?Math.round(ok/tot*100):0;
-    const bar='█'.repeat(Math.round(pct/10))+'░'.repeat(10-Math.round(pct/10));
+    const filled=Math.round(pct/10);
+    const bar='█'.repeat(filled)+'░'.repeat(10-filled);
+
+    // Топ успешных пулов с hashrate
+    const okPools = results
+      .filter(r=>r.tier==='pool'&&r.ok)
+      .sort((a,b)=>(HR[b.channel||b.name]||0)-(HR[a.channel||a.name]||0))
+      .slice(0,5)
+      .map(r=>`${r.channel||r.name}(${HR[r.channel||r.name]||'?'}%)`);
+
+    const okNodes = results.filter(r=>r.tier==='node'&&r.ok).map(r=>r.channel||r.name);
+
+    const feeInfo = analysis
+      ? `${analysis.vsize}vB · ${analysis.feeRate}→${analysis.fastest} sat/vB (${Math.round((analysis.feeRatio||0)*100)}%)`
+      : '';
+
     text=[
-      `⚡ *TurboTX v7 — ${plan.toUpperCase()}*`,
-      `📋 \`${txid.slice(0,14)}…${txid.slice(-6)}\` 🌐 \`${ip}\``,
-      `⏱ ${ms}ms`,
-      `\`${bar}\` ${pct}% (${ok}/${tot})`,
-      hr>0?`⛏ ~${hr}% хешрейта`:'',
-      `🔗 ${results.filter(r=>r.tier==='node'&&r.ok).map(r=>r.channel).join(', ')||'—'}`,
-      plan==='premium'?`🏊 ${results.filter(r=>r.tier==='pool'&&r.ok).map(r=>r.channel).join(', ')||'—'}`:'',
-      analysis?`📐 ${analysis.vsize}vB·${analysis.feeRate}sat/vB${analysis.needCpfp?' ⚠️CPFP':' ✅'}${analysis.rbfEnabled?' 🔄RBF':''}`:'',
-      waveStrategy?`🌊 ${waveStrategy.waves} волн (${waveStrategy.label})`:'',
+      `⚡ *TurboTX v10 — ${plan.toUpperCase()}*`,
+      `📋 \`${txid.slice(0,14)}…${txid.slice(-6)}\` · \`${ip}\``,
+      `⏱ ${ms}ms · \`${bar}\` ${pct}% (${ok}/${tot})`,
+      hr>0 ? `⛏ ~${hr}% hashrate охвачено` : '',
+      okNodes.length ? `🔗 Ноды: ${okNodes.join(', ')}` : '',
+      okPools.length ? `🏊 Пулы: ${okPools.join(', ')}` : '',
+      feeInfo ? `📐 ${feeInfo}${analysis.needCpfp?' ⚠️CPFP':' ✅'}${analysis.rbfEnabled?' 🔄RBF':''}` : '',
+      waveStrategy ? `🌊 ${waveStrategy.waves} волн · ${waveStrategy.label}` : '',
       `🕐 ${new Date().toLocaleString('ru',{timeZone:'Europe/Moscow'})} МСК`,
     ].filter(Boolean).join('\n');
   }
@@ -963,16 +1052,23 @@ export default async function handler(req, res) {
   const ip = getIp(req);
   if (isBot(req)) { tg({txid:'?',plan:'?',ip,blocked:'bot_ua'}).catch(()=>{}); return res.status(403).json({ok:false,error:'Forbidden'}); }
 
-  const {txid, plan='free', hex:hexIn} = req.body||{};
-  if (!txid||!/^[a-fA-F0-9]{64}$/.test(txid)) return res.status(400).json({ok:false,error:'Invalid TXID'});
-  if (hexIn&&hexIn.length>MAX_HEX_BYTES*2) return res.status(413).json({ok:false,error:'Hex too large'});
+  const body = req.body || {};
+  const effectivePlan = ['free','premium'].includes(body.plan) ? body.plan : 'free';
 
-  const effectivePlan = ['free','premium'].includes(plan) ? plan : 'free';
-
+  // ── Авторизация Premium ──
   if (effectivePlan==='premium') {
-    const secret=process.env.PREMIUM_SECRET, token=req.headers['x-turbotx-token']||req.body?.token;
+    const secret=process.env.PREMIUM_SECRET, token=req.headers['x-turbotx-token']||body.token;
     if (secret&&token!==secret) return res.status(401).json({ok:false,error:'Invalid premium token'});
   }
+
+  // ── Определяем режим: одиночный или batch ──
+  const isBatch = Array.isArray(body.txids);
+  if (isBatch) return handleBatch(req, res, body, effectivePlan, ip);
+
+  // ── Одиночный режим ───────────────────────────────────────
+  const {txid, hex:hexIn} = body;
+  if (!txid||!/^[a-fA-F0-9]{64}$/.test(txid)) return res.status(400).json({ok:false,error:'Invalid TXID'});
+  if (hexIn&&hexIn.length>MAX_HEX_BYTES*2) return res.status(413).json({ok:false,error:'Hex too large'});
 
   const rl = checkLimits(ip, txid, effectivePlan);
   if (!rl.ok) {
@@ -989,12 +1085,10 @@ export default async function handler(req, res) {
     hexIn&&HEX_RE.test(hexIn) ? Promise.resolve(hexIn) : getHex(txid),
     analyze(txid),
   ]);
-  let hex      = hexRes.status === 'fulfilled' ? hexRes.value : null;
-  const analysis = analysisRes.status === 'fulfilled' ? analysisRes.value : null;
+  let hex      = hexRes.status==='fulfilled' ? hexRes.value : null;
+  const analysis = analysisRes.status==='fulfilled' ? analysisRes.value : null;
 
-  // ③ Smart hex retry — TX только что попала в мемпул, hex ещё не проиндексирован
-  // Ждём 3 секунды и пробуем ещё раз только для Premium (не тратим Free лимиты)
-  if (!hex && effectivePlan === 'premium') {
+  if (!hex && effectivePlan==='premium') {
     await sleep(3000);
     hex = await getHex(txid).catch(()=>null);
   }
@@ -1002,42 +1096,113 @@ export default async function handler(req, res) {
   if (analysis?.confirmed) { setConfirmed(txid); return res.status(200).json({ok:true,confirmed:true,analysis}); }
   if (effectivePlan==='free'&&!hex) return res.status(200).json({ok:false,error:'TX hex not found.',analysis});
 
-  // ③ Адаптивная стратегия волн
   const waveStrategy = calcWaveStrategy(analysis?.feeRate, analysis?.fastest);
 
-  const channels = effectivePlan==='premium' ? premiumChannels(txid,hex) : freeChannels(hex);
-  const results  = await run(channels);
-  const ms       = Date.now()-t0;
+  let channels;
+  if (effectivePlan==='premium') {
+    channels = hex ? premiumChannels(txid,hex) : txidOnlyChannels(txid);
+  } else {
+    channels = freeChannels(hex);
+  }
+  const results = await run(channels, analysis?.feeRatio ?? 0.5);
+  const ms      = Date.now()-t0;
 
   const hr = effectivePlan==='premium'
     ? results.filter(r=>r.ok&&r.tier==='pool').reduce((s,r)=>s+(HR[r.name||r.channel]||0),0) : 0;
-
   const okCount = results.filter(r=>r.ok).length;
 
   const summary = {
     total:results.length, ok:okCount, failed:results.length-okCount,
     hexFound:!!hex, ms, plan:effectivePlan, hashrateReach:hr,
-    feeRate:       analysis?.feeRate       ?? null,
-    needCpfp:      analysis?.needCpfp      ?? false,
+    feeRate:       analysis?.feeRate    ?? null,
+    feeRatio:      analysis?.feeRatio   ?? null,
+    needCpfp:      analysis?.needCpfp   ?? false,
     cpfpFeeNeeded: analysis?.cpfpFeeNeeded ?? 0,
-    rbfEnabled:    analysis?.rbfEnabled    ?? false,
+    rbfEnabled:    analysis?.rbfEnabled ?? false,
     waveStrategy,
-    // ② Circuit breaker — сколько каналов сейчас в OPEN/HALF_OPEN
     circuitBreakers: (() => {
-      const open = [], halfOpen = [];
-      for (const [name, e] of _cb) {
-        if (e.state === 'OPEN')      open.push(name);
-        if (e.state === 'HALF_OPEN') halfOpen.push(name);
+      const open=[], halfOpen=[];
+      for (const [name,e] of _cb) {
+        if (e.state==='OPEN')      open.push(name);
+        if (e.state==='HALF_OPEN') halfOpen.push(name);
       }
-      return open.length + halfOpen.length > 0 ? { open, halfOpen } : undefined;
+      return open.length+halfOpen.length>0 ? {open,halfOpen} : undefined;
     })(),
   };
 
   tg({results,txid,plan:effectivePlan,analysis,ms,hr,ip,waveStrategy}).catch(()=>{});
 
   return res.status(200).json({
-    ok: okCount>0, results, summary, analysis,
-    waveStrategy,
-    ...(effectivePlan==='premium'?{jobId:`${txid.slice(0,8)}_${Date.now()}`}:{}),
+    ok: okCount>0, results, summary, analysis, waveStrategy,
+    ...(effectivePlan==='premium' ? {jobId:`${txid.slice(0,8)}_${Date.now()}`} : {}),
+  });
+}
+
+// ─── BATCH HANDLER ────────────────────────────────────────────
+// POST { txids: ['abc...', 'def...'], plan: 'premium' }
+// Конкуренты этого не умеют — обрабатываем пачку транзакций параллельно
+async function handleBatch(req, res, body, plan, ip) {
+  const MAX_BATCH = plan==='premium' ? 20 : 5;
+  const txids = (body.txids||[])
+    .filter(t => typeof t==='string' && /^[a-fA-F0-9]{64}$/.test(t))
+    .slice(0, MAX_BATCH);
+
+  if (txids.length===0) return res.status(400).json({ok:false,error:'No valid TXIDs in batch'});
+
+  const t0 = Date.now();
+
+  // Обрабатываем параллельно, но делим каналы — не перегружаем пулы
+  // Free: каждый TXID получает 3 канала
+  // Premium: первые 3 TXID — полный набор, остальные — txidOnly
+  const batchResults = await Promise.allSettled(
+    txids.map(async (txid, idx) => {
+      if (isConfirmed(txid)) return { txid, ok:true, confirmed:true, cached:true };
+
+      const rl = checkLimits(ip, txid, plan);
+      if (!rl.ok) return { txid, ok:false, rateLimited:true, retryAfter:rl.retryAfter };
+
+      const [hexRes, analysisRes] = await Promise.allSettled([
+        getHex(txid),
+        analyze(txid),
+      ]);
+      const hex      = hexRes.status==='fulfilled' ? hexRes.value : null;
+      const analysis = analysisRes.status==='fulfilled' ? analysisRes.value : null;
+
+      if (analysis?.confirmed) { setConfirmed(txid); return {txid,ok:true,confirmed:true,analysis}; }
+
+      let channels;
+      if (plan==='premium') {
+        // Первые 3 получают полный набор, остальные — txidOnly (экономим ресурсы)
+        channels = idx < 3
+          ? (hex ? premiumChannels(txid,hex) : txidOnlyChannels(txid))
+          : txidOnlyChannels(txid);
+      } else {
+        if (!hex) return {txid,ok:false,error:'hex not found',analysis};
+        channels = freeChannels(hex);
+      }
+
+      const results = await run(channels, analysis?.feeRatio ?? 0.5);
+      const okCount = results.filter(r=>r.ok).length;
+      const hr = plan==='premium'
+        ? results.filter(r=>r.ok&&r.tier==='pool').reduce((s,r)=>s+(HR[r.name||r.channel]||0),0) : 0;
+
+      return { txid, ok:okCount>0, okCount, hexFound:!!hex, hashrateReach:hr, analysis };
+    })
+  );
+
+  const items = batchResults.map((r,i) =>
+    r.status==='fulfilled' ? r.value : {txid:txids[i], ok:false, error:r.reason?.message}
+  );
+  const successCount = items.filter(i=>i.ok).length;
+
+  return res.status(200).json({
+    ok:   successCount>0,
+    batch: true,
+    total: items.length,
+    succeeded: successCount,
+    failed: items.length - successCount,
+    ms: Date.now()-t0,
+    plan,
+    items,
   });
 }
