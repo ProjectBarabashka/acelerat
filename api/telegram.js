@@ -31,7 +31,10 @@ const PREM_SECRET = process.env.PREMIUM_SECRET || '';
 const _stats = { broadcasts: 0, statusChecks: 0, cpfpCalcs: 0, startedAt: Date.now() };
 
 function base() {
-  return process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000';
+  // PRODUCTION_URL берём из env (задать в Vercel: PRODUCTION_URL=https://acelerat.vercel.app)
+  // Фоллбэк на VERCEL_URL только если PRODUCTION_URL не задан
+  return process.env.PRODUCTION_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
 }
 
 async function ft(url, opts = {}, ms = 10000) {
@@ -523,6 +526,14 @@ async function handleCallback(cb) {
 export default async function handler(req, res) {
   // Telegram всегда шлёт POST
   if (req.method !== 'POST') return res.status(200).end('TurboTX Bot OK');
+
+  // Проверяем X-Telegram-Bot-Api-Secret-Token если задан TG_WEBHOOK_SECRET
+  // Задать: /setWebhook с secret_token=process.env.TG_WEBHOOK_SECRET
+  const webhookSecret = process.env.TG_WEBHOOK_SECRET;
+  if (webhookSecret) {
+    const incoming = req.headers['x-telegram-bot-api-secret-token'];
+    if (incoming !== webhookSecret) return res.status(403).end();
+  }
 
   // Быстрый ответ Telegram (не ждём нашей обработки)
   res.status(200).json({ ok: true });

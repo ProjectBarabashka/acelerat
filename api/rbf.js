@@ -37,7 +37,7 @@ async function ft(url, ms = 7000) {
 // BTC/USD
 async function getBtcPrice() {
   try {
-    const r = await ft('https://mempool.space/api/v1/prices', {}, 5000);
+    const r = await ft('https://mempool.space/api/v1/prices', 5000);
     if (r.ok) { const j = await r.json(); return j.USD || null; }
   } catch {}
   return null;

@@ -86,10 +86,9 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(204).set(CORS).end();
   Object.entries(CORS).forEach(([k,v]) => res.setHeader(k,v));
 
-  const verbose
   const _ip = req.headers['x-real-ip'] || req.headers['x-forwarded-for']?.split(',')[0]?.trim() || 'unknown';
   if (!checkRl(_ip)) return res.status(429).json({ ok:false, error:'Too many requests' });
- = req.query?.verbose === '1';
+  const verbose = req.query?.verbose === '1';
 
   const t0 = Date.now();
   const results = await Promise.allSettled(CHANNELS.map(ch => ping(ch)))

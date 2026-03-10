@@ -77,7 +77,8 @@ function adaptiveNextInterval(waveNum, txFeeRate, fees, baseInterval) {
 }
 
 function baseUrl() {
-  return process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000';
+  return process.env.PRODUCTION_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
 }
 
 export default async function handler(req, res) {

@@ -57,7 +57,7 @@ async function safeJson(r){ try{ return await r.json(); } catch{ return {}; } }
 
 async function getBtcPrice() {
   try {
-    const r = await ft('https://mempool.space/api/v1/prices', {}, 5000);
+    const r = await ft('https://mempool.space/api/v1/prices', 5000);
     if (r.ok) { const j = await safeJson(r); return j.USD||null; }
   } catch {}
   return null;
@@ -100,11 +100,11 @@ export default async function handler(req, res) {
     const txRsp   = getR(txR);
     const feesRsp = getR(feesR);
     const mpRsp   = getR(mpR);
-    const priceVal = getR(priceVal);
+    const priceVal = priceP.status === 'fulfilled' ? priceP.value : null;
 
     if (!txRsp?.ok) {
       // Fallback: blockstream
-      const fb = await ft(`https://blockstream.info/api/tx/${txid}`, {}, 6000);
+      const fb = await ft(`https://blockstream.info/api/tx/${txid}`, 6000);
       if (!fb.ok) return res.status(404).json({ ok:false, error:'TX not found' });
     }
 
