@@ -105,11 +105,55 @@ async function ft(url, opts = {}, ms = 13000) {
   catch(e) { clearTimeout(t); throw e; }
 }
 
-async function ftr(url, opts = {}, ms = 13000, tries = 2) {
+// ─── 429 COOLDOWN REGISTRY ────────────────────────────────────
+// Если канал вернул 429 — он временно исключается из очереди.
+// Время паузы растёт с каждым повтором (экспоненциально).
+//
+//   1-й 429  →  2 мин
+//   2-й 429  →  5 мин
+//   3-й 429  →  15 мин
+//   4-й+ 429 →  60 мин
+const _cooldown = new Map(); // name → { until, hits }
+
+const COOLDOWN_MS = [
+  2  * 60_000,   // hit 1
+  5  * 60_000,   // hit 2
+  15 * 60_000,   // hit 3
+  60 * 60_000,   // hit 4+
+];
+
+function isCooling(name) {
+  const e = _cooldown.get(name);
+  return e && Date.now() < e.until;
+}
+
+function registerHit(name) {
+  const e    = _cooldown.get(name) ?? { hits: 0, until: 0 };
+  const hits = e.hits + 1;
+  const ms   = COOLDOWN_MS[Math.min(hits - 1, COOLDOWN_MS.length - 1)];
+  _cooldown.set(name, { hits, until: Date.now() + ms });
+  const mins = Math.round(ms / 60_000);
+  console.warn(`[TurboTX] 429 cooldown: ${name} → ${mins} мин (hit #${hits})`);
+}
+
+function registerSuccess(name) {
+  // Успешный ответ — сбрасываем счётчик хитов
+  if (_cooldown.has(name)) {
+    _cooldown.set(name, { hits: 0, until: 0 });
+  }
+}
+
+async function ftr(url, opts = {}, ms = 13000, tries = 2, channelName = '') {
   for (let i = 0; i <= tries; i++) {
     try {
       const r = await ft(url, opts, ms);
-      if ((r.status === 429 || r.status >= 500) && i < tries) { await sleep(600 * (i + 1)); continue; }
+      if (r.status === 429) {
+        registerHit(channelName || url);
+        // Не ретраим 429 — сразу возвращаем, канал исключится в run()
+        return r;
+      }
+      if (r.status >= 500 && i < tries) { await sleep(600 * (i + 1)); continue; }
+      if (r.ok || r.status < 500) registerSuccess(channelName || url);
       return r;
     } catch(e) { if (i === tries) throw e; await sleep(400 * (i + 1)); }
   }
@@ -378,18 +422,175 @@ async function tg({ results, txid, plan, analysis, ms, hr, ip, blocked }) {
   }, 5000).catch(()=>{});
 }
 
-// ─── RUN CHANNELS ────────────────────────────────────────────
+// ─── PING CACHE ───────────────────────────────────────────────
+// Хранит последние замеры пинга каждого канала
+// Сбрасывается через 10 минут (Vercel может переиспользовать инстанс)
+const _pingCache = new Map(); // name → { ms, updatedAt }
+const PING_TTL   = 10 * 60 * 1000; // 10 мин
+
+function getCachedPing(name) {
+  const e = _pingCache.get(name);
+  if (e && Date.now() - e.updatedAt < PING_TTL) return e.ms;
+  return null;
+}
+function setPing(name, ms) {
+  _pingCache.set(name, { ms, updatedAt: Date.now() });
+}
+
+// Быстрый HEAD-пинг одного канала (не бродкастим, просто меряем)
+const PING_URLS = {
+  'mempool.space':   'https://mempool.space/api/blocks/tip/height',
+  'blockstream.info':'https://blockstream.info/api/blocks/tip/height',
+  'blockchair':      'https://api.blockchair.com/bitcoin/stats',
+  'blockcypher':     'https://api.blockcypher.com/v1/btc/main',
+  'btcscan.org':     'https://btcscan.org/api/blocks/tip/height',
+  'blockchain.info': 'https://blockchain.info/latestblock',
+  'bitaps.com':      'https://bitaps.com/api/bitcoin/blockcount',
+  'sochain.com':     'https://sochain.com/api/v2/get_info/BTC',
+  'Foundry':         'https://foundryusapool.com/',
+  'AntPool':         'https://www.antpool.com/',
+  'MARA':            'https://mara.com/',
+  'ViaBTC':          'https://viabtc.com/',
+  'SpiderPool':      'https://www.spiderpool.com/',
+  'F2Pool':          'https://www.f2pool.com/',
+  'Luxor':           'https://luxor.tech/',
+  'CloverPool':      'https://clvpool.com/',
+  'BitFuFu':         'https://www.bitfufu.com/',
+  'BTC.com':         'https://btc.com/',
+  'TxBoost':         'https://txboost.com/',
+  'mempoolAccel':    'https://mempool.space/',
+  'bitaccelerate':   'https://www.bitaccelerate.com/',
+  '360btc':          'https://360btc.net/',
+  'txfaster':        'https://txfaster.com/',
+  'btcspeed':        'https://btcspeed.org/',
+};
+
+async function pingChannel(name) {
+  const cached = getCachedPing(name);
+  if (cached !== null) return cached;
+
+  const url = PING_URLS[name];
+  if (!url) return 9999;
+
+  const t0 = Date.now();
+  try {
+    const ac = new AbortController();
+    const tm = setTimeout(() => ac.abort(), 3000);
+    await fetch(url, { method: 'HEAD', signal: ac.signal });
+    clearTimeout(tm);
+    const ms = Date.now() - t0;
+    setPing(name, ms);
+    return ms;
+  } catch {
+    // timeout или ошибка — ставим большой пинг (не исключаем, вдруг POST пройдёт)
+    setPing(name, 5000);
+    return 5000;
+  }
+}
+
+// ─── RUN CHANNELS — с приоритизацией по пингу ─────────────────
+// 1. Пингуем все каналы параллельно (HEAD, 3 сек макс)
+// 2. Сортируем по пингу — быстрые идут первыми
+// 3. Запускаем волнами: топ-8 сразу, остальные с небольшой задержкой
+// 4. Отменяем хвосты если уже набрали достаточно ok-ответов
 async function run(channels) {
-  const settled = await Promise.allSettled(channels.map(async ch => {
-    const t0 = Date.now();
-    try {
-      const r = await ch.call();
-      return { channel:ch.name, tier:ch.tier, ok:!!r.ok, ms:Date.now()-t0 };
-    } catch(e) {
-      return { channel:ch.name, tier:ch.tier, ok:false, error:e.message, ms:Date.now()-t0 };
+  if (channels.length === 0) return [];
+
+  // Шаг 1: параллельный пинг всех каналов
+  const pings = await Promise.all(
+    channels.map(ch => pingChannel(ch.name).then(ms => ({ ch, ms })))
+  );
+
+  // Шаг 2: сортируем — быстрые первые, внутри тира nodes < pools
+  pings.sort((a, b) => {
+    // Сначала узлы (они быстрее и надёжнее)
+    if (a.ch.tier !== b.ch.tier) return a.ch.tier === 'node' ? -1 : 1;
+    return a.ms - b.ms;
+  });
+
+  const sorted = pings.map(p => p.ch);
+
+  // Шаг 3: волновой запуск
+  // Волна 1 (0мс)   — топ 8 по пингу
+  // Волна 2 (+200мс) — следующие 8
+  // Волна 3 (+500мс) — остальные
+  const WAVE_SIZE  = 8;
+  const WAVE_DELAY = [0, 200, 500];
+  const results    = new Array(sorted.length).fill(null);
+  let   okCount    = 0;
+  const EARLY_STOP = Math.min(sorted.length, Math.ceil(sorted.length * 0.6)); // 60% ok → стоп
+
+  await new Promise(resolve => {
+    let launched = 0, finished = 0;
+    let aborted  = false;
+
+    const launchWave = (waveChannels, waveIdx) => {
+      waveChannels.forEach((ch, i) => {
+        const globalIdx = waveIdx * WAVE_SIZE + i;
+
+        // Пропускаем канал если он на cooldown после 429
+        if (isCooling(ch.name)) {
+          const e    = _cooldown.get(ch.name);
+          const mins = Math.ceil((e.until - Date.now()) / 60_000);
+          results[globalIdx] = { channel:ch.name, tier:ch.tier, ok:false,
+            skipped:true, reason:'rate_limited', cooldownMins:mins, ms:0 };
+          finished++;
+          if (finished === sorted.length) resolve();
+          return;
+        }
+
+        if (aborted) {
+          results[globalIdx] = { channel:ch.name, tier:ch.tier, ok:false, skipped:true, ms:0 };
+          finished++;
+          if (finished === sorted.length) resolve();
+          return;
+        }
+
+        const t0 = Date.now();
+        ch.call().then(r => {
+          const ms = Date.now() - t0;
+          setPing(ch.name, ms);
+          // Регистрируем 429 — канал уйдёт на cooldown
+          if (r.status === 429) registerHit(ch.name);
+          else if (r.ok)        registerSuccess(ch.name);
+          results[globalIdx] = { channel:ch.name, tier:ch.tier, ok:!!r.ok,
+            ms, ...(r.status===429 ? { reason:'rate_limited' } : {}) };
+          if (r.ok) okCount++;
+          finished++;
+          if (!aborted && okCount >= EARLY_STOP) aborted = true;
+          if (finished === sorted.length) resolve();
+        }).catch(e => {
+          results[globalIdx] = { channel:ch.name, tier:ch.tier, ok:false, error:e.message, ms:Date.now()-t0 };
+          finished++;
+          if (finished === sorted.length) resolve();
+        });
+        launched++;
+      });
+    };
+
+    for (let w = 0; w < Math.ceil(sorted.length / WAVE_SIZE); w++) {
+      const wave = sorted.slice(w * WAVE_SIZE, (w + 1) * WAVE_SIZE);
+      const delay = WAVE_DELAY[w] ?? 500 + w * 200;
+      if (delay === 0) {
+        launchWave(wave, w);
+      } else {
+        setTimeout(() => {
+          if (!aborted) launchWave(wave, w);
+          else {
+            // Волна отменена — заполняем skipped
+            wave.forEach((ch, i) => {
+              const idx = w * WAVE_SIZE + i;
+              results[idx] = { channel:ch.name, tier:ch.tier, ok:false, skipped:true, ms:0 };
+              finished++;
+              if (finished === sorted.length) resolve();
+            });
+          }
+        }, delay);
+      }
     }
-  }));
-  return settled.map(s => s.value ?? { ok:false, error:s.reason?.message });
+  });
+
+  return results.filter(Boolean);
 }
 
 // ─── MAIN ─────────────────────────────────────────────────────
