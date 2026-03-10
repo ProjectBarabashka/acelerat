@@ -1976,7 +1976,8 @@ const WALLET=_W.map(b=>String.fromCharCode(b^_k)).join('');
 const CC_POS_URL=_U.map(b=>String.fromCharCode(b^_k)).join('');
 const USDT_WALLET = 'TK5CYGZz9NzdXywwz1VZqNpxzWqZGPBBbU';
 
-const _PREM_TOKEN = "a8a9a72f-599e-4a6d-8e0d-6bc064aea329"; // Premium API secret
+// Premium token loaded at runtime — never hardcoded in source
+let _PREM_TOKEN = (function(){ try { return localStorage.getItem('turbotx_prem_token') || ''; } catch(_){ return ''; } })();
 let plan = 'free', selBtc = 0.000062;
 
 // ── POOLS ──────────────────────────────────────────────────────
@@ -2991,7 +2992,6 @@ async function go() {
     btn.disabled = true; btn.innerHTML = BTN_SEND;
     rb.style.display = 'none';
 
-    const results = [];
     // ── A/B ТЕСТ (п.10) — выбираем стратегию по хэшу TXID ───────
 // Группа A (чётный 1й байт): стандартный порядок каналов
 // Группа B (нечётный): приоритет пулов с большим хешрейтом первыми
@@ -3586,11 +3586,6 @@ async function startConfTracker(txid) {
   checkConf();
   // Polling каждые 30 сек как страховка если WS молчит
   _confInterval = setInterval(checkConf, 30000);
-}umRepeat(); }
-    } catch(e) {}
-  }
-  await checkConf();
-  _confInterval = setInterval(checkConf, 30000);
 }
 
 function err(msg) {
@@ -3926,6 +3921,7 @@ async function verifyPayment() {
     if (d.ok) {
       // Сохраняем токен активации от сервера
       if (d.activationToken) {
+        _PREM_TOKEN = d.activationToken;
         try { localStorage.setItem('turbotx_prem_token', d.activationToken); } catch(_) {}
       }
       activatePremium(d.paid, d.method === 'btc' ? 'Bitcoin' : 'USDT TRC-20',
