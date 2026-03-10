@@ -1,4 +1,3 @@
-```markdown
 # ⚡ T_U_R_B_O_T_X — Bitcoin Transaction Accelerator
 
 <p align="center">
@@ -12,7 +11,7 @@
 
 ## 🇺🇸 English Version
 
-> **Status: ⚠️ PRODUCTION (2026)**  
+> **Status: 🟢 PRODUCTION (2026)**  
 > Fully serverless, enterprise-grade Bitcoin transaction accelerator.  
 > Real rebroadcast to 8 nodes + 16 mining pools covering ~80% of network hashrate.
 
@@ -77,7 +76,7 @@ Client (index.html) ↔ Vercel Edge/Serverless Functions ↔ External APIs
 
 ## 🇷🇺 Русская Версия
 
-> **Статус: ⚠️ PRODUCTION (2026)**  
+> **Статус: 🟢 PRODUCTION (2026)**  
 > Полностью serverless, профессиональный ускоритель Bitcoin‑транзакций.  
 > Реальный rebroadcast в 8 нод + 16 пулов, покрывающих ~80% хешрейта сети.
 
@@ -148,4 +147,6 @@ Client (index.html) ↔ Vercel Edge/Serverless Functions ↔ External APIs
   <b>Developed by ProjectBarabashka</b><br>
   <i>Ensuring your Bitcoin transactions never get stuck.</i>
 </p>
-```
+``` 
+
+опять текс поделен на 2 части
