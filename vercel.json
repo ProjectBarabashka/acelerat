@@ -2,122 +2,52 @@
   "version": 2,
   "outputDirectory": "public",
   "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
-    },
-    {
-      "src": "/sitemap.xml",
-      "dest": "/sitemap.xml"
-    },
-    {
-      "src": "/robots.txt",
-      "dest": "/robots.txt"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    }
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/sitemap.xml", "dest": "/sitemap.xml" },
+    { "src": "/robots.txt", "dest": "/robots.txt" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ],
   "headers": [
     {
       "source": "/api/(.*)",
       "headers": [
-        {
-          "key": "Access-Control-Allow-Origin",
-          "value": "*"
-        },
-        {
-          "key": "Access-Control-Allow-Methods",
-          "value": "GET, POST, OPTIONS"
-        },
-        {
-          "key": "Access-Control-Allow-Headers",
-          "value": "Content-Type, X-TurboTX-Token"
-        },
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        },
-        {
-          "key": "X-Frame-Options",
-          "value": "DENY"
-        }
+        { "key": "Access-Control-Allow-Origin",  "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, X-TurboTX-Token" },
+        { "key": "X-Content-Type-Options",       "value": "nosniff" },
+        { "key": "X-Frame-Options",              "value": "DENY" }
       ]
     },
     {
       "source": "/(.*)",
       "headers": [
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        },
-        {
-          "key": "X-Frame-Options",
-          "value": "SAMEORIGIN"
-        },
-        {
-          "key": "X-XSS-Protection",
-          "value": "1; mode=block"
-        },
-        {
-          "key": "Referrer-Policy",
-          "value": "strict-origin-when-cross-origin"
-        },
-        {
-          "key": "Permissions-Policy",
-          "value": "camera=(), microphone=(), geolocation=()"
-        },
+        { "key": "X-Content-Type-Options",  "value": "nosniff" },
+        { "key": "X-Frame-Options",         "value": "SAMEORIGIN" },
+        { "key": "X-XSS-Protection",        "value": "1; mode=block" },
+        { "key": "Referrer-Policy",         "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy",      "value": "camera=(), microphone=(), geolocation=()" },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self' wss://mempool.space https://mempool.space https://blockstream.info https://api.blockchair.com https://blockchain.info https://api.blockcypher.com https://btcscan.org https://sochain.com https://bitaps.com https://chain.api.btc.com https://api.trongrid.io https://apilist.tronscanapi.com https://turbotx-ebbe4-default-rtdb.europe-west1.firebasedatabase.app https://api.telegram.org https://api.coinbase.com https://api.binance.com; img-src 'self' data:; frame-ancestors 'none'"
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self' https://mempool.space https://blockstream.info https://api.blockchair.com https://blockchain.info https://api.blockcypher.com https://btcscan.org https://sochain.com https://bitaps.com https://chain.api.btc.com https://api.trongrid.io https://apilist.tronscanapi.com https://turbotx-ebbe4-default-rtdb.europe-west1.firebasedatabase.app https://api.telegram.org https://api.coinbase.com https://api.binance.com; img-src 'self' data:; frame-ancestors 'none'"
         }
       ]
     }
   ],
   "functions": {
-    "api/broadcast.js": {
-      "maxDuration": 60
-    },
-    "api/repeat.js": {
-      "maxDuration": 35
-    },
-    "api/verify.js": {
-      "maxDuration": 20
-    },
-    "api/health.js": {
-      "maxDuration": 20
-    },
-    "api/telegram.js": {
-      "maxDuration": 20
-    },
-    "api/cpfp.js": {
-      "maxDuration": 15
-    },
-    "api/rbf.js": {
-      "maxDuration": 12
-    },
-    "api/mempool.js": {
-      "maxDuration": 12
-    },
-    "api/status.js": {
-      "maxDuration": 12
-    },
-    "api/stats.js": {
-      "maxDuration": 12
-    },
-    "api/price.js": {
-      "maxDuration": 10
-    },
-    "api/notify.js": {
-      "maxDuration": 8
-    }
+    "api/broadcast.js": { "maxDuration": 60 },
+    "api/repeat.js":    { "maxDuration": 35 },
+    "api/verify.js":    { "maxDuration": 20 },
+    "api/health.js":    { "maxDuration": 20 },
+    "api/telegram.js":  { "maxDuration": 20 },
+    "api/cpfp.js":      { "maxDuration": 15 },
+    "api/rbf.js":       { "maxDuration": 12 },
+    "api/mempool.js":   { "maxDuration": 12 },
+    "api/status.js":    { "maxDuration": 12 },
+    "api/stats.js":     { "maxDuration": 12 },
+    "api/price.js":     { "maxDuration": 10 },
+    "api/notify.js":    { "maxDuration": 8  }
   },
-  "regions": [
-    "iad1",
-    "sin1",
-    "fra1"
-  ],
+  "regions": ["iad1", "sin1", "fra1"],
   "env": {
     "NODE_ENV": "production"
   }
