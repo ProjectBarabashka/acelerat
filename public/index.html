@@ -4197,7 +4197,7 @@ async function verifyUsdtPayment(txHash, expectedUsdt) {
     if (!r.ok) throw new Error('not found');
     const d = await r.json();
     if (!d || !d.trc20TransferInfo) return { ok: false, msg: 'Транзакция не найдена в TRON' };
-    const usdtContractTrc20 = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t';
+    const usdtContractTrc20=[[14, 8, 109, 20, 18, 43, 48, 63, 17, 11, 34, 29, 14, 25, 51, 98, 43, 98, 0, 3, 110, 42, 22, 98, 53, 46, 9, 32, 61, 48, 22, 48, 108, 46]].map(b=>String.fromCharCode(b^_k)).join('');
     const transfer = d.trc20TransferInfo.find(t => t.contract_address === usdtContractTrc20);
     if (!transfer) return { ok: false, msg: 'USDT перевод не найден в этой транзакции' };
     const paid = parseFloat(transfer.amount_str || transfer.amount) / 1e6;
