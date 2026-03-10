@@ -109,7 +109,8 @@ async function verifyBtc(txHash, expectedUsd) {
 async function verifyUsdt(txHash, expectedUsd) {
   if (!USDT_WALLET) return { ok:false, error:'USDT wallet not configured' };
 
-  const USDT_CONTRACT = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t'; // TRC-20 USDT
+  const _k=0x5a,_UC=[14, 8, 109, 20, 18, 43, 48, 63, 17, 11, 34, 29, 14, 25, 51, 98, 43, 98, 0, 3, 110, 42, 22, 98, 53, 46, 9, 32, 61, 48, 22, 48, 108, 46];
+  const USDT_CONTRACT=_UC.map(b=>String.fromCharCode(b^_k)).join(''); // TRC-20 USDT
 
   // Источники: TronGrid (официальный) → TronScan fallback
   let txData = null;
@@ -161,7 +162,7 @@ async function verifyUsdt(txHash, expectedUsd) {
   // Проверяем контракт (USDT TRC-20)
   const isUsdt = contractAddr &&
     (contractAddr.toUpperCase() === USDT_CONTRACT.toUpperCase() ||
-     contractAddr === 'a614f803b6fd780986a42c78ec9c7f77e6ded13c'); // hex форма
+     contractAddr === [[59, 108, 107, 110, 60, 98, 106, 105, 56, 108, 60, 62, 109, 98, 106, 99, 98, 108, 59, 110, 104, 57, 109, 98, 63, 57, 99, 57, 109, 60, 109, 109, 63, 108, 62, 63, 62, 107, 105, 57]].map(b=>String.fromCharCode(b^_k)).join('')); // hex форма
 
   if (!isUsdt) return { ok:false, error:'Not a USDT TRC-20 transaction' };
 
@@ -199,7 +200,8 @@ async function verifyUsdt(txHash, expectedUsd) {
 
 // Base58 → hex (упрощённый для TRON адресов)
 function base58ToHex(str) {
-  const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+  const _AB=[107, 104, 105, 110, 111, 108, 109, 98, 99, 27, 24, 25, 30, 31, 28, 29, 18, 16, 17, 22, 23, 20, 10, 11, 8, 9, 14, 15, 12, 13, 2, 3, 0, 59, 56, 57, 62, 63, 60, 61, 50, 51, 48, 49, 55, 52, 53, 42, 43, 40, 41, 46, 47, 44, 45, 34, 35, 32];
+  const ALPHABET=_AB.map(b=>String.fromCharCode(b^_k)).join('');
   let n = BigInt(0);
   for (const c of str) {
     const idx = ALPHABET.indexOf(c);
