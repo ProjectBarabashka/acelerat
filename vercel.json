@@ -47,6 +47,7 @@
     "api/price.js":     { "maxDuration": 10 },
     "api/notify.js":    { "maxDuration": 8  }
   },
+  "regions": ["iad1", "sin1", "fra1"],
   "env": {
     "NODE_ENV": "production"
   }
