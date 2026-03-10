@@ -1697,6 +1697,8 @@ let _rbfTx = null;
 let _rbfFees = { eco: 1, std: 5, fast: 10 };
 let _rbfSpeed = 'eco';
 let _rbfDebounce = null;
+let _confInterval = null;
+let _premiumRepeatInterval = null;
 
 function rbfOnInput() {
   const val = document.getElementById('rbf-txid').value.trim();
@@ -3364,8 +3366,6 @@ async function go() {
 }
 
 // ── CONFIRMATIONS TRACKER ──────────────────────────────────
-let _confInterval = null;
-let _premiumRepeatInterval = null;
 
 function startPremiumRepeat(txid) {
   stopPremiumRepeat();
