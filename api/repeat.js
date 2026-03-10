@@ -1,6 +1,6 @@
 // ══════════════════════════════════════════════════════════════
-//  TurboTX v8 ★ ADAPTIVE WAVES ★  —  /api/repeat.js
-//  Vercel Serverless · Node.js 20
+//  TurboTX v11 ★ ADAPTIVE WAVES ★  —  /api/repeat.js
+//  Vercel Serverless · Node.js 20 · Hobby Plan
 //
 //  POST /api/repeat
 //  Body: { txid, wave:1-8, token?, startedAt? }
@@ -21,6 +21,20 @@ const CORS = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, X-TurboTX-Token',
 };
+
+// Rate limiter — repeat дорогой (30 req/ч per IP)
+const _rl = new Map();
+function checkRl(ip) {
+  const now = Date.now(), h = 3_600_000;
+  if (_rl.size > 500) for (const [k,v] of _rl) if (v.r < now) _rl.delete(k);
+  let e = _rl.get(ip);
+  if (!e || e.r < now) { e = {c:0, r:now+h}; _rl.set(ip, e); }
+  return ++e.c <= 30;
+}
+function getIp(req) {
+  return req.headers['x-real-ip'] ||
+    req.headers['x-forwarded-for']?.split(',')[0]?.trim() || 'unknown';
+}
 
 const BASE_INTERVALS = [
   15  * 60_000,   // wave 1
@@ -100,6 +114,9 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(204).set(CORS).end();
   Object.entries(CORS).forEach(([k, v]) => res.setHeader(k, v));
   if (req.method !== 'POST') return res.status(405).json({ ok: false, error: 'POST only' });
+
+  const ip = getIp(req);
+  if (!checkRl(ip)) return res.status(429).json({ ok:false, error:'Too many requests' });
 
   const secret = process.env.PREMIUM_SECRET;
   const token  = req.headers['x-turbotx-token'] || req.body?.token;

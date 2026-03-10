@@ -1120,6 +1120,7 @@ export default async function handler(req, res) {
     cpfpFeeNeeded: analysis?.cpfpFeeNeeded ?? 0,
     rbfEnabled:    analysis?.rbfEnabled ?? false,
     waveStrategy,
+    totalChannels: 25, // 8 nodes + 17 pools
     circuitBreakers: (() => {
       const open=[], halfOpen=[];
       for (const [name,e] of _cb) {

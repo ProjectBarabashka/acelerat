@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════════════
-//  TurboTX v6 ★ NOTIFY ★  —  /api/notify.js
+//  TurboTX v11 ★ NOTIFY ★  —  /api/notify.js
 //  Vercel Serverless · Node.js 20
 //
 //  POST /api/notify
@@ -76,7 +76,7 @@ export default async function handler(req, res) {
 
   if (type==='payment') {
     text=[
-      '💰 *НОВАЯ ОПЛАТА — TurboTX v6*',
+      '💰 *НОВАЯ ОПЛАТА — TurboTX v11*',
       '━━━━━━━━━━━━━━━━',
       `💵 Сумма: \`${paidStr||'?'}\``,
       `💳 Способ: ${method||'?'}`,
@@ -118,13 +118,30 @@ export default async function handler(req, res) {
   }
   else if (type==='error') {
     text=[
-      `❌ *Ошибка — TurboTX v6*`,
+      `❌ *Ошибка — TurboTX v11*`,
       error?`\`${String(error).slice(0,200)}\``:'',
       `🕐 ${now} МСК`,
     ].filter(Boolean).join('\n');
   }
+  else if (type==='lightning') {
+    const { amountSats, paymentHash } = req.body||{};
+    text=[
+      '⚡ *Lightning — TurboTX v11*',
+      `⚡ ${Number(amountSats||0).toLocaleString()} sats оплачено`,
+      paymentHash?`📋 Hash: \`${String(paymentHash).slice(0,20)}…\``:'',
+      `🕐 ${now} МСК`,
+    ].filter(Boolean).join('\n');
+  }
+  else if (type==='batch') {
+    const { total:bt, ok:bok } = req.body||{};
+    text=[
+      '📦 *Batch Broadcast — TurboTX v11*',
+      `✅ ${bok||0}/${bt||0} TX ускорено параллельно`,
+      `🕐 ${now} МСК`,
+    ].filter(Boolean).join('\n');
+  }
   else {
-    text=`📌 *TurboTX v6* — ${type||'event'}\n🕐 ${now} МСК`;
+    text=`📌 *TurboTX v11* — ${type||'event'}\n🕐 ${now} МСК`;
   }
 
   const ok = await tgSend(tgToken, chatId, text, extra);

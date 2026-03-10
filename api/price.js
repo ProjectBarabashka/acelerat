@@ -8,7 +8,7 @@ function checkRl(ip) {
 }
 
 // ══════════════════════════════════════════════════════════════
-//  TurboTX v6 ★ DYNAMIC PRICE ★  —  /api/price.js
+//  TurboTX v11 ★ DYNAMIC PRICE ★  —  /api/price.js
 //  Vercel Serverless · Node.js 20
 //
 //  GET /api/price
@@ -116,9 +116,12 @@ export default async function handler(req, res) {
 
   res.setHeader('Cache-Control', 's-maxage=180, stale-while-revalidate=300');
 
+  // Вычисляем sats для Lightning
+  const sats = btcPrice ? Math.ceil((usd / btcPrice) * 1e8) : null;
+
   return res.status(200).json({
     ok: true,
-    usd, btc, btcPrice,
+    usd, btc, sats, btcPrice,  // sats = Lightning invoice amount
     feeRate,
     fees: {
       fastest:  allFees.fastestFee  || feeRate,

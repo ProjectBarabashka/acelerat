@@ -8,7 +8,7 @@ function checkRl(ip) {
 }
 
 // ══════════════════════════════════════════════════════════════
-//  TurboTX v6 ★ MEMPOOL ANALYTICS ★  —  /api/mempool.js
+//  TurboTX v11 ★ MEMPOOL ANALYTICS ★  —  /api/mempool.js
 //  Vercel Serverless · Node.js 20
 //
 //  GET /api/mempool
@@ -49,18 +49,24 @@ export default async function handler(req, res) {
 
   try {
     // Параллельный сбор данных
-    const [feesR, mpR, blocksR, txR] = await Promise.allSettled([
+    const [feesR, mpR, blocksR, txR, txR2] = await Promise.allSettled([
       ft('https://mempool.space/api/v1/fees/recommended'),
       ft('https://mempool.space/api/mempool'),
       ft('https://mempool.space/api/v1/mining/blocks/fee-rates/24h'),
       txid ? ft(`https://mempool.space/api/tx/${txid}`) : Promise.resolve(null),
+      txid ? ft(`https://blockstream.info/api/tx/${txid}`) : Promise.resolve(null), // fallback
     ]);
 
     const get = s => s.status==='fulfilled' && s.value?.ok ? s.value : null;
     const fees   = get(feesR)   ? await j(get(feesR))   : {};
     const mp     = get(mpR)     ? await j(get(mpR))     : {};
     const blocks = get(blocksR) ? await j(get(blocksR)) : [];
-    const tx     = txid && get(txR) ? await j(get(txR)) : null;
+    // TX: mempool.space или blockstream.info fallback
+    let tx = null;
+    if (txid) {
+      if (get(txR))  tx = await j(get(txR));
+      else if (get(txR2)) tx = await j(get(txR2));
+    }
 
     const fastest  = fees.fastestFee    || 50;
     const halfHour = fees.halfHourFee   || 30;
@@ -134,11 +140,13 @@ export default async function handler(req, res) {
         confirmed: tx.status?.confirmed || false,
         mempoolPosition: mpPos,
         // Совет
-        advice: needCpfp
-          ? `Комиссия слишком низкая (${feeRate} sat/vB). Используй CPFP или ускорение.`
-          : feeRate >= fastest
-            ? `Комиссия отличная (${feeRate} sat/vB). Подтверждение в следующем блоке.`
-            : `Ожидание ~${minsEta} мин. Ускорение поможет.`,
+        advice: tx.status?.confirmed
+          ? `✅ Транзакция уже подтверждена.`
+          : needCpfp
+            ? `⚠️ Комиссия слишком низкая (${feeRate}/${fastest} sat/vB). ${rbf ? 'RBF доступен — замените TX.' : 'Используй CPFP или TurboTX ускорение.'}`
+            : feeRate >= fastest
+              ? `✅ Комиссия отличная (${feeRate} sat/vB) — следующий блок (~10 мин).`
+              : `⏳ Ожидание ~${minsEta} мин. TurboTX ускорение сократит время.`,
       };
     }
 
