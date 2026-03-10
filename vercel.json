@@ -4,8 +4,8 @@
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/$1" },
     { "src": "/sitemap.xml", "dest": "/sitemap.xml" },
-    { "src": "/robots.txt", "dest": "/robots.txt" },
-    { "src": "/(.*)", "dest": "/index.html" }
+    { "src": "/robots.txt",  "dest": "/robots.txt"  },
+    { "src": "/(.*)",        "dest": "/index.html"   }
   ],
   "headers": [
     {
@@ -21,14 +21,14 @@
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Content-Type-Options",  "value": "nosniff" },
-        { "key": "X-Frame-Options",         "value": "SAMEORIGIN" },
-        { "key": "X-XSS-Protection",        "value": "1; mode=block" },
-        { "key": "Referrer-Policy",         "value": "strict-origin-when-cross-origin" },
-        { "key": "Permissions-Policy",      "value": "camera=(), microphone=(), geolocation=()" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options",        "value": "SAMEORIGIN" },
+        { "key": "X-XSS-Protection",       "value": "1; mode=block" },
+        { "key": "Referrer-Policy",        "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy",     "value": "camera=(), microphone=(), geolocation=()" },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self' https://mempool.space https://blockstream.info https://api.blockchair.com https://blockchain.info https://api.blockcypher.com https://btcscan.org https://sochain.com https://bitaps.com https://chain.api.btc.com https://api.trongrid.io https://apilist.tronscanapi.com https://turbotx-ebbe4-default-rtdb.europe-west1.firebasedatabase.app https://api.telegram.org https://api.coinbase.com https://api.binance.com; img-src 'self' data:; frame-ancestors 'none'"
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self' wss://mempool.space https://mempool.space https://blockstream.info https://api.blockchair.com https://blockchain.info https://api.blockcypher.com https://btcscan.org https://sochain.com https://bitaps.com https://chain.api.btc.com https://api.trongrid.io https://apilist.tronscanapi.com https://turbotx-ebbe4-default-rtdb.europe-west1.firebasedatabase.app https://api.telegram.org https://api.coinbase.com https://api.binance.com; img-src 'self' data:; frame-ancestors 'none'"
         }
       ]
     }
