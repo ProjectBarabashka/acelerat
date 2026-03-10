@@ -104,16 +104,105 @@ function avgResponseMs(name) {
 }
 
 // ─── КЛАССИФИКАЦИЯ ОШИБОК ────────────────────────────────────
-function classifyError(status, body='') {
+// ─── VERCEL ERROR CODES → КЛАССИФИКАЦИЯ ──────────────────────
+// Источник: https://vercel.com/docs/errors
+// Разбиваем на 4 категории поведения:
+//
+//  'retry_now'   — повторить немедленно (transient, не наша вина)
+//  'retry_later' — повторить через паузу (временный сбой)
+//  'skip'        — пропустить канал совсем в этой волне (throttle/timeout)
+//  'permanent'   — не повторять (наша ошибка — плохой запрос)
+//  'accepted'    — TX уже принята (200/400 с "known"/"duplicate")
+//  'rate_limit'  — cooldown (429)
+//  'ok'          — успех
+
+// Vercel error codes которые приходят в заголовке x-vercel-error
+const VERCEL_RETRY_NOW = new Set([
+  'FUNCTION_INVOCATION_FAILED',       // 500 — мгновенный сбой, стоит повторить
+  'INTERNAL_FUNCTION_INVOCATION_FAILED',
+  'NO_RESPONSE_FROM_FUNCTION',        // 502 — функция не ответила
+  'SANDBOX_NOT_LISTENING',            // 502 — sandbox не готов
+  'INTERNAL_FUNCTION_NOT_READY',      // 500 — cold start не завершён
+  'INTERNAL_MISSING_RESPONSE_FROM_CACHE',
+  'ROUTER_CANNOT_MATCH',              // 502 — роутинг сломан, попробуем снова
+  'ROUTER_EXTERNAL_TARGET_CONNECTION_ERROR', // 502 — сетевой сбой к пулу
+  'ROUTER_EXTERNAL_TARGET_HANDSHAKE_ERROR',  // 502
+  'DNS_HOSTNAME_RESOLVE_FAILED',      // 502 — DNS временно упал
+  'DNS_HOSTNAME_SERVER_ERROR',        // 502
+]);
+
+const VERCEL_RETRY_LATER = new Set([
+  'FUNCTION_THROTTLED',               // 503 — нас throttle-ят, подождать
+  'INTERNAL_FUNCTION_SERVICE_UNAVAILABLE', // 500
+  'DEPLOYMENT_PAUSED',                // 503 — деплой на паузе
+  'INTERNAL_CACHE_LOCK_FULL',         // 500
+  'INTERNAL_CACHE_LOCK_TIMEOUT',      // 500
+  'EDGE_FUNCTION_INVOCATION_FAILED',  // 500
+  'MIDDLEWARE_INVOCATION_FAILED',     // 500
+  'SANDBOX_STOPPED',                  // 410 — sandbox перезапускается
+]);
+
+const VERCEL_SKIP = new Set([
+  'FUNCTION_INVOCATION_TIMEOUT',      // 504 — таймаут, не ждём этот канал
+  'INTERNAL_FUNCTION_INVOCATION_TIMEOUT',
+  'EDGE_FUNCTION_INVOCATION_TIMEOUT', // 504
+  'MIDDLEWARE_INVOCATION_TIMEOUT',    // 504
+  'INFINITE_LOOP_DETECTED',           // 508 — не повторять
+  'MIDDLEWARE_RUNTIME_DEPRECATED',    // 503 — устаревший runtime
+]);
+
+const VERCEL_PERMANENT = new Set([
+  'DEPLOYMENT_BLOCKED',               // 403
+  'DEPLOYMENT_DELETED',               // 410
+  'DEPLOYMENT_DISABLED',              // 402
+  'DEPLOYMENT_NOT_FOUND',             // 404
+  'FUNCTION_PAYLOAD_TOO_LARGE',       // 413
+  'FUNCTION_RESPONSE_PAYLOAD_TOO_LARGE', // 500
+  'INVALID_REQUEST_METHOD',           // 405
+  'MALFORMED_REQUEST_HEADER',         // 400
+  'DNS_HOSTNAME_NOT_FOUND',           // 502 — DNS не существует
+  'DNS_HOSTNAME_EMPTY',               // 502
+  'DNS_HOSTNAME_RESOLVED_PRIVATE',    // 404
+]);
+
+function classifyVercelError(vercelCode) {
+  if (!vercelCode) return null;
+  if (VERCEL_RETRY_NOW.has(vercelCode))   return 'retry_now';
+  if (VERCEL_RETRY_LATER.has(vercelCode)) return 'retry_later';
+  if (VERCEL_SKIP.has(vercelCode))        return 'skip';
+  if (VERCEL_PERMANENT.has(vercelCode))   return 'permanent';
+  return null; // неизвестный код — fallback на статус
+}
+
+function classifyError(status, body='', vercelCode='') {
+  // Сначала проверяем Vercel-специфичный код (самый точный)
+  const vercelCls = classifyVercelError(vercelCode);
+  if (vercelCls) return vercelCls;
+
   if (status === 429) return 'rate_limit';
-  if (status === 0)   return 'temporary';
-  if (status >= 500)  return 'temporary';
+  if (status === 0)   return 'retry_now';   // network / AbortError — мгновенный retry
+
+  // 5xx — смотрим детальнее
+  if (status === 500) return 'retry_now';   // обычный 500 — стоит повторить
+  if (status === 502) return 'retry_now';   // bad gateway — upstream упал временно
+  if (status === 503) return 'retry_later'; // service unavailable — подождать
+  if (status === 504) return 'skip';        // gateway timeout — не ждём этот канал
+  if (status === 508) return 'skip';        // loop detected
+  if (status === 410) return 'retry_later'; // gone/stopped — может восстановиться
+  if (status >= 500)  return 'retry_now';   // прочие 5xx
+
+  // 4xx
   if (status === 400 || status === 404) {
     const b = String(body).toLowerCase();
-    if (b.includes('already')||b.includes('duplicate')||b.includes('known')) return 'accepted';
+    if (b.includes('already')||b.includes('duplicate')||b.includes('known')||b.includes('exists'))
+      return 'accepted';
     return 'permanent';
   }
-  if (status >= 400) return 'permanent';
+  if (status === 401 || status === 402 || status === 403) return 'permanent';
+  if (status === 413) return 'permanent'; // payload too large
+  if (status === 405) return 'permanent'; // method not allowed
+  if (status >= 400)  return 'permanent';
+
   return 'ok';
 }
 
@@ -205,14 +294,37 @@ async function ftr(url, opts={}, ms=13000, tries=2, chName='', tier='node') {
   for (let i=0; i<=tries; i++) {
     try {
       const r = await ft(url, opts, timeout);
-      if (r.status === 429) { registerHit(chName||url); return r; }
-      if (r.status >= 500) {
-        setNegCache(chName||url); // ⑤ negative cache
-        if (i < tries) { await sleep(600*(i+1)); continue; }
+
+      // Читаем Vercel error code из заголовка (есть только у Vercel-хостед пулов)
+      const vercelCode = r.headers?.get?.('x-vercel-error') || '';
+      const cls = classifyError(r.status, '', vercelCode);
+
+      if (cls === 'rate_limit') {
+        registerHit(chName||url);
+        return r; // не ретраим 429
       }
-      if (r.ok || r.status < 500) registerSuccess(chName||url);
+      if (cls === 'skip') {
+        // 504/508/throttle — не ретраим, сразу возвращаем
+        setNegCache(chName||url);
+        return r;
+      }
+      if (cls === 'permanent') {
+        return r; // не ретраим permanent ошибки
+      }
+      if ((cls === 'retry_now' || cls === 'retry_later') && i < tries) {
+        const delay = cls === 'retry_now' ? 200 : 800 * (i+1); // retry_now быстро
+        await sleep(delay);
+        continue;
+      }
+      if (cls === 'retry_later' && i === tries) {
+        setNegCache(chName||url); // исчерпали попытки — neg cache
+      }
+      if (r.ok || cls === 'ok' || cls === 'accepted') registerSuccess(chName||url);
       return r;
-    } catch(e) { if (i===tries) throw e; await sleep(400*(i+1)); }
+    } catch(e) {
+      if (i===tries) throw e;
+      await sleep(300*(i+1));
+    }
   }
 }
 
@@ -338,21 +450,25 @@ async function run(channels) {
         const t0 = Date.now();
         ch.call().then(r => {
           const ms  = Date.now()-t0;
-          const cls = classifyError(r.status, '');
+          const vercelCode = r.headers?.get?.('x-vercel-error') || '';
+          const cls = classifyError(r.status, '', vercelCode);
           const isOk = r.ok || cls==='accepted';
 
-          // ① Обновляем статистику надёжности
+          // ① Статистика надёжности
           recordStat(ch.name, isOk, ms);
           setPing(ch.name, ms);
 
-          if (r.status===429)        registerHit(ch.name);
-          else if (isOk)           { registerChannelOk(ch.name); registerSuccess(ch.name); }
-          else if (cls==='temporary') { registerFail(ch.name); setNegCache(ch.name); } // ⑤
+          if (cls==='rate_limit')  registerHit(ch.name);
+          else if (isOk)         { registerChannelOk(ch.name); registerSuccess(ch.name); }
+          else if (cls==='skip') { registerFail(ch.name); setNegCache(ch.name); }   // 504/throttle
+          else if (cls==='retry_later') { registerFail(ch.name); setNegCache(ch.name); } // исчерпали
+          else if (cls==='retry_now')   { registerFail(ch.name); } // temporary, neg cache не ставим
 
           results[globalIdx] = {
             channel:ch.name, tier:ch.tier, ok:isOk, ms,
             score: +reliabilityScore(ch.name).toFixed(2),
             geo: POOL_GEO[ch.name] || (ch.tier==='node'?'node':null),
+            ...(vercelCode ? {vercelError:vercelCode} : {}),
             ...(cls!=='ok'&&!isOk ? {reason:cls} : {}),
           };
           if (isOk) okCount++;
@@ -360,9 +476,15 @@ async function run(channels) {
           if (!aborted && okCount >= EARLY_STOP) aborted = true;
         }).catch(e => {
           const ms = Date.now()-t0;
+          const isAbort = e.name==='AbortError';
           recordStat(ch.name, false, ms);
-          registerFail(ch.name);
-          results[globalIdx] = {channel:ch.name, tier:ch.tier, ok:false, error:e.message, reason:'temporary', ms};
+          // AbortError = наш таймаут → skip (не засоряем dead counter)
+          // Сетевая ошибка → retry_now → registerFail
+          if (!isAbort) registerFail(ch.name);
+          results[globalIdx] = {
+            channel:ch.name, tier:ch.tier, ok:false,
+            error:e.message, reason: isAbort ? 'skip' : 'retry_now', ms,
+          };
           if (++finished===sorted.length) resolve();
         });
       });
