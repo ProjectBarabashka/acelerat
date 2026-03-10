@@ -1,15 +1,17 @@
 // ══════════════════════════════════════════════════════════════
-//  TurboTX v6 ★ ADAPTIVE WAVES ★  —  /api/repeat.js
+//  TurboTX v8 ★ ADAPTIVE WAVES ★  —  /api/repeat.js
 //  Vercel Serverless · Node.js 20
 //
 //  POST /api/repeat
-//  Body: { txid, wave:1-5, token? }
+//  Body: { txid, wave:1-8, token?, startedAt? }
 //  Headers: X-TurboTX-Token: <secret>
 //
-//  ═══ АДАПТИВНЫЕ ВОЛНЫ (п.4) ════════════════════════════════
-//  Перед каждой волной анализируем fee rate сети + TX.
-//  Если сеть разгрузилась и TX конкурентоспособна — ускоряем.
-//  Если перегружена — флагуем CPFP/RBF.
+//  УЛУЧШЕНИЯ v8:
+//  ⑦ Congestion backoff — при сети >150 sat/vB интервал ×1.5
+//     При снижении нагрузки интервал ÷1.5 (ускоряем)
+//  ⑧ Самовосстановление — клиент передаёт startedAt + waveStrategy,
+//     сервер определяет пропущенные волны при Vercel cold start
+//     и немедленно запускает догоняющий broadcast
 // ══════════════════════════════════════════════════════════════
 
 export const config = { maxDuration: 35 };
@@ -21,12 +23,16 @@ const CORS = {
 };
 
 const BASE_INTERVALS = [
-  15  * 60_000,
-  15  * 60_000,
-  30  * 60_000,
-  60  * 60_000,
-  120 * 60_000,
+  15  * 60_000,   // wave 1
+  15  * 60_000,   // wave 2
+  30  * 60_000,   // wave 3
+  60  * 60_000,   // wave 4
+  120 * 60_000,   // wave 5
+  120 * 60_000,   // wave 6  ← v8: aggressive strategy
+  120 * 60_000,   // wave 7
+  120 * 60_000,   // wave 8
 ];
+const MAX_WAVES = 8;
 
 async function ft(url, opts = {}, ms = 10000) {
   const ac = new AbortController();
@@ -56,22 +62,31 @@ async function isTxConfirmed(txid) {
            : { confirmed:false };
 }
 
-// ─── АДАПТИВНЫЙ ИНТЕРВАЛ ─────────────────────────────────────
+// ─── ⑦ CONGESTION BACKOFF ────────────────────────────────────
+// Если сеть перегружена (>150 sat/vB) → ×1.5 интервал (ждать бессмысленно)
+// Если разгрузилась и TX конкурентоспособна → ÷1.5 (ускоряем!)
+// Если TX почти в следующем блоке → 5 мин максимум
 function adaptiveNextInterval(waveNum, txFeeRate, fees, baseInterval) {
   if (!fees || !txFeeRate) return { ms: baseInterval, reason: 'no_data' };
   const fastest  = fees.fastestFee  || 50;
   const halfHour = fees.halfHourFee || 30;
   const ratio    = txFeeRate / fastest;
 
-  // TX конкурентоспособна — сократить паузу
+  // TX конкурентоспособна — следующий блок уже близко
   if (ratio >= 0.9)
     return { ms: Math.min(baseInterval, 5 * 60_000), reason: 'tx_competitive' };
-  // Близко к halfHour — ускорить
+
+  // Близко к halfHour — ускорить интервал
   if (txFeeRate >= halfHour * 0.8)
     return { ms: Math.round(baseInterval * 0.6), reason: 'near_confirmation' };
-  // Сеть перегружена — нужен CPFP
+
+  // ⑦ Сеть критически перегружена → ×1.5 (нет смысла слать в пул каждые 15 мин)
   if (fastest > 150)
-    return { ms: baseInterval, reason: 'high_congestion', needCpfp: true };
+    return { ms: Math.round(baseInterval * 1.5), reason: 'high_congestion', needCpfp: true };
+
+  // Умеренная перегрузка, но сеть разгружается (сравниваем с halfHour)
+  if (fastest > 80 && halfHour < fastest * 0.7)
+    return { ms: Math.round(baseInterval * 0.8), reason: 'congestion_clearing' };
 
   return { ms: baseInterval, reason: 'normal' };
 }
@@ -91,13 +106,26 @@ export default async function handler(req, res) {
   if (secret && token !== secret)
     return res.status(401).json({ ok: false, error: 'Premium token required' });
 
-  const { txid, wave = 1 } = req.body || {};
+  const { txid, wave = 1, startedAt, waveIntervalMs } = req.body || {};
   if (!txid || !/^[a-fA-F0-9]{64}$/.test(txid))
     return res.status(400).json({ ok: false, error: 'Invalid TXID' });
 
-  const waveNum = parseInt(wave) || 1;
-  if (waveNum < 1 || waveNum > 5)
-    return res.status(400).json({ ok: false, error: 'Wave must be 1-5' });
+  let waveNum = parseInt(wave) || 1;
+  if (waveNum < 1 || waveNum > MAX_WAVES)
+    return res.status(400).json({ ok: false, error: `Wave must be 1-${MAX_WAVES}` });
+
+  // ⑧ Самовосстановление — проверяем не пропустили ли волны
+  // Если startedAt и waveIntervalMs переданы, вычисляем какая волна должна быть сейчас
+  let recoveredWaves = 0;
+  if (startedAt && waveIntervalMs && waveNum > 1) {
+    const elapsed = Date.now() - parseInt(startedAt);
+    const expectedWave = Math.min(MAX_WAVES, Math.floor(elapsed / waveIntervalMs) + 1);
+    if (expectedWave > waveNum) {
+      recoveredWaves = expectedWave - waveNum;
+      waveNum = expectedWave; // догоняем
+      console.log(`[repeat] recovery: пропущено ${recoveredWaves} волн, стартуем с волны ${waveNum}`);
+    }
+  }
 
   // 1. Проверка + fee rates параллельно
   const [statusRes, dataRes] = await Promise.allSettled([
@@ -143,7 +171,7 @@ export default async function handler(req, res) {
 
   return res.status(200).json({
     confirmed:false, broadcasted:true, wave:waveNum,
-    nextWave:    waveNum < 5 ? waveNum+1 : null,
+    nextWave:    waveNum < MAX_WAVES ? waveNum+1 : null,
     nextWaveMs,
     adaptiveReason: adaptive.reason,
     txFeeRate, networkFastest: fastest,
@@ -151,9 +179,9 @@ export default async function handler(req, res) {
     needCpfp, cpfpFeeNeeded: cpfpFee,
     broadcastSummary: broadcastData?.summary      ?? null,
     hashrateReach:    broadcastData?.summary?.hashrateReach ?? 0,
-    // ③ Стратегия волн из broadcast (адаптивное кол-во волн)
     waveStrategy: broadcastData?.waveStrategy ?? null,
-    // Если broadcast вернул другой интервал — используем его
     recommendedNextWaveMs: broadcastData?.waveStrategy?.intervalMs ?? nextWaveMs,
+    // ⑧ Информация о восстановлении
+    ...(recoveredWaves > 0 ? { recoveredWaves, recoveryNote: `Пропущено ${recoveredWaves} волн — догнали` } : {}),
   });
 }

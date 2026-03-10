@@ -1,16 +1,27 @@
 // ══════════════════════════════════════════════════════════════
-//  TurboTX v7 ★ MAXIMUM POWER ★  —  /api/broadcast.js
+//  TurboTX v8 ★ MAXIMUM POWER ★  —  /api/broadcast.js
 //  Vercel Serverless · Node.js 20
 //
-//  УЛУЧШЕНИЯ v7:
-//  ① Статистика надёжности каналов — successCount/failCount/score
-//  ② hex-источники сортируются по истории скорости
-//  ③ Адаптивное кол-во волн по fee ratio (п.3 документа)
-//  ④ Раздельные таймауты: узлы 5с, пулы 15с (п.4)
-//  ⑤ Negative cache 5xx — не долбим мёртвые каналы (п.5)
-//  ⑥ Geo-группировка пулов для параллельного запуска (п.1)
-//  + Все предыдущие: ping sort, 429 cooldown, dead channels,
-//    adaptive timeouts, error classification, AbortController
+//  УЛУЧШЕНИЯ v8:
+//  ① PRODUCTION_URL фикс — preview деплои не ломают bootstrap
+//  ② Circuit Breaker (CLOSED→OPEN→HALF_OPEN) для каждого канала
+//     5 провалов за 10 мин → OPEN на 2 часа → HALF_OPEN → тест
+//  ③ Smart hex retry — TX только что в мемпуле, ждём 3с и пробуем снова
+//     (Premium only, не тратим Free лимиты)
+//
+//  ДВИЖОК v7 (сохранено):
+//  ④ Статистика надёжности каналов — score = success/(success+fail)
+//  ⑤ hex-источники сортируются по истории скорости (avgResponseMs)
+//  ⑥ Адаптивное кол-во волн по fee ratio (easy/standard/aggressive)
+//  ⑦ Раздельные таймауты: узлы 5с, пулы 15с
+//  ⑧ Negative cache 5xx — не долбим мёртвые каналы 5 мин
+//  ⑨ Geo-группировка пулов USA/ASIA/GLOBAL
+//  ⑩ Vercel error codes классификация (retry_now/later/skip/permanent)
+//  ⑪ Ping-sort + priority score: 0.6×reliability − 0.4×ping
+//  ⑫ AbortController + adaptive timeouts
+//  ⑬ 429 exponential cooldown (2→5→15→60 мин)
+//  ⑭ Dead channel exclusion с TTL 30 мин
+//  ⑮ Early stop при 65% успеха (не тратим время)
 // ══════════════════════════════════════════════════════════════
 
 export const config = { maxDuration: 60 };
@@ -273,6 +284,80 @@ function registerFail(name) {
 }
 function registerChannelOk(name) { _deadChannels.delete(name); }
 
+// ─── ② CIRCUIT BREAKER ───────────────────────────────────────
+// CLOSED  → работает нормально
+// OPEN    → выключен на OPEN_TTL (2 часа), не тратим время
+// HALF_OPEN → пробуем 1 запрос: ok → CLOSED, fail → OPEN снова
+//
+// Триггер: 5 провалов за последние 10 минут → OPEN
+const _cb = new Map(); // name → { state, fails, windowStart, openUntil, halfOpenAt }
+const CB_FAIL_THRESHOLD = 5;
+const CB_FAIL_WINDOW    = 10 * 60_000;   // 10 мин наблюдения
+const CB_OPEN_TTL       = 2 * 3_600_000; // 2 часа в OPEN
+const CB_HALF_OPEN_WAIT = 5 * 60_000;    // 5 мин до пробного запроса
+
+function cbGet(name) {
+  return _cb.get(name) ?? { state:'CLOSED', fails:0, windowStart:Date.now(), openUntil:0, halfOpenAt:0 };
+}
+
+function cbIsBlocked(name) {
+  const e = cbGet(name);
+  const now = Date.now();
+  if (e.state === 'CLOSED') return false;
+  if (e.state === 'OPEN') {
+    if (now >= e.openUntil) {
+      // Переходим в HALF_OPEN — дадим один шанс
+      _cb.set(name, { ...e, state:'HALF_OPEN', halfOpenAt:now });
+      return false; // пускаем один запрос
+    }
+    return true; // ещё заблокирован
+  }
+  if (e.state === 'HALF_OPEN') {
+    // Только один запрос одновременно в HALF_OPEN
+    return false;
+  }
+  return false;
+}
+
+function cbOnSuccess(name) {
+  const e = cbGet(name);
+  if (e.state === 'HALF_OPEN') {
+    // Успех в HALF_OPEN → восстанавливаем
+    _cb.set(name, { state:'CLOSED', fails:0, windowStart:Date.now(), openUntil:0, halfOpenAt:0 });
+    console.log(`[CB] ${name} HALF_OPEN→CLOSED (восстановлен)`);
+  } else if (e.state === 'CLOSED') {
+    // Сброс счётчика окна при успехе
+    if (e.fails > 0) _cb.set(name, { ...e, fails:0, windowStart:Date.now() });
+  }
+}
+
+function cbOnFail(name) {
+  const e = cbGet(name);
+  const now = Date.now();
+  if (e.state === 'HALF_OPEN') {
+    // Провал в HALF_OPEN → снова OPEN
+    _cb.set(name, { ...e, state:'OPEN', openUntil:now+CB_OPEN_TTL });
+    console.warn(`[CB] ${name} HALF_OPEN→OPEN (провал)`);
+    return;
+  }
+  if (e.state === 'OPEN') return; // уже открыт
+  // CLOSED — считаем провалы в окне
+  let { fails, windowStart } = e;
+  if (now - windowStart > CB_FAIL_WINDOW) {
+    // Новое окно
+    fails = 1; windowStart = now;
+  } else {
+    fails++;
+  }
+  if (fails >= CB_FAIL_THRESHOLD) {
+    _cb.set(name, { state:'OPEN', fails, windowStart, openUntil:now+CB_OPEN_TTL, halfOpenAt:0 });
+    console.warn(`[CB] ${name} CLOSED→OPEN (${fails} провалов за ${CB_FAIL_WINDOW/60_000}мин)`);
+  } else {
+    _cb.set(name, { ...e, fails, windowStart });
+  }
+}
+
+
 // ─── PING CACHE ───────────────────────────────────────────────
 const _pingCache = new Map();
 const PING_TTL   = 10 * 60_000;
@@ -441,6 +526,10 @@ async function run(channels) {
           results[globalIdx] = {channel:ch.name, tier:ch.tier, ok:false, skipped:true, reason:'dead', ms:0};
           if (++finished===sorted.length) resolve(); return;
         }
+        if (cbIsBlocked(ch.name)) {  // ② Circuit breaker
+          results[globalIdx] = {channel:ch.name, tier:ch.tier, ok:false, skipped:true, reason:'circuit_open', ms:0};
+          if (++finished===sorted.length) resolve(); return;
+        }
         if (isCooling(ch.name)) {
           const e=_cooldown.get(ch.name);
           const mins=Math.ceil((e.until-Date.now())/60_000);
@@ -468,10 +557,10 @@ async function run(channels) {
           setPing(ch.name, ms);
 
           if (cls==='rate_limit')  registerHit(ch.name);
-          else if (isOk)         { registerChannelOk(ch.name); registerSuccess(ch.name); }
-          else if (cls==='skip') { registerFail(ch.name); setNegCache(ch.name); }   // 504/throttle
-          else if (cls==='retry_later') { registerFail(ch.name); setNegCache(ch.name); } // исчерпали
-          else if (cls==='retry_now')   { registerFail(ch.name); } // temporary, neg cache не ставим
+          else if (isOk)         { registerChannelOk(ch.name); registerSuccess(ch.name); cbOnSuccess(ch.name); }
+          else if (cls==='skip') { registerFail(ch.name); setNegCache(ch.name); cbOnFail(ch.name); }
+          else if (cls==='retry_later') { registerFail(ch.name); setNegCache(ch.name); cbOnFail(ch.name); }
+          else if (cls==='retry_now')   { registerFail(ch.name); cbOnFail(ch.name); }
 
           results[globalIdx] = {
             channel:ch.name, tier:ch.tier, ok:isOk, ms,
@@ -489,7 +578,7 @@ async function run(channels) {
           recordStat(ch.name, false, ms);
           // AbortError = наш таймаут → skip (не засоряем dead counter)
           // Сетевая ошибка → retry_now → registerFail
-          if (!isAbort) registerFail(ch.name);
+          if (!isAbort) { registerFail(ch.name); cbOnFail(ch.name); }
           results[globalIdx] = {
             channel:ch.name, tier:ch.tier, ok:false,
             error:e.message, reason: isAbort ? 'skip' : 'retry_now', ms,
@@ -770,11 +859,16 @@ setInterval(() => {
   const cutoff = Date.now() - CONFIRMED_TTL;
   for (const [k, v] of _confirmed) if (v < cutoff) _confirmed.delete(k);
 }, 3_600_000); // every hour
+function siteBase() {
+  return process.env.PRODUCTION_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
+}
+
 async function bootstrapFromHealth() {
   if (_healthBootstrapped) return;
   _healthBootstrapped = true;
   try {
-    const base = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000';
+    const base = siteBase();
     const r = await fetch(`${base}/api/health?verbose=1`, {signal:AbortSignal.timeout(8000)});
     if (!r.ok) return;
     const data = await r.json();
@@ -855,8 +949,15 @@ export default async function handler(req, res) {
     hexIn&&HEX_RE.test(hexIn) ? Promise.resolve(hexIn) : getHex(txid),
     analyze(txid),
   ]);
-  const hex      = hexRes.status === 'fulfilled' ? hexRes.value : null;
+  let hex      = hexRes.status === 'fulfilled' ? hexRes.value : null;
   const analysis = analysisRes.status === 'fulfilled' ? analysisRes.value : null;
+
+  // ③ Smart hex retry — TX только что попала в мемпул, hex ещё не проиндексирован
+  // Ждём 3 секунды и пробуем ещё раз только для Premium (не тратим Free лимиты)
+  if (!hex && effectivePlan === 'premium') {
+    await sleep(3000);
+    hex = await getHex(txid).catch(()=>null);
+  }
 
   if (analysis?.confirmed) { setConfirmed(txid); return res.status(200).json({ok:true,confirmed:true,analysis}); }
   if (effectivePlan==='free'&&!hex) return res.status(200).json({ok:false,error:'TX hex not found.',analysis});
@@ -881,6 +982,15 @@ export default async function handler(req, res) {
     cpfpFeeNeeded: analysis?.cpfpFeeNeeded ?? 0,
     rbfEnabled:    analysis?.rbfEnabled    ?? false,
     waveStrategy,
+    // ② Circuit breaker — сколько каналов сейчас в OPEN/HALF_OPEN
+    circuitBreakers: (() => {
+      const open = [], halfOpen = [];
+      for (const [name, e] of _cb) {
+        if (e.state === 'OPEN')      open.push(name);
+        if (e.state === 'HALF_OPEN') halfOpen.push(name);
+      }
+      return open.length + halfOpen.length > 0 ? { open, halfOpen } : undefined;
+    })(),
   };
 
   tg({results,txid,plan:effectivePlan,analysis,ms,hr,ip,waveStrategy}).catch(()=>{});
