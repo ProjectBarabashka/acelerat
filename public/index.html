@@ -701,6 +701,19 @@ textarea.batch-input::placeholder{color:rgba(255,255,255,.22)}
 .nb-btc{background:rgba(247,147,26,.15);color:var(--a);border:1px solid rgba(247,147,26,.3)}
 .nb-trc{background:rgba(255,68,0,.12);color:#ff6b35;border:1px solid rgba(255,107,53,.3)}
 .nb-erc{background:rgba(98,126,234,.12);color:#8b9dff;border:1px solid rgba(98,126,234,.3)}
+.nb-ln{background:rgba(255,214,0,.12);color:#ffd600;border:1px solid rgba(255,214,0,.3)}
+.ln-qr-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;padding:12px 0 4px}
+.ln-qr-img{width:180px;height:180px;border-radius:12px;border:3px solid rgba(255,214,0,.25);background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.ln-qr-img img{width:174px;height:174px;border-radius:9px;display:block}
+.ln-invoice-box{background:rgba(255,214,0,.05);border:1px solid rgba(255,214,0,.15);border-radius:10px;padding:10px 12px;width:100%;box-sizing:border-box}
+.ln-invoice-str{font-family:var(--mono);font-size:.55rem;color:var(--m2);word-break:break-all;line-height:1.5;max-height:48px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+.ln-timer{font-family:var(--mono);font-size:.65rem;color:var(--m);display:flex;align-items:center;gap:6px}
+.ln-timer-bar{flex:1;height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden}
+.ln-timer-fill{height:100%;background:#ffd600;border-radius:2px;transition:width 1s linear}
+.ln-status{text-align:center;font-family:var(--mono);font-size:.72rem;padding:8px 0 2px}
+.ln-status.pending{color:var(--m2)}
+.ln-status.paid{color:var(--g)}
+.ln-status.expired{color:var(--err)}
 .trust-row{ display:flex; align-items:center; justify-content:center; gap:20px; padding:16px 0; flex-wrap:wrap; margin-bottom:28px; border-top:1px solid rgba(255,255,255,.04); border-bottom:1px solid rgba(255,255,255,.04) }
 .trust-item{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:.62rem;color:var(--m2);letter-spacing:.5px}
 .trust-item svg{color:var(--g);flex-shrink:0}
@@ -4029,20 +4042,230 @@ function switchModalTab(tab, el) {
   if (tc) tc.classList.add('show');
   const vs = document.getElementById('verify-section');
   const svb = document.getElementById('show-verify-btn');
-  if (tab === 'promo') {
+  // Lightning и Промокод — скрываем стандартную секцию верификации (у них своя)
+  if (tab === 'promo' || tab === 'ln') {
     if (vs) vs.style.display = 'none';
     if (svb) svb.style.display = 'none';
   } else {
     if (svb) svb.style.display = 'block';
   }
   const note = document.getElementById('modal-note');
-  if (note) note.textContent = tab === 'usdt'
-    ? 'Прямая оплата USDT TRC-20 — сеть TRON, без посредников'
-    : tab === 'promo' ? 'Введите промокод — моментальная активация'
-    : 'Прямая оплата Bitcoin — без посредников';
+  if (note) note.textContent =
+    tab === 'usdt'  ? 'Прямая оплата USDT TRC-20 — сеть TRON, без посредников' :
+    tab === 'promo' ? 'Введите промокод — моментальная активация' :
+    tab === 'ln'    ? 'Lightning Network — мгновенная оплата ⚡' :
+                     'Прямая оплата Bitcoin — без посредников';
   if (tab === 'btc') _updateDirectAmount();
   if (tab === 'usdt') _updateUsdtAmount();
   if (tab === 'promo') setTimeout(() => { const inp = document.getElementById('promo-input'); if (inp) inp.focus(); }, 80);
+  // При открытии LN — сбрасываем если нет активного invoice
+  if (tab === 'ln' && !_lnActiveHash) lnResetToInit();
+}
+
+// ── LIGHTNING NETWORK ─────────────────────────────────────────
+let _lnActiveHash    = null;  // текущий payment hash для polling
+let _lnPollingTimer  = null;  // setInterval id
+let _lnCountdownTimer= null;  // setInterval для таймера
+let _lnExpiresAt     = 0;
+let _lnInvoiceStr    = '';
+let _lnTotalSecs     = 3600;
+
+function lnResetToInit() {
+  _lnActiveHash = null;
+  clearInterval(_lnPollingTimer);
+  clearInterval(_lnCountdownTimer);
+  _lnPollingTimer = null;
+  _lnCountdownTimer = null;
+  _lnInvoiceStr = '';
+  document.getElementById('ln-init-state').style.display  = '';
+  document.getElementById('ln-invoice-state').style.display = 'none';
+  document.getElementById('ln-success-state').style.display = 'none';
+  const errEl = document.getElementById('ln-init-error');
+  if (errEl) { errEl.style.display = 'none'; errEl.textContent = ''; }
+  const btn = document.getElementById('ln-create-btn');
+  if (btn) { btn.disabled = false; btn.style.opacity = ''; }
+}
+
+function lnShowError(msg) {
+  const errEl = document.getElementById('ln-init-error');
+  if (errEl) { errEl.textContent = '⚠ ' + msg; errEl.style.display = 'block'; }
+  const btn = document.getElementById('ln-create-btn');
+  if (btn) { btn.disabled = false; btn.style.opacity = ''; btn.textContent = ''; btn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><polygon points="13,2 3,14 12,14 11,22 21,10 12,10" fill="#ffd600"/></svg> Попробовать снова</span>'; }
+}
+
+async function lnCreateInvoice() {
+  if (!rateLimit('ln_invoice', 3000)) return;
+  const btn = document.getElementById('ln-create-btn');
+  if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; btn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffd600" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Создаём invoice…</span>'; }
+  const errEl = document.getElementById('ln-init-error');
+  if (errEl) errEl.style.display = 'none';
+
+  try {
+    const amountUsd = typeof selectedUsd === 'number' && selectedUsd > 0 ? selectedUsd : 4;
+    const resp = await fetch('/api/lightning', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ amountUsd }),
+    });
+    const data = await resp.json();
+
+    if (!resp.ok || !data.ok) {
+      lnShowError(data.error || 'Ошибка создания invoice');
+      return;
+    }
+
+    // Показываем invoice
+    _lnActiveHash  = data.paymentHash;
+    _lnInvoiceStr  = data.invoice;
+    _lnExpiresAt   = data.expiresAt;
+    _lnTotalSecs   = data.expiresInSeconds || 3600;
+
+    document.getElementById('ln-init-state').style.display   = 'none';
+    document.getElementById('ln-invoice-state').style.display = '';
+    document.getElementById('ln-success-state').style.display = 'none';
+
+    // Сумма
+    const satsEl = document.getElementById('ln-amount-sats');
+    const usdEl  = document.getElementById('ln-amount-usd');
+    if (satsEl) satsEl.textContent = (data.amountSats || 0).toLocaleString('ru');
+    if (usdEl)  usdEl.textContent  = amountUsd;
+
+    // Invoice строка
+    const strEl = document.getElementById('ln-invoice-str');
+    if (strEl) strEl.textContent = data.invoice;
+
+    // QR через qrserver.com API (надёжный, без JS-зависимостей)
+    const qrContainer = document.getElementById('ln-qr-container');
+    if (qrContainer) {
+      const qrData = encodeURIComponent(data.lightningUri || ('lightning:' + data.invoice.toUpperCase()));
+      qrContainer.innerHTML = '<img src="https://api.qrserver.com/v1/create-qr-code/?size=174x174&format=png&qzone=1&color=000000&bgcolor=ffffff&data=' + qrData + '" alt="Lightning QR" width="174" height="174" style="border-radius:9px;display:block" onerror="this.parentElement.innerHTML=\'<div style=\\\'font-family:var(--mono);font-size:.6rem;color:var(--m2);text-align:center;padding:20px 10px\\\'>QR недоступен.<br>Скопируйте invoice выше</div>\'">';
+    }
+
+    // Запускаем таймер
+    lnStartCountdown(_lnTotalSecs);
+
+    // Запускаем polling
+    lnStartPolling(_lnActiveHash);
+
+  } catch(e) {
+    lnShowError('Ошибка сети: ' + e.message);
+  }
+}
+
+function lnStartCountdown(totalSecs) {
+  clearInterval(_lnCountdownTimer);
+  const startedAt = Date.now();
+  function tick() {
+    const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+    const remaining = Math.max(0, totalSecs - elapsed);
+    const mins = Math.floor(remaining / 60);
+    const secs = remaining % 60;
+    const timerEl = document.getElementById('ln-timer-text');
+    const fillEl  = document.getElementById('ln-timer-fill');
+    if (timerEl) timerEl.textContent = mins + ':' + String(secs).padStart(2, '0');
+    if (fillEl)  fillEl.style.width  = Math.max(0, (remaining / totalSecs) * 100) + '%';
+    // Красный когда <2 минут
+    if (timerEl) timerEl.style.color = remaining < 120 ? 'var(--err)' : 'var(--t)';
+    if (remaining <= 0) {
+      clearInterval(_lnCountdownTimer);
+      clearInterval(_lnPollingTimer);
+      lnSetStatus('expired', '⌛ Invoice истёк — создайте новый');
+    }
+  }
+  tick();
+  _lnCountdownTimer = setInterval(tick, 1000);
+}
+
+function lnStartPolling(paymentHash) {
+  clearInterval(_lnPollingTimer);
+  let attempts = 0;
+  const MAX_ATTEMPTS = 180; // 3 часа при интервале 60с, но обычно ~60 попыток
+
+  const poll = async () => {
+    if (!_lnActiveHash || _lnActiveHash !== paymentHash) return;
+    attempts++;
+    if (attempts > MAX_ATTEMPTS) { clearInterval(_lnPollingTimer); return; }
+
+    try {
+      const resp = await fetch('/api/lightning?hash=' + paymentHash);
+      if (!resp.ok) return;
+      const data = await resp.json();
+
+      if (data.paid || data.settled) {
+        clearInterval(_lnPollingTimer);
+        clearInterval(_lnCountdownTimer);
+        _lnActiveHash = null;
+        lnOnSuccess(data);
+      } else if (data.expired) {
+        clearInterval(_lnPollingTimer);
+        clearInterval(_lnCountdownTimer);
+        lnSetStatus('expired', '⌛ Invoice истёк — создайте новый');
+      }
+    } catch(e) { /* silent */ }
+  };
+
+  poll(); // сразу проверяем
+  _lnPollingTimer = setInterval(poll, 5000); // каждые 5 секунд
+}
+
+function lnSetStatus(type, text) {
+  const el = document.getElementById('ln-status-text');
+  if (!el) return;
+  el.className = 'ln-status ' + type;
+  el.textContent = text;
+}
+
+function lnOnSuccess(data) {
+  document.getElementById('ln-invoice-state').style.display = 'none';
+  document.getElementById('ln-success-state').style.display = '';
+
+  const details = document.getElementById('ln-success-details');
+  if (details) {
+    const sats = data.amountSats ? data.amountSats.toLocaleString('ru') + ' sats · ' : '';
+    details.innerHTML = sats + 'Premium активирован<br><span style="color:var(--g);font-weight:700">✓ Закройте окно и запустите ускорение</span>';
+  }
+
+  // Активируем Premium токен если пришёл
+  if (data.activationToken) {
+    try { localStorage.setItem('turbotx_prem_token', data.activationToken); } catch(e) {}
+    window._premToken = data.activationToken;
+    // Переключаем план на premium
+    if (typeof pick === 'function') pick('premium');
+  }
+
+  // Закрываем modal через 3 секунды
+  setTimeout(() => {
+    if (typeof closeM === 'function') closeM();
+  }, 3500);
+}
+
+function lnCopyInvoice() {
+  if (!_lnInvoiceStr) return;
+  navigator.clipboard.writeText(_lnInvoiceStr).then(() => {
+    const btn = document.getElementById('ln-copy-btn');
+    if (btn) {
+      btn.textContent = '✓ Скопировано';
+      btn.style.color = 'var(--g)';
+      setTimeout(() => { btn.textContent = '⎘ Копировать'; btn.style.color = ''; }, 2000);
+    }
+  }).catch(() => {
+    // Fallback для старых браузеров
+    const ta = document.createElement('textarea');
+    ta.value = _lnInvoiceStr;
+    ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+    const btn = document.getElementById('ln-copy-btn');
+    if (btn) { btn.textContent = '✓ Скопировано'; setTimeout(() => { btn.textContent = '⎘ Копировать'; }, 2000); }
+  });
+}
+
+function lnCancelInvoice() {
+  clearInterval(_lnPollingTimer);
+  clearInterval(_lnCountdownTimer);
+  _lnActiveHash = null;
+  lnResetToInit();
 }
 
 // ── PROMO CODE ────────────────────────────────────────────────
@@ -5643,6 +5866,7 @@ console.log('[TurboTX] Server API connected ✓');
   <!-- ВКЛАДКИ СПОСОБА ОПЛАТЫ -->
   <div class="pay-tabs" style="margin-bottom:14px">
     <div class="pay-tab on" id="ptab-btc" onclick="switchModalTab('btc',this)">₿ Bitcoin <span class="network-badge nb-btc" style="margin-left:4px">BTC</span></div>
+    <div class="pay-tab" id="ptab-ln" onclick="switchModalTab('ln',this)">⚡ Lightning <span class="network-badge nb-ln" style="margin-left:4px">LN</span></div>
     <div class="pay-tab" id="ptab-usdt" onclick="switchModalTab('usdt',this)">₮ USDT <span class="network-badge nb-trc" style="margin-left:4px">TRC-20</span></div>
     <div class="pay-tab" id="ptab-promo" onclick="switchModalTab('promo',this)">🎟 Промокод</div>
   </div>
@@ -5653,7 +5877,72 @@ console.log('[TurboTX] Server API connected ✓');
     <button class="cpbtn" onclick="cpDirect()" id="direct-copy-btn"><span style="display:inline-flex;align-items:center;gap:8px;justify-content:center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Скопировать BTC адрес</span></button>
     <div style="background:rgba(247,147,26,.05);border:1px solid rgba(247,147,26,.18);border-radius:10px;padding:11px 14px;margin-top:10px;font-family:var(--mono);font-size:.67rem;color:var(--m2);line-height:1.9"><div style="color:var(--a);font-weight:700;margin-bottom:3px">Инструкция:</div><div>① Скопируйте адрес выше</div><div>② Отправьте точную сумму BTC со своего кошелька</div><div>③ Нажмите «Я уже оплатил» ниже</div><div>④ Вставьте TXID платежа → Premium активируется</div></div>
   </div>
-  <!-- ВКЛАДКА 2: USDT TRC-20 -->
+  <!-- ВКЛАДКА 2: LIGHTNING NETWORK -->
+  <div id="mtab-ln" class="pay-tab-content">
+    <!-- Состояние: initial (кнопка создать invoice) -->
+    <div id="ln-init-state">
+      <div style="text-align:center;padding:16px 0 10px">
+        <svg width="48" height="54" viewBox="0 0 32 36" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 0 12px rgba(255,214,0,.35))">
+          <polygon points="18,2 4,20 15,20 14,34 28,16 17,16" fill="#ffd600" opacity=".95"/>
+          <polygon points="18,2 4,20 15,20 14,34 28,16 17,16" fill="none" stroke="rgba(255,255,255,.2)" stroke-width=".5"/>
+        </svg>
+        <div style="font-family:var(--mono);font-size:.78rem;color:var(--t);font-weight:700;margin-top:10px">Lightning Network</div>
+        <div style="font-family:var(--mono);font-size:.63rem;color:var(--m2);margin-top:5px;line-height:1.6">Мгновенная оплата без ожидания подтверждений.<br>Совместимо с любым LN-кошельком.</div>
+      </div>
+      <div style="background:rgba(255,214,0,.05);border:1px solid rgba(255,214,0,.15);border-radius:10px;padding:11px 14px;margin:4px 0 14px;font-family:var(--mono);font-size:.65rem;color:var(--m2);line-height:1.8">
+        <span style="color:#ffd600;font-weight:700">Кошельки: </span>Wallet of Satoshi · Phoenix · Breez · Muun · Zeus · BlueWallet · любой LN
+      </div>
+      <button class="okbtn" id="ln-create-btn" onclick="lnCreateInvoice()" style="background:linear-gradient(135deg,rgba(255,214,0,.18),rgba(247,147,26,.18));border:1px solid rgba(255,214,0,.35);color:#ffd600">
+        <span style="display:inline-flex;align-items:center;gap:8px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><polygon points="13,2 3,14 12,14 11,22 21,10 12,10" fill="#ffd600"/></svg>
+          Создать Lightning Invoice
+        </span>
+      </button>
+      <div id="ln-init-error" style="display:none;margin-top:10px;font-family:var(--mono);font-size:.7rem;color:var(--err);text-align:center"></div>
+    </div>
+
+    <!-- Состояние: invoice создан — QR + polling -->
+    <div id="ln-invoice-state" style="display:none">
+      <div class="ln-qr-wrap">
+        <div class="ln-qr-img" id="ln-qr-container">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="rgba(255,214,0,.3)" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        </div>
+        <div style="font-family:var(--mono);font-size:.72rem;color:var(--t);font-weight:700">
+          ⚡ <span id="ln-amount-sats">…</span> sats <span style="color:var(--m2);font-weight:400">≈ $<span id="ln-amount-usd">…</span></span>
+        </div>
+      </div>
+
+      <!-- Invoice строка + копировать -->
+      <div class="ln-invoice-box" style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+          <span style="font-family:var(--mono);font-size:.56rem;color:var(--m);letter-spacing:1px;text-transform:uppercase">Lightning Invoice</span>
+          <button onclick="lnCopyInvoice()" style="background:rgba(255,214,0,.1);border:1px solid rgba(255,214,0,.25);border-radius:5px;padding:3px 9px;font-family:var(--mono);font-size:.58rem;color:#ffd600;cursor:pointer" id="ln-copy-btn">⎘ Копировать</button>
+        </div>
+        <div class="ln-invoice-str" id="ln-invoice-str">загрузка…</div>
+      </div>
+
+      <!-- Таймер -->
+      <div class="ln-timer" style="margin-bottom:10px">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Осталось: <strong id="ln-timer-text" style="color:var(--t)">60:00</strong>
+        <div class="ln-timer-bar"><div class="ln-timer-fill" id="ln-timer-fill" style="width:100%"></div></div>
+      </div>
+
+      <!-- Статус -->
+      <div class="ln-status pending" id="ln-status-text">⏳ Ожидаем оплату…</div>
+
+      <!-- Кнопка отмены -->
+      <button onclick="lnCancelInvoice()" style="width:100%;margin-top:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:9px;font-family:var(--mono);font-size:.65rem;color:var(--m2);cursor:pointer">← Создать новый invoice</button>
+    </div>
+
+    <!-- Состояние: успешная оплата -->
+    <div id="ln-success-state" style="display:none;text-align:center;padding:20px 0">
+      <div style="font-size:2.5rem;margin-bottom:10px">⚡✅</div>
+      <div style="font-family:var(--mono);font-size:.85rem;color:var(--g);font-weight:700;margin-bottom:6px">Lightning оплата получена!</div>
+      <div style="font-family:var(--mono);font-size:.67rem;color:var(--m2);line-height:1.7" id="ln-success-details">Premium активирован</div>
+    </div>
+  </div>
+  <!-- ВКЛАДКА 3: USDT TRC-20 -->
   <div id="mtab-usdt" class="pay-tab-content">
     <div class="abox" style="margin-bottom:10px"><div class="al">USDT TRC-20 адрес для оплаты</div><div class="av" id="usdt-wallet-display" style="word-break:break-all;font-size:.7rem;cursor:pointer" onclick="cpUsdt()" title="Нажмите чтобы скопировать">— загружаем —</div></div>
     <div class="abox" style="margin-bottom:12px"><div class="al">Сумма к оплате</div><div class="av green" id="usdt-amount">$4 USDT</div></div>
