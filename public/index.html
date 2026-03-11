@@ -329,7 +329,7 @@ nav{
 .net-heart.calm  svg { animation:hb-calm 3s ease-in-out infinite; }
 .net-heart.mid   svg { animation:hb-mid  1.5s ease-in-out infinite; }
 .net-heart.busy  svg { animation:hb-busy  .7s ease-in-out infinite; }
-.net-heart .h-body { transition:fill .8s,filter .8s; }
+.net-heart .h-body { transition:fill .2s,filter .2s; }
 .net-heart.no-transition .h-body,.net-heart.no-transition .h-ice,.net-heart.no-transition .h-flame { transition:none !important; }
 .net-heart.calm  .h-body { fill:#5bc8f5; filter:drop-shadow(0 0 4px rgba(91,200,245,.6)); }
 .net-heart.mid   .h-body { fill:#ffd166; filter:drop-shadow(0 0 5px rgba(255,209,102,.6)); }
@@ -2616,22 +2616,24 @@ async function _updateChannelsFromStats() {
     const r = await _rtFetchWithTimeout('/api/stats?_t=' + Math.floor(Date.now()/60000), 6000);
     if (!r.ok) return;
     const d = await r.json();
+    // pools-online из network.feeRate — если stats вернул данные, значит сервер жив
     const el2 = document.getElementById('pools-online');
     if (el2 && d.ok) {
       if (el2.textContent === '—' || el2.textContent === '') {
-        el2.style.opacity = ''; el2.style.animation = 'none';
-        el2.textContent = '30 / 30'; el2.style.color = 'var(--g)';
+        el2.style.opacity = '';
+        el2.style.animation = 'none';
+        el2.textContent = '30 / 30';
+        el2.style.color = 'var(--g)';
       }
     }
-    // FIX: хешрейт — данные приходили с сервера но НИКОГДА не писались в DOM
+    // FIX: хешрейт
     const ehs = d?.network?.hashrateEHs;
     if (ehs && ehs > 0) {
       const hrDisplay = document.getElementById('hr-display');
       const hrFill    = document.getElementById('hr-fill');
       const hrLabel   = document.getElementById('hr-label');
       if (hrDisplay) hrDisplay.textContent = ehs.toFixed(1);
-      const pct = Math.min(100, Math.round(ehs / 900 * 100));
-      if (hrFill) hrFill.style.width = pct + '%';
+      if (hrFill)    hrFill.style.width = Math.min(100, Math.round(ehs / 900 * 100)) + '%';
       if (hrLabel) {
         hrLabel.textContent = ehs > 700 ? '🔥 рекордный' : ehs > 500 ? '⚡ высокий' : ehs > 300 ? '✅ норма' : '📉 низкий';
         hrLabel.style.color = ehs > 700 ? '#ff6b00' : ehs > 500 ? 'var(--a)' : 'var(--g)';
@@ -5333,28 +5335,15 @@ async function fetchMempoolStats() {
       const fees = rFee.status === 'fulfilled' && rFee.value?.ok ? await rFee.value.json() : null;
       const mem  = rMem.status === 'fulfilled' && rMem.value?.ok ? await rMem.value.json() : null;
       if (fees || mem) {
-        const fbFee = fees?.fastestFee ?? 0;
-        const fbMp  = mem?.count ?? 0;
-        // FIX: раньше congestion: 'low' было захардкожено — сердце сбрасывалось в синий
-        // при каждом fallback-тике. Теперь вычисляем как на сервере (порог 35k TX).
-        const fbCongestion =
-          fbFee > 150 ? 'critical' :
-          fbFee >  60 ? 'extreme'  :
-          fbFee >  30 ? 'high'     :
-          fbFee >  10 ? 'medium'   :
-          fbMp  > 35000 ? 'high'   : 'low';
-        const fbEmoji = { critical:'🔴', extreme:'🔴', high:'🟠', medium:'🟡', low:'🟢' }[fbCongestion];
         _rtApplyTicker({
-          feeRate: fbFee || null,
+          feeRate: fees?.fastestFee ?? null,
           fees: fees ? { fastest: fees.fastestFee, halfHour: fees.halfHourFee, hour: fees.hourFee } : null,
           mempool: mem ? { count: mem.count, vsize: mem.vsize } : null,
-          congestion: fbCongestion,
-          emoji: fbEmoji,
-          text: 'Данные из fallback',
+          congestion: 'low', emoji: '🟢', text: 'Данные из fallback',
           mempoolCongestion: mem ? {
-            level: mem.count > 35000 ? 'medium' : 'low',
-            emoji: mem.count > 35000 ? '🟡' : '🟢',
-            text:  mem.count > 35000 ? 'Мемпул умеренно загружен' : 'Мемпул в норме',
+            level: mem.count > 50000 ? 'high' : mem.count > 30000 ? 'medium' : 'low',
+            emoji: mem.count > 50000 ? '🟠' : mem.count > 30000 ? '🟡' : '🟢',
+            text: mem.count > 50000 ? 'Мемпул сильно загружен' : mem.count > 30000 ? 'Мемпул умеренно загружен' : 'Мемпул в норме',
             txCount: mem.count,
           } : null,
         });
@@ -5365,14 +5354,69 @@ async function fetchMempoolStats() {
   }
 }
 
+// ── INSTANT PRELOAD: прямо на mempool.space без сервера ───────
+// Цель: сердце и цена правильного цвета через ~100мс после F5,
+// НЕ ждём /api/price (Vercel serverless cold start = 300–800мс).
+// /api/price придёт позже и перезапишет с авторитетными данными.
+async function _preloadMempoolDirect() {
+  try {
+    const [rFee, rMem] = await Promise.allSettled([
+      fetch('https://mempool.space/api/v1/fees/recommended', { signal: AbortSignal.timeout(4000), cache: 'no-store' }),
+      fetch('https://mempool.space/api/mempool',             { signal: AbortSignal.timeout(4000), cache: 'no-store' }),
+    ]);
+    const fees = rFee.status === 'fulfilled' && rFee.value?.ok ? await rFee.value.json() : null;
+    const mem  = rMem.status === 'fulfilled' && rMem.value?.ok ? await rMem.value.json() : null;
+    if (!fees && !mem) return; // ничего не пришло — не трогаем DOM
+
+    const feeRate = fees?.fastestFee || 10;
+    const mpCount = mem?.count  || 0;
+    const mpVsize = mem?.vsize  || 0;
+
+    // Те же пороги что и на сервере (router.js handlePrice)
+    const mpTierIdx  = mpCount > 100000 ? 4 : mpCount > 60000 ? 3 : mpCount > 30000 ? 2 : mpCount > 10000 ? 1 : 0;
+    const feeTierIdx = feeRate > 200     ? 4 : feeRate > 100   ? 3 : feeRate > 50    ? 2 : feeRate > 20    ? 1 : 0;
+    const tierIdx    = Math.max(mpTierIdx, feeTierIdx);
+
+    const CONGESTIONS = ['low','medium','high','extreme','critical'];
+    const EMOJIS      = ['🟢','🟡','🟠','🔴','🔴'];
+    const TEXTS       = ['Спокойно','Умеренно','Нагрузка','Перегрузка','Критично'];
+    const PRICES      = [3, 4, 6, 12, 18]; // соответствует PRICE_TIERS на сервере
+
+    const congestion = CONGESTIONS[tierIdx];
+
+    const mempoolCongestion = {
+      level:   congestion,
+      emoji:   EMOJIS[tierIdx],
+      text:    mpCount > 80000 ? 'Мемпул критически перегружен' :
+               mpCount > 50000 ? 'Мемпул сильно загружен'       :
+               mpCount > 30000 ? 'Мемпул умеренно загружен'      :
+               mpCount > 10000 ? 'Мемпул в норме'                : 'Мемпул свободен',
+      txCount: mpCount,
+    };
+
+    _rtApplyTicker({
+      feeRate,
+      usd:       PRICES[tierIdx],
+      fees:      fees ? { fastest: feeRate, halfHour: fees.halfHourFee, hour: fees.hourFee, economy: fees.economyFee || fees.minimumFee } : null,
+      mempool:   { count: mpCount, vsize: mpVsize },
+      congestion,
+      emoji:     EMOJIS[tierIdx],
+      text:      TEXTS[tierIdx],
+      mempoolCongestion,
+    });
+  } catch(e) { /* тихо — /api/price всё равно придёт */ }
+}
+
 // ── Запуск + петля каждые 20 сек ─────────────────────────────
 (function _rtStart() {
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function() {
-      fetchMempoolStats();
+      _preloadMempoolDirect(); // ← мгновенно: прямо на mempool.space
+      fetchMempoolStats();     // ← параллельно: /api/price с ценой BTC
       setInterval(fetchMempoolStats, 20000);
     });
   } else {
+    _preloadMempoolDirect();
     fetchMempoolStats();
     setInterval(fetchMempoolStats, 20000);
   }
@@ -6143,15 +6187,21 @@ window._TurboAPI = {
           mempool = { count: m.count, vsize: m.vsize };
           mpCount2 = m.count || 0;
         }
-        // FIX: вычисляем congestion с порогом 35k — иначе undefined → 'low' → синее сердце
-        const mpTierIdx2 = mpCount2 > 100000 ? 4 : mpCount2 > 60000 ? 3 : mpCount2 > 35000 ? 2 : 0;
+        // FIX: вычисляем congestion — без него applyPrice ставит 'low' → синее сердце
+        const mpTierIdx2  = mpCount2 > 100000 ? 4 : mpCount2 > 60000 ? 3 : mpCount2 > 30000 ? 2 : mpCount2 > 10000 ? 1 : 0;
         const feeTierIdx2 = PRICE_TIERS.indexOf(tier);
         const combinedTier2 = PRICE_TIERS[Math.max(feeTierIdx2, mpTierIdx2)];
-        const congestion2 = combinedTier2.label;
+        const mempoolCongestion2 =
+          mpCount2 > 80000  ? { level:'critical', emoji:'🔴', text:'Мемпул критически перегружен', txCount:mpCount2 } :
+          mpCount2 > 50000  ? { level:'high',     emoji:'🟠', text:'Мемпул сильно загружен',        txCount:mpCount2 } :
+          mpCount2 > 30000  ? { level:'medium',   emoji:'🟡', text:'Мемпул умеренно загружен',      txCount:mpCount2 } :
+          mpCount2 > 10000  ? { level:'low',      emoji:'🟢', text:'Мемпул в норме',                txCount:mpCount2 } :
+                              { level:'clear',    emoji:'🟢', text:'Мемпул свободен',               txCount:mpCount2 };
         _cached = {
-          usd: tier.usd, feeRate, emoji: tier.emoji, text: tier.text,
-          confLabel: tier.confLabel, btc: null, ok: true,
-          congestion: congestion2,
+          usd: combinedTier2.usd, feeRate, emoji: combinedTier2.emoji, text: combinedTier2.text,
+          confLabel: combinedTier2.confLabel, btc: null, ok: true,
+          congestion: combinedTier2.label,
+          mempoolCongestion: mempoolCongestion2,
           fees: { fastest: j.fastestFee, halfHour: j.halfHourFee, hour: j.hourFee, economy: j.minimumFee || j.economyFee },
           mempool,
         };
