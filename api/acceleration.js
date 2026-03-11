@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════════════
-//  TurboTX v13 ★ SMART ADVISOR ★  —  /api/acceleration.js
+//  TurboTX v14 ★ SMART ADVISOR ★  —  /api/acceleration.js
 //  Vercel Serverless · Node.js 20
 //
 //  GET /api/acceleration?txid=<64hex>[&hex=<rawHex>]
@@ -86,36 +86,94 @@ async function getCurrentMiners() {
   } catch { return null; }
 }
 
-// ─── ⑧ FEE MARKET WINDOW ─────────────────────────────────────
-// Статистически дешевле всего UTC 02:00–06:00 (азиатская ночь + европейское утро)
-// Даём пользователю точный прогноз
-function cheapWindowForecast() {
+// ─── ⑧ FEE MARKET WINDOW (v14: динамический на основе реальных данных) ─
+// Запрашиваем историю fee за 24ч из mempool.space и находим реальный минимум
+// Fallback: статистическое окно 01:00–06:00 UTC
+let _feeWindowCache = { data: null, at: 0 };
+const FEE_WINDOW_TTL = 15 * 60_000; // обновляем каждые 15 мин
+
+async function cheapWindowForecast(currentFeeRate) {
   const now = new Date();
   const utcHour = now.getUTCHours();
-  // Дешёвое окно: 01:00–06:00 UTC
-  const CHEAP_START = 1, CHEAP_END = 6;
-  let hoursUntilCheap;
+  const isWeekend = now.getUTCDay() === 0 || now.getUTCDay() === 6;
 
-  if (utcHour >= CHEAP_START && utcHour < CHEAP_END) {
-    // Сейчас дешёвое окно
+  // Пытаемся получить реальную историю fee за 24ч
+  let cheapHour = null, minFee = null, avgFee = null;
+
+  try {
+    if (!_feeWindowCache.data || Date.now() - _feeWindowCache.at > FEE_WINDOW_TTL) {
+      const r = await ft('https://mempool.space/api/v1/mining/blocks/fee-rates/24h', 7000);
+      if (r.ok) {
+        const blocks = await r.json();
+        if (Array.isArray(blocks) && blocks.length > 0) {
+          _feeWindowCache.data = blocks;
+          _feeWindowCache.at   = Date.now();
+        }
+      }
+    }
+
+    if (_feeWindowCache.data) {
+      const blocks = _feeWindowCache.data;
+      // Группируем блоки по UTC-часам, берём средний fee каждого часа
+      const byHour = {};
+      for (const b of blocks) {
+        const ts = b.timestamp || b.time || 0;
+        if (!ts) continue;
+        const h = new Date(ts * 1000).getUTCHours();
+        if (!byHour[h]) byHour[h] = [];
+        byHour[h].push(b.avgFee || b.medianFee || b.feeRange?.[0] || 0);
+      }
+      const hourlyAvg = Object.entries(byHour).map(([h, fees]) => ({
+        hour: parseInt(h),
+        avg:  Math.round(fees.reduce((a, b) => a + b, 0) / fees.length),
+      })).filter(h => h.avg > 0);
+
+      if (hourlyAvg.length >= 4) {
+        hourlyAvg.sort((a, b) => a.avg - b.avg);
+        cheapHour = hourlyAvg[0].hour;
+        minFee    = hourlyAvg[0].avg;
+        avgFee    = Math.round(hourlyAvg.reduce((s, h) => s + h.avg, 0) / hourlyAvg.length);
+      }
+    }
+  } catch {}
+
+  // Если данных нет — fallback на статистику
+  const STATIC_START = isWeekend ? 0 : 1; // в выходные дешевле почти весь день
+  const STATIC_END   = isWeekend ? 10 : 6;
+  const cheapStart = cheapHour !== null ? cheapHour : STATIC_START;
+  const cheapEnd   = cheapHour !== null ? (cheapHour + 3) % 24 : STATIC_END;
+
+  // Сколько часов до дешёвого окна
+  let hoursUntilCheap;
+  if (utcHour === cheapStart || (utcHour > cheapStart && utcHour < cheapEnd)) {
     hoursUntilCheap = 0;
-  } else if (utcHour < CHEAP_START) {
-    hoursUntilCheap = CHEAP_START - utcHour;
+  } else if (utcHour < cheapStart) {
+    hoursUntilCheap = cheapStart - utcHour;
   } else {
-    // utcHour >= CHEAP_END
-    hoursUntilCheap = 24 - utcHour + CHEAP_START;
+    hoursUntilCheap = 24 - utcHour + cheapStart;
   }
 
-  const cheapUntilHour = CHEAP_END;
+  const isNowCheap = hoursUntilCheap === 0;
+  const savingPct  = (avgFee && currentFeeRate && avgFee > minFee)
+    ? Math.round((1 - minFee / currentFeeRate) * 100)
+    : null;
+
   return {
-    isNowCheap:     hoursUntilCheap === 0,
+    isNowCheap,
     hoursUntilCheap,
-    cheapWindowUtc: '01:00–06:00 UTC',
-    cheapWindowMsk: '04:00–09:00 МСК',
+    cheapWindowUtc: `${String(cheapStart).padStart(2,'0')}:00–${String(cheapEnd).padStart(2,'0')}:00 UTC`,
+    cheapWindowMsk: `${String((cheapStart+3)%24).padStart(2,'0')}:00–${String((cheapEnd+3)%24).padStart(2,'0')}:00 МСК`,
     currentUtcHour: utcHour,
-    tip: hoursUntilCheap === 0
-      ? '💚 Сейчас дешёвое время — комиссии минимальны'
-      : `⏰ Дешёвое окно через ${hoursUntilCheap}ч (${CHEAP_START}:00–${CHEAP_END}:00 UTC)`,
+    isWeekend,
+    dynamicData: minFee !== null,   // true = данные реальные, false = статистика
+    minFeeRate:   minFee,
+    avgFeeRate24h: avgFee,
+    potentialSavingPct: savingPct,
+    tip: isNowCheap
+      ? `💚 Сейчас дешёвое время — комиссии минимальны${minFee ? ` (~${minFee} sat/vB)` : ''}`
+      : isWeekend
+        ? `📅 Выходной — комиссии обычно ниже. Дешёвое окно через ${hoursUntilCheap}ч`
+        : `⏰ Дешёвое окно через ${hoursUntilCheap}ч (${String(cheapStart).padStart(2,'0')}:00–${String(cheapEnd).padStart(2,'0')}:00 UTC)${savingPct ? ` — экономия ~${savingPct}%` : ''}`,
   };
 }
 
@@ -259,7 +317,7 @@ async function makeDecision(txid, btcPrice, fees, tx, status, mp, miners) {
 
   const costs = costAnalysis(feeRate, fastest, vsize, feePaid, btcPrice);
   const timing = timeForecast(feeRate, fastest, halfHour, stuckHours);
-  const cheapWindow = cheapWindowForecast();
+  const cheapWindow = await cheapWindowForecast(feeRate); // v14: async + динамический
   const rescuePlan = stuckRescuePlan(feeRate, fastest, vsize, feePaid, rbfEnabled, stuckHours);
 
   // ③ Exact numbers for action

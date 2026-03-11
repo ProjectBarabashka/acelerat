@@ -1,10 +1,18 @@
 // ══════════════════════════════════════════════════════════════
-//  TurboTX v13 ★ МАКСИМАЛЬНАЯ МОЩЬ 2026 ★  —  /api/broadcast.js
+//  TurboTX v14 ★ МАКСИМАЛЬНАЯ МОЩЬ 2026 ★  —  /api/broadcast.js
 //  Vercel Serverless · Node.js 20 · Hobby Plan
 //
-//  ━━━ НОВОЕ В v13 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  ⒜ LAST-BLOCK-MINER BOOST — определяем кто добыл последний блок
-//     и отправляем в этот пул ПЕРВЫМ (он сейчас ищет следующий блок!)
+//  ━━━ НОВОЕ В v14 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  ⒜ WAVE_SIZE 8→12 + WAVE_DELAY 0/150/400→0/80/200ms
+//     Меньше волн, быстрее покрытие всех каналов
+//  ⒝ HASHRATE_STOP_TARGET 70%→80% (агрессивный режим: 85%→90%)
+//     Больше пулов получают TX до early stop
+//  ⒞ DEAD_TTL_MS 30мин→10мин
+//     Мёртвый канал быстрее восстанавливается в ротацию
+//  ⒟ CB_OPEN_TTL 2ч→45мин
+//     Circuit Breaker открывается быстрее после восстановления пула
+//
+//  ━━━ НАСЛЕДСТВО v13 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //  ⒝ MARA SLIPSTREAM — прямая отправка в приватный мемпул MARA
 //     Bypass обычной очереди — транзакция видна только MARA
 //  ⒞ +5 НОВЫХ ПУЛОВ: SBI Crypto, EMCDPool, Rawpool, 2Miners, Lincoin
@@ -223,7 +231,7 @@ function setNegCache(name) { _negCache.set(name, Date.now()+NEG_CACHE_TTL); }
 // ─── DEAD CHANNEL ─────────────────────────────────────────────
 const _deadChannels = new Map();
 const DEAD_THRESHOLD = 3;
-const DEAD_TTL_MS = 30 * 60_000;
+const DEAD_TTL_MS = 10 * 60_000; // v14: 10 мин (было 30 — пулы восстанавливаются быстрее)
 function isDead(name) {
   const e = _deadChannels.get(name);
   if (!e) return false;
@@ -242,7 +250,7 @@ function registerChannelOk(name) { _deadChannels.delete(name); }
 const _cb = new Map();
 const CB_FAIL_THRESHOLD = 5;
 const CB_FAIL_WINDOW = 10 * 60_000;
-const CB_OPEN_TTL = 2 * 3_600_000;
+const CB_OPEN_TTL = 45 * 60_000; // v14: 45 мин (было 2 часа — канал мог уже восстановиться)
 function cbGet(name) { return _cb.get(name) ?? {state:'CLOSED',fails:0,windowStart:Date.now(),openUntil:0,halfOpenAt:0}; }
 function cbIsBlocked(name) {
   const e = cbGet(name), now = Date.now();
@@ -487,8 +495,8 @@ async function run(channels, feeRatioHint = 0.5, lastBlockMiner = null) {
 
   const sorted = pings.map(p => p.ch);
 
-  const WAVE_SIZE  = 8;
-  const WAVE_DELAY = [0, 150, 400];
+  const WAVE_SIZE  = 12;              // v14: 12→12→6 вместо 8→8→8→6 (меньше волн, быстрее покрытие)
+  const WAVE_DELAY = [0, 80, 200];    // v14: агрессивнее (было 0/150/400)
   const results    = new Array(sorted.length).fill(null);
   let okCount = 0, okHashrate = 0;
   const seenPools = new Set();
@@ -499,8 +507,8 @@ async function run(channels, feeRatioHint = 0.5, lastBlockMiner = null) {
 
   // ⒠ v12: Hashrate-weighted early stop
   // Вместо "65% каналов" → "70% хешрейта покрыто"
-  const HASHRATE_STOP_TARGET = feeRatioHint < 0.4 ? 85 : feeRatioHint >= 0.8 ? 60 : 70;
-  const COUNT_STOP  = Math.max(3, Math.ceil(activeChannels.length * (feeRatioHint < 0.4 ? 0.85 : 0.65)));
+  const HASHRATE_STOP_TARGET = feeRatioHint < 0.4 ? 90 : feeRatioHint >= 0.8 ? 70 : 80; // v14: +10% (было 85/60/70)
+  const COUNT_STOP  = Math.max(3, Math.ceil(activeChannels.length * (feeRatioHint < 0.4 ? 0.90 : 0.75))); // v14: +10%
 
   await new Promise(resolve => {
     let finished = 0, aborted = false;

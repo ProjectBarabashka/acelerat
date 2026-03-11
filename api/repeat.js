@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════════════
-//  TurboTX v13 ★ ADAPTIVE WAVES ★  —  /api/repeat.js
+//  TurboTX v14 ★ ADAPTIVE WAVES ★  —  /api/repeat.js
 //  Vercel Serverless · Node.js 20 · Hobby Plan
 //
 //  POST /api/repeat
@@ -73,8 +73,10 @@ const BASE_INTERVALS = [
   120 * 60_000,   // волна 6
   120 * 60_000,   // волна 7
   120 * 60_000,   // волна 8
+  180 * 60_000,   // волна 9  ← v14: для TX 18+ часов в мемпуле
+  180 * 60_000,   // волна 10 ← v14: финальная агрессивная волна
 ];
-const MAX_WAVES = 8;
+const MAX_WAVES = 10; // v14: было 8
 
 // Суммарное время до волны N (для восстановления)
 function cumulativeMsToWave(targetWave) {
@@ -96,20 +98,27 @@ async function getTxFeeAndStatus(txid) {
   return { tx, fees, status };
 }
 
-// Подтверждение — проверяем 2 источника параллельно
+// Подтверждение — проверяем 3 источника параллельно (v14: +Blockchair)
 async function isTxConfirmed(txid) {
-  const check = async (url) => {
+  const check = async (url, parse) => {
     try {
       const r = await ft(url, {}, 6000);
-      if (r.ok) { const s = await sj(r); if (s.confirmed) return s; }
+      if (r.ok) { const s = await parse(r); if (s?.confirmed) return s; }
     } catch {}
     return null;
   };
-  const [a, b] = await Promise.allSettled([
-    check(`https://mempool.space/api/tx/${txid}/status`),
-    check(`https://blockstream.info/api/tx/${txid}/status`),
+  const [a, b, c] = await Promise.allSettled([
+    check(`https://mempool.space/api/tx/${txid}/status`,    r => r.json()),
+    check(`https://blockstream.info/api/tx/${txid}/status`, r => r.json()),
+    check(`https://api.blockchair.com/bitcoin/transactions?q=hash(${txid})`, async r => {
+      const j = await r.json();
+      const tx = j?.data?.[0];
+      return tx?.block_id ? { confirmed: true, block_height: tx.block_id, block_time: tx.time } : null;
+    }),
   ]);
-  const s = (a.status==='fulfilled' && a.value) || (b.status==='fulfilled' && b.value);
+  const s = (a.status==='fulfilled' && a.value) ||
+            (b.status==='fulfilled' && b.value) ||
+            (c.status==='fulfilled' && c.value);
   return s
     ? { confirmed:true, blockHeight:s.block_height, blockTime:s.block_time }
     : { confirmed:false };
