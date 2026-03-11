@@ -1,152 +1,314 @@
-# ⚡ T_U_R_B_O_T_X — Bitcoin Transaction Accelerator
+# ⚡ T_U_R_B_O_T_X — Bitcoin Transaction Accelerator v13
 
 <p align="center">
-  <a href="#english-version">English</a> •
-  <a href="#russian-version">Русский</a>
+  <img src="https://img.shields.io/badge/version-v13-f7931a?style=for-the-badge&logo=bitcoin&logoColor=white"/>
+  <img src="https://img.shields.io/badge/status-PRODUCTION-00e87a?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/hashrate-~88%25-7c5cfc?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/channels-30-26d0a8?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/Lightning-Network-ffd600?style=for-the-badge"/>
+</p>
+
+<p align="center">
+  <a href="#english">🇺🇸 English</a> &nbsp;•&nbsp;
+  <a href="#russian">🇷🇺 Русский</a> &nbsp;•&nbsp;
+  <a href="https://acelerat.vercel.app">🌐 Live Demo</a>
 </p>
 
 ---
 
-<div id="english-version"></div>
+<div id="english"></div>
 
-## 🇺🇸 English Version
+## 🇺🇸 English
 
-> **Status: 🟢 PRODUCTION (2026)**  
-> Fully serverless, enterprise-grade Bitcoin transaction accelerator.  
-> Real rebroadcast to 8 nodes + 16 mining pools covering ~80% of network hashrate.
+> **Status: 🟢 PRODUCTION (2026) · v13**
+> Fully serverless Bitcoin transaction accelerator.
+> 30 broadcast channels: 8 hex-nodes + 22 mining pool accelerators covering **~88% of network hashrate**.
+> Now with **Lightning Network** instant payments.
 
-A professional toolkit to monitor and accelerate stuck Bitcoin transactions.  
-Built on **Vercel Serverless**, **Firebase Realtime Database**, and raw performance.
+### 🔥 What's New in v13
 
-### 🔥 Key Features
-*   **Serverless Core** — All heavy lifting done in `/api/*` endpoints (Node.js 20). No CORS, no browser limitations.
-*   **Massive Reach** — 24 channels simultaneously: 8 public nodes + 16 mining pools (Foundry, AntPool, MARA, ViaBTC, SpiderPool, Luxor, etc.).
-*   **Smart Acceleration** — Real CPFP & RBF calculators with precise fee recommendations and wallet instructions (Electrum, Sparrow, Ledger, etc.).
-*   **Dynamic Pricing** — Price changes with mempool load: from $3 (calm) to $18 (critical). Real BTC/USD rate from multiple sources.
-*   **Live Diagnostics** — Instant TX analysis: fee rate, mempool position, RBF support, need for CPFP.
-*   **Global Sync** — Firebase-backed live feed of confirmed transactions, global queue, and total acceleration counter.
-*   **Batch Mode** — Accelerate up to 20 TXIDs at once (Premium only).
-*   **Enterprise‑grade Protection** — IP rate‑limiting, TXID cooldown, bot filtering, hex size limits.
+| Feature | Description |
+|---|---|
+| ⚡ **Lightning Network** | Instant invoice payments via LNURL-pay. Compatible with WoS, Phoenix, Breez, Muun, Zeus |
+| 📊 **Network Intelligence** | Live dashboard: real-time price, fee rate, mempool size, Smart Advisor recommendations |
+| 🎯 **Last-Block-Miner Boost** | Detects who mined the last block — sends to that pool first for max priority |
+| 🔐 **MARA Slipstream** | Private mempool submission to Marathon's Slipstream API |
+| 🧠 **Smart Advisor** | AI-powered acceleration strategy via `/api/acceleration` endpoint |
+| 🛡 **Anti-Stuck 72h** | Auto-detects transactions stuck >72h, switches to aggressive mode |
+| 📦 **Batch ×20** | Accelerate up to 20 TXIDs simultaneously (Premium) |
+| 🔁 **8 Waves** | Adaptive wave intervals: 15→15→30→60→120→120→120→120 min |
+| 💱 **Dynamic Pricing** | $3–18 based on real-time mempool load |
+| 🌍 **Multi-language** | Auto-detects browser language (RU/EN + 8 others via flags) |
 
-### 🧠 Technical Architecture
-```
-
-Client (index.html) ↔ Vercel Edge/Serverless Functions ↔ External APIs
-│                                    │
-└─ Firebase Realtime DB (sync)       └─ 8 nodes + 16 pools
+### 🏗 Architecture
 
 ```
-*   **`/api/broadcast.js`** — heart of the system. Fetches TX hex, respects rate limits, sends to 8 nodes + 16 pools with exponential backoff.
-*   **`/api/cpfp.js`** — advanced CPFP calculator (address‑type aware, USD values, wallet instructions).
-*   **`/api/rbf.js`** — RBF checker with BIP‑125 compliance and comparison to CPFP.
-*   **`/api/price.js`** — dynamic pricing based on mempool.space fee estimates + fallback sources.
-*   **`/api/verify.js`** — payment verification (BTC on‑chain & USDT TRC‑20). Returns activation token.
-*   **`/api/health.js`** — monitors all 24 channels, returns availability and response times.
-*   **`/api/repeat.js`** — implements 6 premium waves (0,15,30,60,120,240 min) with confirmation checks.
-*   **`/api/status.js`**, **`/api/mempool.js`**, **`/api/stats.js`** — live network data.
+Browser (index.html, ~6200 lines, single file SPA — zero build step)
+    │
+    ├── /api/router.js       → price · mempool · cpfp · rbf · status · stats
+    ├── /api/broadcast.js    → 30 channels (8 hex-nodes + 22 pool accelerators)
+    ├── /api/lightning.js    → Lightning invoices via LNURL-pay  ← NEW v13
+    ├── /api/repeat.js       → 8-wave premium repeat scheduler
+    ├── /api/verify.js       → BTC on-chain + USDT TRC-20 payment verification
+    ├── /api/acceleration.js → Smart Advisor strategy engine
+    └── /api/telegram.js     → Payment notifications
+         │
+Firebase RTDB ──────────────── mempool.space, coinbase, binance APIs
+(counters · feed · queue)       (real-time fee + price data)
+```
 
-### ⚙️ How It Works
-1. **Submit TXID** — either single or batch (Premium).
-2. **Server fetches hex** from 8 different explorers (fallback chain).
-3. **Analysis** — fee rate, mempool position, RBF status, CPFP need.
-4. **Rebroadcast** —  
-   *Free:* 3 public nodes (mempool.space, blockstream, blockchair).  
-   *Premium:* 8 nodes + 16 pools (~80% hashrate) with automatic retries.
-5. **Live tracking** — confirmation dots, queue position, push notifications.
-6. **Premium waves** — automatic re‑broadcasts at 15,30,60,120,240 min until confirmed.
+**Vercel Hobby Plan constraints respected:**
+- All functions: `maxDuration ≤ 60s` (broadcast) or `≤ 20s` (others)
+- No paid databases — Firebase free tier only
+- No Redis, no KV store, no Postgres add-ons
+- Single-file SPA — zero build step, zero npm on frontend
+- CSP headers configured for all required external domains
 
-### 💳 Service Details & Limits
-*   **🎁 Free Tier:** 100 accelerations per day (global limit). Rebroadcast to 3 nodes, one auto‑retry after 20 min.
-*   **💎 Premium:** Dynamic price $3–18. Access to all 24 channels, 6 waves, batch mode, priority queue.
-*   **⏱ Typical times:** Free – 1‑3 hours; Premium – 10‑20 minutes.
-*   **🔁 Refund guarantee:** If not confirmed within 6 hours, money back.
+### 📡 Broadcast Channels (~88% hashrate)
 
-### 📞 Contact & Support
-*   **Support:** [@Sup_TurboTX](https://t.me/Sup_TurboTX)
-*   **Updates:** [@TurboTXAcel](https://t.me/TurboTXAcel)
-*   **Reviews:** [@TurboTXcoment](https://t.me/TurboTXcoment)
-*   **Email:** pollytrazlo@gmail.com
+| Pool | Hashrate | Method |
+|---|---|---|
+| Foundry USA | ~27% | Direct API ⭐ |
+| AntPool | ~16% | Direct API ⭐ |
+| MARA (Marathon) | ~11% | Direct API + Slipstream ⭐ |
+| ViaBTC | ~9% | Direct API |
+| SpiderPool | ~8% | Direct API ★ |
+| F2Pool | ~7% | Direct API |
+| Luxor | ~5% | Direct API ★ |
+| CloverPool | ~4% | Direct API |
+| BitFuFu | ~4% | Direct API ★ |
+| BTC.com | ~3% | Direct API |
+| Ocean.xyz | ~2% | Direct API |
+| EMCDPool | ~2% | Direct API |
+| SBICrypto | ~2% | Direct API |
+| + 9 more pools | ~3% | P2P / API |
+| **8 hex-nodes** | — | mempool.space · blockstream · blockchair · blockcypher · btcscan + 3 more |
 
-### 🌐 Live Demo
-👉 **[Open Web App (Production)](https://acelerat.vercel.app)**
+### ⚡ Lightning Network (v13)
+
+Full LNURL-pay flow built into the payment modal:
+
+1. User clicks "⚡ Lightning" tab → "Create Invoice"
+2. Server POST `/api/lightning` → fetches BTC price, gets LNURL params, requests invoice
+3. Frontend renders QR code (api.qrserver.com, no JS libs needed)
+4. Auto-polling every 5s → `GET /api/lightning?hash=<paymentHash>`
+5. On payment detected: Premium token issued, modal closes automatically
+
+Compatible with: **Wallet of Satoshi, Phoenix, Breez, Muun, Zeus, BlueWallet, LNbits**, any LN wallet.
+
+Requires env var: `LIGHTNING_ADDRESS=user@domain.com` (any Lightning Address).
+
+### 💳 Payment Methods
+
+| Method | Network | Verification |
+|---|---|---|
+| ₿ Bitcoin | On-chain | mempool.space + blockstream fallback |
+| ⚡ Lightning | LN via LNURL-pay | In-memory polling (`/api/lightning`) |
+| ₮ USDT | TRC-20 / TRON | TronGrid + TronScan fallback |
+| 🎟 Promo | — | SHA-256 hash, Firebase usage counter |
+
+### ⚙️ Dynamic Pricing Logic
+
+```
+feeRate ≤ 10 sat/vB  →  $3   🟢 Network calm     → best time to accelerate
+feeRate ≤ 30 sat/vB  →  $4   🟡 Moderate load
+feeRate ≤ 60 sat/vB  →  $7   🟠 High load
+feeRate ≤ 150 sat/vB →  $12  🔴 Congested
+feeRate > 150 sat/vB →  $18  🔥 Critical
+```
+
+CDN cache: `s-maxage=60, stale-while-revalidate=90`. Client cache: 90s with per-minute cache-bust.
+
+### 🛠 Environment Variables
+
+| Variable | Required | Description |
+|---|---|---|
+| `PREMIUM_SECRET` | ✅ | Activation token returned on successful payment |
+| `LIGHTNING_ADDRESS` | ⚡ | Lightning Address for LN invoices |
+| `BTC_WALLET` | ✅ | Bitcoin address for direct payments |
+| `USDT_WALLET` | ✅ | USDT TRC-20 address |
+| `FIREBASE_DB_URL` | ✅ | Firebase Realtime DB URL |
+| `TG_TOKEN` | optional | Telegram bot token for notifications |
+| `TG_CHAT_ID` | optional | Telegram chat ID |
+
+### 📞 Contact
+
+- **Support:** [@Sup_TurboTX](https://t.me/Sup_TurboTX)
+- **Updates:** [@TurboTXAcel](https://t.me/TurboTXAcel)
+- **Reviews:** [@TurboTXcoment](https://t.me/TurboTXcoment)
+- **Email:** pollytrazlo@gmail.com
+
+### 🌐 Live
+
+👉 **[acelerat.vercel.app](https://acelerat.vercel.app)**
 
 ---
 
-<div id="russian-version"></div>
+<div id="russian"></div>
 
-## 🇷🇺 Русская Версия
+## 🇷🇺 Русская версия
 
-> **Статус: 🟢 PRODUCTION (2026)**  
-> Полностью serverless, профессиональный ускоритель Bitcoin‑транзакций.  
-> Реальный rebroadcast в 8 нод + 16 пулов, покрывающих ~80% хешрейта сети.
+> **Статус: 🟢 PRODUCTION (2026) · v13**
+> Полностью serverless ускоритель Bitcoin-транзакций.
+> 30 каналов broadcast: 8 hex-узлов + 22 пул-акселератора, покрывающих **~88% хешрейта Bitcoin**.
+> Теперь с оплатой через **Lightning Network**.
 
-Профессиональный набор инструментов для мониторинга и ускорения «зависших» Bitcoin‑транзакций.  
-Построен на **Vercel Serverless**, **Firebase Realtime Database** и чистой производительности.
+### 🔥 Что нового в v13
 
-### 🔥 Основные возможности
-*   **Serverless ядро** — вся логика вынесена в `/api/*` (Node.js 20). Никаких CORS‑ограничений.
-*   **24 канала одновременно** — 8 публичных нод + 16 майнинг‑пулов (Foundry, AntPool, MARA, ViaBTC, SpiderPool, Luxor и др.).
-*   **Умные калькуляторы** — CPFP и RBF с точными рекомендациями и инструкциями для кошельков (Electrum, Sparrow, Ledger…).
-*   **Динамическая цена** — от $3 (сеть свободна) до $18 (перегрузка). Реальный курс BTC/USD из нескольких источников.
-*   **Живая диагностика** — при вводе TXID мгновенный анализ: комиссия, позиция в мемпуле, RBF, нужен ли CPFP.
-*   **Глобальная синхронизация** — Firebase: лента подтверждений, общая очередь, счётчик ускорений.
-*   **Пакетный режим** — до 20 TXID за раз (только Premium).
-*   **Защита уровня enterprise** — лимиты по IP, кулдаун TXID, фильтрация ботов, ограничение размера hex.
+| Фича | Описание |
+|---|---|
+| ⚡ **Lightning Network** | Мгновенные invoice-платежи через LNURL-pay. WoS, Phoenix, Breez, Muun, Zeus |
+| 📊 **Network Intelligence** | Live-дашборд: цена, fee rate, мемпул, Smart Advisor рекомендации в реальном времени |
+| 🎯 **Last-Block-Miner Boost** | Определяет, кто добыл последний блок — отправляет туда первым |
+| 🔐 **MARA Slipstream** | Подача в приватный мемпул Marathon Digital через Slipstream API |
+| 🧠 **Smart Advisor** | Анализ TX, выбор оптимальной стратегии ускорения |
+| 🛡 **Anti-Stuck 72h** | Авто-определение TX >72ч, переход в агрессивный режим |
+| 📦 **Batch ×20** | Пакетное ускорение до 20 TXID за раз (Premium) |
+| 🔁 **8 волн** | Адаптивные интервалы: 15→15→30→60→120→120→120→120 мин |
+| 💱 **Динамическая цена** | $3–18 в зависимости от реальной загрузки мемпула |
+| 🌍 **Мультиязычность** | Авто-определение языка браузера (9 языков) |
 
-### 🧠 Техническая архитектура
-*   **`/api/broadcast.js`** — сердце системы. Получает hex, проверяет лимиты, отправляет в 8 нод + 16 пулов с exponential backoff.
-*   **`/api/cpfp.js`** — продвинутый CPFP‑калькулятор (учёт типа адреса, USD, инструкции).
-*   **`/api/rbf.js`** — RBF‑калькулятор с проверкой BIP‑125 и сравнением с CPFP.
-*   **`/api/price.js`** — динамическое ценообразование на основе загрузки mempool.
-*   **`/api/verify.js`** — проверка оплаты (BTC on‑chain & USDT TRC‑20). Возвращает токен активации.
-*   **`/api/health.js`** — мониторинг всех 24 каналов, статус и время ответа.
-*   **`/api/repeat.js`** — реализует 6 премиум‑волн (0,15,30,60,120,240 мин) с автоматическими повторами.
-*   **`/api/status.js`**, **`/api/mempool.js`**, **`/api/stats.js`** — живые данные сети.
+### 🏗 Техническая архитектура
 
-### ⚙️ Как это работает
-1. **Отправляете TXID** (один или пачкой).
-2. **Сервер получает hex** из 8 разных эксплореров (цепочка fallback).
-3. **Анализ** — ставка, позиция в мемпуле, RBF, нужен ли CPFP.
-4. **Rebroadcast** —  
-   *Free:* 3 публичные ноды (mempool.space, blockstream, blockchair).  
-   *Premium:* 8 нод + 16 пулов (~80% хешрейта) с автоматическими повторными попытками.
-5. **Живой трекинг** — точки подтверждений, позиция в очереди, push‑уведомления.
-6. **Премиум‑волны** — автоповторы через 15,30,60,120,240 мин до подтверждения.
+```
+Браузер (index.html, ~6200 строк, SPA без сборки, единый файл)
+    │
+    ├── /api/router.js       → price · mempool · cpfp · rbf · status · stats
+    ├── /api/broadcast.js    → 30 каналов (8 нод + 22 пула)
+    ├── /api/lightning.js    → Lightning invoice через LNURL-pay  ← НОВОЕ v13
+    ├── /api/repeat.js       → 8-волновой Premium повтор
+    ├── /api/verify.js       → Верификация BTC + USDT TRC-20
+    ├── /api/acceleration.js → Smart Advisor
+    └── /api/telegram.js     → Уведомления об оплате
+         │
+Firebase RTDB ─────────────── mempool.space, coinbase, binance APIs
+(счётчики · лента · очередь)   (live данные сети)
+```
 
-### 💳 Детали сервиса и лимиты
-*   **🎁 Бесплатно:** 100 ускорений в сутки (общий лимит). Rebroadcast в 3 ноды, один автоповтор через 20 мин.
-*   **💎 Premium:** динамическая цена $3–18. Все 24 канала, 6 волн, пакетный режим, приоритет.
-*   **⏱ Типичное время:** Free – 1‑3 часа; Premium – 10‑20 минут.
-*   **🔁 Гарантия возврата:** если не подтвердится за 6 часов — вернём деньги.
+**Соответствие Vercel Hobby плану:**
+- Все функции: `maxDuration ≤ 60с` (broadcast) или `≤ 20с` (остальные)
+- Только Firebase free tier — никаких платных баз данных
+- Без Redis, без KV, без Postgres — ноль платных add-on'ов
+- Фронтенд — один HTML-файл без build-шага и npm
+- CSP заголовки настроены под все внешние домены
 
-### 📞 Контакты и поддержка
-*   **Техподдержка:** [@Sup_TurboTX](https://t.me/Sup_TurboTX)
-*   **Обновления:** [@TurboTXAcel](https://t.me/TurboTXAcel)
-*   **Отзывы:** [@TurboTXcoment](https://t.me/TurboTXcoment)
-*   **Email:** pollytrazlo@gmail.com
+### 📡 Каналы broadcast (~88% хешрейта)
 
-### 🌐 Доступ к инструменту
-👉 **[Открыть Web‑интерфейс (Production)](https://acelerat.vercel.app)**
+**Foundry USA** (~27%) · **AntPool** (~16%) · **MARA + Slipstream** (~11%) · **ViaBTC** (~9%) · **SpiderPool** (~8%) · **F2Pool** (~7%) · **Luxor** (~5%) · **CloverPool** (~4%) · **BitFuFu** (~4%) · **BTC.com** (~3%) · **Ocean.xyz** (~2%) · **EMCDPool** (~2%) · **SBICrypto** (~2%) · 9 других пулов
+
+**8 hex-узлов:** mempool.space · blockstream.info · blockchair · blockcypher · btcscan.org + 3 дополнительных
+
+### ⚡ Lightning Network (v13)
+
+Полный LNURL-pay флоу в модалке оплаты:
+
+1. Вкладка «⚡ Lightning» → «Создать Invoice»
+2. Сервер: `POST /api/lightning` → получает курс BTC, LNURL params, запрашивает invoice
+3. Фронтенд: QR-код через api.qrserver.com (без JS-библиотек)
+4. Автополинг каждые 5с: `GET /api/lightning?hash=<paymentHash>`
+5. При оплате: выдаётся Premium токен, модалка закрывается автоматически
+
+Совместимо с: **Wallet of Satoshi, Phoenix, Breez, Muun, Zeus, BlueWallet, LNbits**, любым LN-кошельком.
+
+Требует переменную окружения: `LIGHTNING_ADDRESS=user@domain.com`
+
+### 💳 Способы оплаты
+
+| Метод | Сеть | Верификация |
+|---|---|---|
+| ₿ Bitcoin | On-chain | mempool.space + blockstream fallback |
+| ⚡ Lightning | LN / LNURL-pay | In-memory polling |
+| ₮ USDT | TRC-20 / TRON | TronGrid + TronScan fallback |
+| 🎟 Промокод | — | SHA-256 hash + Firebase счётчик |
+
+### 💳 Детали и лимиты
+
+| | Бесплатно | Premium |
+|---|---|---|
+| Каналов broadcast | 3 CORS-узла | 30 (8 нод + 22 пула) |
+| Лимит в сутки | 100 TX (Firebase глобальный счётчик) | Без лимита |
+| Волны повтора | 1 (через 20 мин) | 8 волн до 4 часов |
+| Цена | $0 | $3–18 (динамически) |
+| Время Premium | 1–3 часа | ~10–20 минут |
+| Гарантия | — | Возврат за 6 часов |
+
+### 🆚 TurboTX vs конкуренты (2026)
+
+| Параметр | **TurboTX v13** | ViaBTC | CloverPool | BitAccelerate |
+|---|---|---|---|---|
+| Бесплатный план | ✅ 100/день | 20/час | ❌ | ❌ |
+| Кол-во каналов | **30 (сервер)** | 1 пул | 1 пул | ~20 (клиент) |
+| Цена Premium | **$3–18 динамич.** | $25+ | $24+ | ~$65 |
+| Lightning Network | **✅** | ❌ | ❌ | ❌ |
+| Серверный broadcast | **✅ реальный ответ** | ❌ | ❌ | ❌ |
+| Авто-волны | **8 волн · 4ч** | ❌ | ❌ | раз в 6ч |
+| Охват хешрейта | **~88%** | — | — | ~30% |
+| CPFP калькулятор | **✅** | ❌ | ❌ | ❌ |
+| RBF калькулятор | **✅** | ❌ | ❌ | ❌ |
+| Гарантия возврата | **✅ 6ч** | ❌ | ❌ | ❌ |
+
+### 📞 Контакты
+
+- **Техподдержка:** [@Sup_TurboTX](https://t.me/Sup_TurboTX)
+- **Обновления:** [@TurboTXAcel](https://t.me/TurboTXAcel)
+- **Отзывы:** [@TurboTXcoment](https://t.me/TurboTXcoment)
+- **Email:** pollytrazlo@gmail.com
+
+### 🌐 Доступ
+
+👉 **[acelerat.vercel.app](https://acelerat.vercel.app)**
 
 ---
 
-## ⚖️ License & Intellectual Property / Лицензия и Авторское право
+## 📋 Changelog
+
+### v13 — 2026 Март
+- ⚡ **Lightning Network** — полноценный UI: QR-код, LNURL-pay, auto-polling каждые 5с, 60мин таймер, авто-активация Premium
+- 📊 **Network Intelligence Dashboard** — 4 live-карточки на главной странице: текущая цена, fee rate, мемпул, Smart Совет
+- 🎨 **UI Hero Update** — v13 badge, 7 feature-badges в hero секции, Lightning в списке оплаты
+- 🆚 **Таблица конкурентов** — добавлена строка Lightning Network (единственные на рынке!)
+- 🐛 **CSP Fix** — добавлен `api.qrserver.com` в `img-src` для QR-кодов Lightning
+- 🏷️ **Rebranding** — все версии обновлены до v13
+
+### v12 — 2026 Февраль
+- 30 каналов broadcast (было 24)
+- Last-Block-Miner Boost
+- MARA Slipstream (приватный мемпул)
+- Anti-Stuck 72h режим
+- HEX Cache
+- Fee Trend Detection
+- Hashrate-Weighted Early Stop
+- UA Rotation
+- 🐛 Исправление dynamic price (6 min stale bug)
+- 🐛 Исправление confLabel (всегда пустой)
+- 🐛 Исправление race condition fetchMempoolStats + updateFeeMeter
+- 🐛 Исправление hashrate bar scale (700→1000 EH/s)
+- 🐛 Исправление applyPrice tier по feeRate вместо usd
+
+### v11 и ранее
+- Smart Advisor (`/api/acceleration`)
+- Batch mode (до 20 TX)
+- CPFP/RBF калькуляторы
+- Firebase live feed + global queue + promo codes
+- Мультиязычность (9 языков)
+- Telegram уведомления
+
+---
+
+## ⚖️ Лицензия
 
 <p align="center">
-  <code><strong>LICENSE: PROPRIETARY</strong></code> &nbsp;&nbsp; | &nbsp;&nbsp; <code><strong>© 2026 ProjectBarabashka</strong></code>
+  <code><strong>LICENSE: PROPRIETARY</strong></code> &nbsp;&nbsp;|&nbsp;&nbsp; <code><strong>© 2026 ProjectBarabashka</strong></code>
 </p>
 
 > [!CAUTION]
 > ### 🚨 PROPRIETARY SOFTWARE / ВСЕ ПРАВА ЗАЩИЩЕНЫ (2026)
 >
-> **ENG:** This source code is provided for **educational and viewing purposes only**. Any commercial use, creation of mirrors (clones), or distribution of modified versions of the interface and logic of the **BTC Accelerator** (acelerat.vercel.app) is **STRICTLY PROHIBITED** without the express written permission of the owner.
+> **ENG:** This source code is provided for **educational and viewing purposes only**. Any commercial use, creation of mirrors (clones), or distribution of modified versions is **STRICTLY PROHIBITED** without express written permission.
 >
-> **RUS:** Данный исходный код предоставлен исключительно для **ознакомительных целей**. Любое коммерческое использование, создание зеркал (клонов) или распространение измененных версий интерфейса и логики **BTC Accelerator** (acelerat.vercel.app) **СТРОГО ЗАПРЕЩЕНО** без прямого письменного согласия владельца.
+> **RUS:** Данный исходный код предоставлен исключительно для **ознакомительных целей**. Любое коммерческое использование, создание зеркал или распространение изменённых версий **СТРОГО ЗАПРЕЩЕНО** без письменного согласия владельца.
 
 <p align="center">
   <b>Developed by ProjectBarabashka</b><br>
-  <i>Ensuring your Bitcoin transactions never get stuck.</i>
+  <i>Ensuring your Bitcoin transactions never get stuck. · acelerat.vercel.app</i>
 </p>
-``` 
-
-опять текс поделен на 2 части
