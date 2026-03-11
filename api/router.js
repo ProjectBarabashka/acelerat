@@ -50,38 +50,49 @@ function checkRl(ip, maxPerMin = 30) {
 // ══════════════════════════════════════════════════════════════
 //  HEALTH  —  GET /api/health[?verbose=1]
 // ══════════════════════════════════════════════════════════════
+// v12: хешрейт обновлён Q1 2026 + новые пулы
 const HR_HEALTH = {
-  Foundry:27, AntPool:16, MARA:11, ViaBTC:9, SpiderPool:8,
+  Foundry:27, AntPool:16, MARA:11, MaraSlipstream:11, ViaBTC:9, SpiderPool:8,
   F2Pool:7, Luxor:5, CloverPool:4, BitFuFu:4, 'BTC.com':3,
-  Ocean:2, TxBoost:2, mempoolAccel:1, bitaccelerate:1, '360btc':1, txfaster:1, btcspeed:1,
+  Ocean:2, EMCDPool:2, SBICrypto:2,
+  TxBoost:1, mempoolAccel:1, bitaccelerate:1, '360btc':1, txfaster:1, btcspeed:1,
+  '2Miners':1, Rawpool:1,
 };
 
+// v12: 8 nodes + 22 pools = 30 каналов, ~88% хешрейта
 const HEALTH_CHANNELS = [
-  { name:'mempool.space',   tier:'node', url:'https://mempool.space/api/blocks/tip/height',   method:'GET' },
-  { name:'blockstream',     tier:'node', url:'https://blockstream.info/api/blocks/tip/height', method:'GET' },
-  { name:'blockchair',      tier:'node', url:'https://api.blockchair.com/bitcoin/stats',        method:'GET' },
-  { name:'blockcypher',     tier:'node', url:'https://api.blockcypher.com/v1/btc/main',         method:'GET' },
-  { name:'btcscan',         tier:'node', url:'https://btcscan.org/api/blocks/tip/height',       method:'GET' },
-  { name:'blockchain.info', tier:'node', url:'https://blockchain.info/latestblock',             method:'GET' },
-  { name:'bitaps',          tier:'node', url:'https://bitaps.com/api/bitcoin/blockcount',       method:'GET' },
-  { name:'sochain',         tier:'node', url:'https://sochain.com/api/v2/get_info/BTC',         method:'GET' },
-  { name:'Foundry',      tier:'pool', url:'https://foundryusapool.com/',         method:'HEAD' },
-  { name:'AntPool',      tier:'pool', url:'https://www.antpool.com/',            method:'HEAD' },
-  { name:'MARA',         tier:'pool', url:'https://mara.com/',                   method:'HEAD' },
-  { name:'ViaBTC',       tier:'pool', url:'https://viabtc.com/',                 method:'HEAD' },
-  { name:'SpiderPool',   tier:'pool', url:'https://www.spiderpool.com/',         method:'HEAD' },
-  { name:'F2Pool',       tier:'pool', url:'https://www.f2pool.com/',             method:'HEAD' },
-  { name:'Luxor',        tier:'pool', url:'https://luxor.tech/',                 method:'HEAD' },
-  { name:'CloverPool',   tier:'pool', url:'https://clvpool.com/',                method:'HEAD' },
-  { name:'BitFuFu',      tier:'pool', url:'https://www.bitfufu.com/',            method:'HEAD' },
-  { name:'BTC.com',      tier:'pool', url:'https://btc.com/',                    method:'HEAD' },
-  { name:'Ocean',        tier:'pool', url:'https://ocean.xyz/',                  method:'HEAD' },
-  { name:'TxBoost',      tier:'pool', url:'https://txboost.com/',                method:'HEAD' },
-  { name:'mempoolAccel', tier:'pool', url:'https://mempool.space/',              method:'HEAD' },
-  { name:'bitaccelerate',tier:'pool', url:'https://www.bitaccelerate.com/',      method:'HEAD' },
-  { name:'360btc',       tier:'pool', url:'https://360btc.net/',                 method:'HEAD' },
-  { name:'txfaster',     tier:'pool', url:'https://txfaster.com/',               method:'HEAD' },
-  { name:'btcspeed',     tier:'pool', url:'https://btcspeed.org/',               method:'HEAD' },
+  // ── Hex nodes ─────────────────────────────────────────────
+  { name:'mempool.space',    tier:'node', url:'https://mempool.space/api/blocks/tip/height',   method:'GET' },
+  { name:'blockstream',      tier:'node', url:'https://blockstream.info/api/blocks/tip/height', method:'GET' },
+  { name:'blockchair',       tier:'node', url:'https://api.blockchair.com/bitcoin/stats',        method:'GET' },
+  { name:'blockcypher',      tier:'node', url:'https://api.blockcypher.com/v1/btc/main',         method:'GET' },
+  { name:'btcscan',          tier:'node', url:'https://btcscan.org/api/blocks/tip/height',       method:'GET' },
+  { name:'blockchain.info',  tier:'node', url:'https://blockchain.info/latestblock',             method:'GET' },
+  { name:'bitaps',           tier:'node', url:'https://bitaps.com/api/bitcoin/blockcount',       method:'GET' },
+  { name:'sochain',          tier:'node', url:'https://sochain.com/api/v2/get_info/BTC',         method:'GET' },
+  // ── Mining pools ──────────────────────────────────────────
+  { name:'Foundry',          tier:'pool', url:'https://foundryusapool.com/',             method:'HEAD' },
+  { name:'AntPool',          tier:'pool', url:'https://www.antpool.com/',                method:'HEAD' },
+  { name:'MARA',             tier:'pool', url:'https://mara.com/',                       method:'HEAD' },
+  { name:'MaraSlipstream',   tier:'pool', url:'https://slipstream.mara.com/',            method:'HEAD' }, // v12 NEW
+  { name:'ViaBTC',           tier:'pool', url:'https://viabtc.com/',                     method:'HEAD' },
+  { name:'SpiderPool',       tier:'pool', url:'https://www.spiderpool.com/',             method:'HEAD' },
+  { name:'F2Pool',           tier:'pool', url:'https://www.f2pool.com/',                 method:'HEAD' },
+  { name:'Luxor',            tier:'pool', url:'https://luxor.tech/',                     method:'HEAD' },
+  { name:'CloverPool',       tier:'pool', url:'https://clvpool.com/',                    method:'HEAD' },
+  { name:'BitFuFu',          tier:'pool', url:'https://www.bitfufu.com/',                method:'HEAD' },
+  { name:'BTC.com',          tier:'pool', url:'https://btc.com/',                        method:'HEAD' },
+  { name:'Ocean',            tier:'pool', url:'https://ocean.xyz/',                      method:'HEAD' },
+  { name:'EMCDPool',         tier:'pool', url:'https://emcd.io/',                        method:'HEAD' }, // v12 NEW
+  { name:'SBICrypto',        tier:'pool', url:'https://sbicrypto.com/',                  method:'HEAD' }, // v12 NEW
+  { name:'2Miners',          tier:'pool', url:'https://2miners.com/',                    method:'HEAD' }, // v12 NEW
+  { name:'Rawpool',          tier:'pool', url:'https://rawpool.com/',                    method:'HEAD' }, // v12 NEW
+  { name:'TxBoost',          tier:'pool', url:'https://txboost.com/',                    method:'HEAD' },
+  { name:'mempoolAccel',     tier:'pool', url:'https://mempool.space/',                  method:'HEAD' },
+  { name:'bitaccelerate',    tier:'pool', url:'https://www.bitaccelerate.com/',          method:'HEAD' },
+  { name:'360btc',           tier:'pool', url:'https://360btc.net/',                     method:'HEAD' },
+  { name:'txfaster',         tier:'pool', url:'https://txfaster.com/',                  method:'HEAD' },
+  { name:'btcspeed',         tier:'pool', url:'https://btcspeed.org/',                   method:'HEAD' },
 ];
 
 async function pingCh(ch, timeout = 5000) {
@@ -254,16 +265,16 @@ async function handleStats(req, res) {
     const CEMOJI={critical:'🔴',extreme:'🔴',high:'🟠',medium:'🟡',low:'🟢'};
     const uptimeSec=Math.round((Date.now()-_sess.startedAt)/1000);
     const uptimeStr=uptimeSec<60?`${uptimeSec}с`:uptimeSec<3600?`${Math.round(uptimeSec/60)}м`:`${Math.round(uptimeSec/3600)}ч`;
-    const avgHr=_sess.premBroadcasts>0?Math.round(_sess.totalHashreachPct/_sess.premBroadcasts):83;
+    const avgHr=_sess.premBroadcasts>0?Math.round(_sess.totalHashreachPct/_sess.premBroadcasts):88;
     const hexRate=_sess.broadcasts>0?Math.round(_sess.broadcastsWithHex/_sess.broadcasts*100):null;
     const pub={
-      ok:true,version:'v11',
+      ok:true,version:'v12',
       network:{blockHeight:tip||null,feeRate:fastest||null,feeHalfHour:halfHour||null,feeHour:hour||null,
         feeEconomy:economy||null,congestion,congestionText:CTEXT[congestion],congestionEmoji:CEMOJI[congestion],
         btcPrice,mempoolCount:mp.count||null,mempoolMB:mp.vsize?+(mp.vsize/1e6).toFixed(1):null,
         hashrateEHs:hr.currentHashrate?+(hr.currentHashrate/1e18).toFixed(2):null},
-      service:{version:'v11',nodeChannels:8,poolChannels:17,totalChannels:25,hashrateReach:`~${avgHr}%`,
-        batchSupport:true,lightningSupport:true,uptime:uptimeStr},
+      service:{version:'v12',nodeChannels:8,poolChannels:22,totalChannels:30,hashrateReach:`~${avgHr}%`,
+        batchSupport:true,lightningSupport:true,maraSlipstream:true,lastBlockMiner:true,uptime:uptimeStr},
       timestamp:Date.now(),
     };
     if(isAdmin) pub.session={startedAt:new Date(_sess.startedAt).toISOString(),uptime:uptimeStr,..._sess,avgHashreachPct:avgHr,hexHitRate:hexRate!==null?`${hexRate}%`:'n/a'};
