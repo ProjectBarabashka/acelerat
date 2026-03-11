@@ -87,12 +87,14 @@ const HEALTH_CHANNELS = [
   { name:'SBICrypto',        tier:'pool', url:'https://sbicrypto.com/',                  method:'HEAD' }, // v12 NEW
   { name:'2Miners',          tier:'pool', url:'https://2miners.com/',                    method:'HEAD' }, // v12 NEW
   { name:'Rawpool',          tier:'pool', url:'https://rawpool.com/',                    method:'HEAD' }, // v12 NEW
-  { name:'TxBoost',          tier:'pool', url:'https://txboost.com/',                    method:'HEAD' },
-  { name:'mempoolAccel',     tier:'pool', url:'https://mempool.space/',                  method:'HEAD' },
-  { name:'bitaccelerate',    tier:'pool', url:'https://www.bitaccelerate.com/',          method:'HEAD' },
-  { name:'360btc',           tier:'pool', url:'https://360btc.net/',                     method:'HEAD' },
-  { name:'txfaster',         tier:'pool', url:'https://txfaster.com/',                  method:'HEAD' },
-  { name:'btcspeed',         tier:'pool', url:'https://btcspeed.org/',                   method:'HEAD' },
+  // Акселераторы: GET вместо HEAD (Cloudflare блокирует HEAD с Vercel IP → ложный offline)
+  // noBlock:true → любой HTTP ответ (включая 4xx) считается "живой"
+  { name:'TxBoost',          tier:'pool', url:'https://txboost.com/',                    method:'GET', noBlock:true },
+  { name:'mempoolAccel',     tier:'pool', url:'https://mempool.space/',                  method:'GET', noBlock:true },
+  { name:'bitaccelerate',    tier:'pool', url:'https://www.bitaccelerate.com/',          method:'GET', noBlock:true },
+  { name:'360btc',           tier:'pool', url:'https://360btc.net/',                     method:'GET', noBlock:true },
+  { name:'txfaster',         tier:'pool', url:'https://txfaster.com/',                   method:'GET', noBlock:true },
+  { name:'btcspeed',         tier:'pool', url:'https://btcspeed.org/',                   method:'GET', noBlock:true },
 ];
 
 async function pingCh(ch, timeout = 5000) {
@@ -102,7 +104,8 @@ async function pingCh(ch, timeout = 5000) {
     const tm = setTimeout(() => ac.abort(), timeout);
     const r  = await fetch(ch.url, { method: ch.method, signal: ac.signal });
     clearTimeout(tm);
-    const ok = r.status < 500;
+    // noBlock: любой HTTP ответ = сайт живой (4xx тоже — просто блокирует наш IP)
+    const ok = ch.noBlock ? r.status < 600 : r.status < 500;
     return { name:ch.name, tier:ch.tier, ok, status:r.status, ms:Date.now()-t0 };
   } catch(e) {
     return { name:ch.name, tier:ch.tier, ok:false, status:0, ms:Date.now()-t0,
@@ -328,19 +331,23 @@ async function handleStats(req, res) {
   const isAdmin = req.query?.admin==='1' && req.headers['x-turbotx-token']===process.env.PREMIUM_SECRET;
   const isLive  = isAdmin && req.query?.live==='1';
   try {
-    const [feesR,mpR,tipR,priceR,hrR,tip2R] = await Promise.allSettled([
-      ft('https://mempool.space/api/v1/fees/recommended',6000),
-      ft('https://mempool.space/api/mempool',6000),
-      ft('https://mempool.space/api/blocks/tip/height',5000),
-      ft('https://mempool.space/api/v1/prices',5000),
-      ft('https://mempool.space/api/v1/mining/hashrate/3d',6000),
-      ft('https://blockstream.info/api/blocks/tip/height',5000),
+    const [feesR,mpR,tipR,priceR,hrR,tip2R,hrFbR] = await Promise.allSettled([
+      ft('https://mempool.space/api/v1/fees/recommended',   {}, 6000),
+      ft('https://mempool.space/api/mempool',               {}, 6000),
+      ft('https://mempool.space/api/blocks/tip/height',     {}, 5000),
+      ft('https://mempool.space/api/v1/prices',             {}, 5000),
+      ft('https://mempool.space/api/v1/mining/hashrate/3d', {}, 8000),
+      ft('https://blockstream.info/api/blocks/tip/height',  {}, 5000),
+      ft('https://api.blockchair.com/bitcoin/stats',        {}, 7000),
     ]);
     const ok = s=>s.status==='fulfilled'&&s.value?.ok?s.value:null;
     const fees  = ok(feesR) ?await sj(ok(feesR)):{};
     const mp    = ok(mpR)   ?await sj(ok(mpR))  :{};
     const price = ok(priceR)?await sj(ok(priceR)):{};
-    const hr    = ok(hrR)   ?await sj(ok(hrR))  :{};
+    let hr = ok(hrR) ? await sj(ok(hrR)) : {};
+    if (!hr.currentHashrate && ok(hrFbR)) {
+      try { const fb=await sj(ok(hrFbR)); if(fb?.data?.hashrate_24h) hr={currentHashrate:fb.data.hashrate_24h}; } catch {}
+    }
     let tip=0;
     if(ok(tipR))  tip=parseInt(await ok(tipR).text(),10)||0;
     if(!tip&&ok(tip2R)) tip=parseInt(await ok(tip2R).text(),10)||0;
@@ -435,8 +442,9 @@ async function handlePrice(req, res) {
   const mpTierIdx =
     mpCount > 100000 || mpVsizeMB > 100 ? 4 :   // critical
     mpCount >  60000 || mpVsizeMB >  60 ? 3 :   // extreme
-    mpCount >  35000 || mpVsizeMB >  35 ? 2 :   // high → жёлтое сердце с 35k TX
-                                          0;    // low  → синее до 35k TX
+    mpCount >  30000 || mpVsizeMB >  30 ? 2 :   // high
+    mpCount >  10000 || mpVsizeMB >  10 ? 1 :   // medium
+                                          0;    // low
 
   // Итоговый тир = максимум из двух сигналов (цена растёт когда ЛЮБОЙ из них высок)
   const feeTierIdx = PRICE_TIERS.indexOf(tierByFee);
