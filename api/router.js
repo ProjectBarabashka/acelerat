@@ -328,19 +328,25 @@ async function handleStats(req, res) {
   const isAdmin = req.query?.admin==='1' && req.headers['x-turbotx-token']===process.env.PREMIUM_SECRET;
   const isLive  = isAdmin && req.query?.live==='1';
   try {
-    const [feesR,mpR,tipR,priceR,hrR,tip2R] = await Promise.allSettled([
-      ft('https://mempool.space/api/v1/fees/recommended',6000),
-      ft('https://mempool.space/api/mempool',6000),
-      ft('https://mempool.space/api/blocks/tip/height',5000),
-      ft('https://mempool.space/api/v1/prices',5000),
-      ft('https://mempool.space/api/v1/mining/hashrate/3d',6000),
-      ft('https://blockstream.info/api/blocks/tip/height',5000),
+    // FIX: ft(url, opts, ms) — раньше таймаут попадал в opts вместо ms
+    const [feesR,mpR,tipR,priceR,hrR,tip2R,hrFbR] = await Promise.allSettled([
+      ft('https://mempool.space/api/v1/fees/recommended',   {}, 6000),
+      ft('https://mempool.space/api/mempool',               {}, 6000),
+      ft('https://mempool.space/api/blocks/tip/height',     {}, 5000),
+      ft('https://mempool.space/api/v1/prices',             {}, 5000),
+      ft('https://mempool.space/api/v1/mining/hashrate/3d', {}, 8000),
+      ft('https://blockstream.info/api/blocks/tip/height',  {}, 5000),
+      ft('https://api.blockchair.com/bitcoin/stats',        {}, 7000), // hashrate fallback
     ]);
     const ok = s=>s.status==='fulfilled'&&s.value?.ok?s.value:null;
     const fees  = ok(feesR) ?await sj(ok(feesR)):{};
     const mp    = ok(mpR)   ?await sj(ok(mpR))  :{};
     const price = ok(priceR)?await sj(ok(priceR)):{};
-    const hr    = ok(hrR)   ?await sj(ok(hrR))  :{};
+    // FIX: hashrate primary mempool.space, fallback Blockchair
+    let hr = ok(hrR) ? await sj(ok(hrR)) : {};
+    if (!hr.currentHashrate && ok(hrFbR)) {
+      try { const fb=await sj(ok(hrFbR)); if(fb?.data?.hashrate_24h) hr={currentHashrate:fb.data.hashrate_24h}; } catch {}
+    }
     let tip=0;
     if(ok(tipR))  tip=parseInt(await ok(tipR).text(),10)||0;
     if(!tip&&ok(tip2R)) tip=parseInt(await ok(tip2R).text(),10)||0;
