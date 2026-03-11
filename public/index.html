@@ -5231,14 +5231,31 @@ function _rtApplyTicker(p) {
                         mc.level === 'medium' ? 'var(--a)' : '#ff5555';
   }
 
-  // ── dot-анимация (пульс иконки) ───────────────────────────
-  const congestion = p.mempoolCongestion?.level || p.congestion || 'low';
-  const dotEl = document.getElementById('net-pulse-dot');
-  if (dotEl) {
-    dotEl.className = 'net-heart ' + (
-      congestion === 'critical' || congestion === 'high' ? 'hot' :
-      congestion === 'medium' ? 'warm' : 'calm'
-    );
+  // ── Все сердечки страницы — по congestion с сервера ─────────
+  // congestion уже учитывает ОБА сигнала: feeRate + очередь мемпула
+  const congestion = p.congestion || 'low';
+  const heartLevel =
+    congestion === 'critical' || congestion === 'extreme' ? 'busy' :
+    congestion === 'high'     || congestion === 'medium'  ? 'mid'  : 'calm';
+
+  ['net-pulse-dot','fee-dot','price-tag-dot','modal-heart-dot'].forEach(function(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const hasSm = el.classList.contains('sm');
+    el.className = 'net-heart ' + heartLevel + (hasSm ? ' sm' : '');
+  });
+
+  // ── price-tag-text — что именно подняло цену ─────────────
+  const tagText = document.getElementById('price-tag-text');
+  if (tagText && p.priceSignals) {
+    const sig = p.priceSignals;
+    if (sig.queueDriver && sig.mpCount) {
+      tagText.textContent = 'очередь ' + Number(sig.mpCount).toLocaleString('ru') + ' TX';
+    } else if (sig.feeDriver && sig.feeRate) {
+      tagText.textContent = sig.feeRate + ' sat/vB';
+    } else {
+      tagText.textContent = p.text || 'сеть';
+    }
   }
 
   // ── Network Intelligence карточки ────────────────────────
@@ -5248,6 +5265,7 @@ function _rtApplyTicker(p) {
   if (window._TurboPrice?.apply && p.usd > 0) {
     try { window._TurboPrice.apply(p); } catch(e) {}
   }
+
 }
 
 async function fetchMempoolStats() {
@@ -6094,25 +6112,23 @@ console.log('[TurboTX] Server API connected ✓');
     if (modalBadge) { modalBadge.style.background = bg; modalBadge.style.color = color; }
   }
 
+  // Маппинг congestion → состояние сердечка и цвета
+  const CONGESTION_STATE = {
+    low:      { level:'calm', color:'var(--g)',  bg:'rgba(0,232,122,.13)',    netText:'спокойно'  },
+    medium:   { level:'mid',  color:'var(--a)',  bg:'rgba(247,147,26,.13)',   netText:'умеренно'  },
+    high:     { level:'mid',  color:'var(--a)',  bg:'rgba(247,147,26,.13)',   netText:'нагрузка'  },
+    extreme:  { level:'busy', color:'#ff5555',   bg:'rgba(255,50,50,.13)',    netText:'перегруз'  },
+    critical: { level:'busy', color:'#ff3333',   bg:'rgba(255,30,30,.16)',    netText:'критично'  },
+  };
+
   function applyPrice(p) {
     if (!p || !p.usd) return;
     const usd = p.usd;
 
-    // BUG FIX: ищем тир по feeRate (как в сервере), а не по usd
-    const feeRate = p.feeRate || 0;
-    const tier = feeRate > 0
-      ? (PRICE_TIERS.find(t => feeRate <= t.maxFee) || PRICE_TIERS.at(-1))
-      : (PRICE_TIERS.find(t => usd <= t.usd) || PRICE_TIERS.at(-1));
-
-    const emoji = p.emoji || tier.emoji;
-    const text  = p.text  || tier.text;
-    const confLabel = p.confLabel || tier.confLabel || '10–20 мин ⚡';
-
-    const isLow = usd <= 4, isMid = usd <= 7;
-    const accentColor = isLow ? 'var(--g)' : isMid ? 'var(--a)' : '#ff5555';
-    const bgColor     = isLow ? 'rgba(0,232,122,.13)' : isMid ? 'rgba(247,147,26,.13)' : 'rgba(255,50,50,.13)';
-
-    selectedUsd = usd;
+    // Берём congestion с сервера (он уже учёл и feeRate и мемпул)
+    const congKey   = p.congestion || 'low';
+    const state     = CONGESTION_STATE[congKey] || CONGESTION_STATE.low;
+    const { level, color: accentColor, bg: bgColor, netText } = state;
 
     // BUG FIX: если btcPrice пришёл с сервера — обновляем _btcUsd ДО расчёта btcVal
     if (p.btcPrice && p.btcPrice > 1000) _btcUsd = p.btcPrice;
@@ -6120,23 +6136,19 @@ console.log('[TurboTX] Server API connected ✓');
     const btcVal = (_btcUsd > 0) ? parseFloat((usd / _btcUsd).toFixed(6)) : (p.btc || null);
     if (btcVal) { selBtc = btcVal; window._selBtc = btcVal; }
 
+    selectedUsd = usd;
+
+    const displayText = p.text || netText;
+    _setNetState(level, displayText, accentColor, bgColor);
+
     const priceEl = document.getElementById('plan-price-usd');
     if (priceEl) priceEl.textContent = '$' + usd;
 
-    const level = isLow ? 'calm' : isMid ? 'mid' : 'busy';
-    const netText = text || (isLow ? 'спокойно' : isMid ? 'умеренно' : 'перегруз');
-    _setNetState(level, netText, accentColor, bgColor);
-
-    // BUG FIX: confLabel всегда берётся из tier — больше не остаётся пустым
+    // confLabel — берём с сервера, он тоже учитывает очередь
     const confEl = document.getElementById('plan-conf-time');
     if (confEl) {
-      // FIX v13: динамическое время по тиру
-      const confLabel = usd <= 4  ? '10–20 мин ⚡ (сеть свободна)'
-                      : usd <= 7  ? '15–30 мин ⚡'
-                      : usd <= 12 ? '20–45 мин (перегрузка)'
-                      : '30–90 мин (критично)';
-      confEl.textContent = 'Premium ≈ ' + (p.confLabel || confLabel);
-      confEl.style.color  = usd <= 4 ? 'var(--g)' : usd <= 7 ? 'var(--a)' : '#ff7755';
+      confEl.textContent = 'Premium ≈ ' + (p.confLabel || '10–20 мин ⚡');
+      confEl.style.color = accentColor;
     }
 
     const btnEl  = document.getElementById('plan-btn-price');  if (btnEl)  btnEl.textContent  = '$' + usd;

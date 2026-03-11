@@ -419,25 +419,29 @@ async function handlePrice(req, res) {
   const {rate:feeRate,all:allFees}=feeRes.status==='fulfilled'?feeRes.value:{rate:20,all:{}};
   const btcPrice=priceRes.status==='fulfilled'?priceRes.value:null;
   const mempoolStats=mempoolRes.status==='fulfilled'?mempoolRes.value:null;
-  // BUG FIX: выбираем тир по feeRate
-  let tier = PRICE_TIERS.find(t => feeRate <= t.maxFee) ?? PRICE_TIERS.at(-1);
+  // ── ДИНАМИЧЕСКАЯ ЦЕНА v14: fee + очередь мемпула ─────────────
+  // Два сигнала определяют тир одновременно — берём максимальный.
+  //
+  // Сигнал 1: feeRate (sat/vB) — рыночная ставка прямо сейчас
+  const mpCount      = mempoolStats?.count || 0;
+  const mpVsizeBytes = mempoolStats?.vsize  || 0;
+  const mpVsizeMB    = mpVsizeBytes / 1_000_000;
 
-  // BUG FIX v14: апгрейд тира по mp.count если feeRate занижен (спам/dust в мемпуле).
-  // Ситуация: мемпул 40k+ TX, но fastestFee = 5–9 sat/vB → tier='low' → UI показывает "Сеть свободна" (синяя анимация).
-  // Реальность: мемпул забит, нужно предупредить пользователя.
-  const mpCount = mempoolStats?.count || 0;
-  const mpVsizeBytes = mempoolStats?.vsize || 0;
-  // Мемпул считается загруженным если > 30k TX ИЛИ > 30 МБ (>3 блоков в очереди)
-  const mpHeavy   = mpCount > 30000 || mpVsizeBytes > 30_000_000;
-  const mpCritical = mpCount > 80000 || mpVsizeBytes > 80_000_000;
+  const tierByFee = PRICE_TIERS.find(t => feeRate <= t.maxFee) ?? PRICE_TIERS.at(-1);
 
-  if (mpCritical && tier.label === 'low') {
-    tier = PRICE_TIERS[2]; // low → high
-  } else if (mpCritical && tier.label === 'medium') {
-    tier = PRICE_TIERS[2]; // medium → high
-  } else if (mpHeavy && tier.label === 'low') {
-    tier = PRICE_TIERS[1]; // low → medium
-  }
+  // Сигнал 2: очередь мемпула (TX count + vsize)
+  // 1 блок = ~1 МБ = ~2000 TX; норма ≤3 блоков = ≤6000 TX / 3 МБ
+  // Каждые +2000 TX сверх нормы = ещё один блок ожидания
+  const mpTierIdx =
+    mpCount > 100000 || mpVsizeMB > 100 ? 4 :   // critical
+    mpCount >  60000 || mpVsizeMB >  60 ? 3 :   // extreme
+    mpCount >  30000 || mpVsizeMB >  30 ? 2 :   // high
+    mpCount >  10000 || mpVsizeMB >  10 ? 1 :   // medium
+                                          0;    // low
+
+  // Итоговый тир = максимум из двух сигналов (цена растёт когда ЛЮБОЙ из них высок)
+  const feeTierIdx = PRICE_TIERS.indexOf(tierByFee);
+  let tier = PRICE_TIERS[Math.max(feeTierIdx, mpTierIdx)];
 
   // Отдельный индикатор нагрузки мемпула (не зависит от feeRate)
   const mempoolCongestion =
@@ -468,8 +472,15 @@ async function handlePrice(req, res) {
   return res.status(200).json({
     ok:true,usd,btc,sats,btcPrice,feeRate,
     fees:{fastest:allFees.fastestFee||feeRate,halfHour:allFees.halfHourFee||feeRate,hour:allFees.hourFee||feeRate,economy:allFees.economyFee||allFees.minimumFee||1},
-    // fee-рынок (feeRate + коррекция по mp.count)
+    // fee-рынок + очередь (комбинированный тир)
     congestion:tier.label,emoji:tier.emoji,text:tier.text,textEn:tier.textEn,
+    // что именно подняло цену (для UI)
+    priceSignals:{
+      feeDriver:  feeTierIdx >= mpTierIdx,   // true = цену поднял feeRate
+      queueDriver: mpTierIdx > feeTierIdx,   // true = цену поднял мемпул
+      feeRate, feeTierIdx, mpTierIdx,
+      mpCount, mpVsizeMB: +mpVsizeMB.toFixed(1),
+    },
     // отдельный индикатор мемпула — показывает РЕАЛЬНОЕ кол-во TX
     mempoolCongestion,
     confLabel,
