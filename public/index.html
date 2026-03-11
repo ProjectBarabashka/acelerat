@@ -4508,73 +4508,113 @@ function lnCancelInvoice() {
   lnResetToInit();
 }
 
-// ── NETWORK INTELLIGENCE v13 ─────────────────────────────────
+// ── NETWORK INTELLIGENCE v14 ─────────────────────────────────
 function updateNetworkIntelligence(priceData, mempoolData) {
-  // Цена
+  const feeRate  = priceData?.feeRate || mempoolData?.fastestFee || 0;
+  const mpCount  = mempoolData?.count  ?? priceData?.mempool?.count  ?? 0;
+  const mpVsize  = mempoolData?.vsize  ?? priceData?.mempool?.vsize  ?? 0;
+  const mpMB     = mpVsize / 1e6;
+
+  // Комбинированный уровень нагрузки (fee + мемпул), аналогично серверу
+  // Берём максимум из двух сигналов
+  const feeLevel  = feeRate > 150 ? 4 : feeRate > 50 ? 3 : feeRate > 30 ? 2 : feeRate > 10 ? 1 : 0;
+  const mpLevel   = mpCount > 100000 || mpMB > 100 ? 4 :
+                    mpCount >  60000 || mpMB >  60  ? 3 :
+                    mpCount >  30000 || mpMB >  30  ? 2 :
+                    mpCount >  10000 || mpMB >  10  ? 1 : 0;
+  const level     = Math.max(feeLevel, mpLevel); // 0=low 1=medium 2=high 3=extreme 4=critical
+
+  // Использовать congestion с сервера если доступен (самый точный)
+  const serverCong = priceData?.congestion;
+  const effectiveLevel = serverCong === 'critical' ? 4 :
+                         serverCong === 'extreme'  ? 3 :
+                         serverCong === 'high'     ? 2 :
+                         serverCong === 'medium'   ? 1 :
+                         serverCong === 'low'      ? 0 : level;
+
+  // ── Цена ──────────────────────────────────────────────────
   const usd = priceData?.usd || priceData?.price;
   if (usd) {
     const el = document.getElementById('ni-price-usd');
     if (el) el.textContent = '$' + usd;
     const tierEl = document.getElementById('ni-price-tier');
     if (tierEl) {
-      const fr = priceData?.feeRate || 0;
-      tierEl.textContent = fr <= 10 ? '🟢 Сеть спокойна — лучший момент' :
-                           fr <= 30 ? '🟡 Умеренная нагрузка' :
-                           fr <= 60 ? '🟠 Повышенная нагрузка' :
-                           fr <= 150? '🔴 Высокая нагрузка' :
-                                      '🔥 Критическая загрузка';
+      tierEl.textContent = effectiveLevel === 0 ? '🟢 Сеть спокойна — лучший момент' :
+                           effectiveLevel === 1 ? '🟡 Умеренная нагрузка' :
+                           effectiveLevel === 2 ? '🟠 Повышенная нагрузка' :
+                           effectiveLevel === 3 ? '🔴 Высокая нагрузка' :
+                                                  '🔥 Критическая загрузка';
     }
   }
-  // Fee rate
-  const feeRate = priceData?.feeRate || mempoolData?.fastestFee || mempoolData?.fees?.fastestFee;
+
+  // ── Fee rate ───────────────────────────────────────────────
   if (feeRate) {
     const el = document.getElementById('ni-fee-rate');
     if (el) el.textContent = feeRate;
     const lbl = document.getElementById('ni-fee-label');
-    if (lbl) lbl.textContent = feeRate <= 5  ? 'Очень низкий — ждать долго' :
-                               feeRate <= 15 ? 'Нормальный — ~30 мин' :
-                               feeRate <= 40 ? 'Умеренный — ~15 мин' :
-                               feeRate <= 80 ? 'Высокий — ~10 мин' :
-                                              'Очень высокий';
-  }
-  // Мемпул
-  const mb = mempoolData?.vsize ? (mempoolData.vsize / 1e6).toFixed(1) : null;
-  const txCount = mempoolData?.count;
-  if (mb) { const el = document.getElementById('ni-mempool-mb'); if (el) el.textContent = mb; }
-  if (txCount) { const el = document.getElementById('ni-mempool-txs'); if (el) el.textContent = txCount.toLocaleString('ru') + ' транзакций'; }
-
-  // Smart совет
-  const fr = feeRate || 0;
-  const titleEl = document.getElementById('ni-advice-title');
-  const textEl  = document.getElementById('ni-advice-text');
-  if (titleEl && textEl) {
-    if (fr <= 10) {
-      titleEl.textContent = 'Сейчас идеально!';
-      textEl.textContent  = 'Сеть разгружена — Premium по минимальной цене, быстрое подтверждение';
-    } else if (fr <= 25) {
-      titleEl.textContent = 'Хороший момент';
-      textEl.textContent  = 'Умеренная нагрузка — Premium эффективен и стоит $3–7';
-    } else if (fr <= 60) {
-      titleEl.textContent = 'Повышенная нагрузка';
-      textEl.textContent  = 'Сеть занята — Premium даст ускорение но цена выше';
-    } else {
-      titleEl.textContent = 'Пиковая загрузка';
-      textEl.textContent  = 'Мемпул переполнен — Premium критически важен для подтверждения';
+    if (lbl) {
+      // Показываем честное время с учётом очереди мемпула
+      const queueExtra = mpLevel >= 2 ? ' · очередь большая' : mpLevel === 1 ? ' · очередь есть' : '';
+      lbl.textContent = feeRate <= 5  ? 'Очень низкий — ждать долго' + queueExtra :
+                        feeRate <= 15 ? 'Нормальный — ~30 мин' + queueExtra :
+                        feeRate <= 40 ? 'Умеренный — ~15 мин' + queueExtra :
+                        feeRate <= 80 ? 'Высокий — ~10 мин' + queueExtra :
+                                       'Очень высокий' + queueExtra;
     }
   }
 
-  // Timing
+  // ── Мемпул ────────────────────────────────────────────────
+  const mb = mpMB > 0 ? mpMB.toFixed(1) : null;
+  if (mb) { const el = document.getElementById('ni-mempool-mb'); if (el) el.textContent = mb; }
+  if (mpCount) {
+    const el = document.getElementById('ni-mempool-txs');
+    if (el) {
+      // Цвет по уровню заполненности
+      const txStr = mpCount.toLocaleString('ru') + ' транзакций';
+      el.textContent = txStr;
+      el.style.color = mpLevel >= 3 ? '#ff5555' : mpLevel >= 2 ? 'var(--a)' : 'var(--m2)';
+    }
+  }
+
+  // ── Smart совет (учитывает ОБА сигнала) ───────────────────
+  const titleEl = document.getElementById('ni-advice-title');
+  const textEl  = document.getElementById('ni-advice-text');
+  if (titleEl && textEl) {
+    if (effectiveLevel === 0) {
+      titleEl.textContent = 'Сейчас идеально!';
+      textEl.textContent  = 'Сеть разгружена — Premium по минимальной цене ($3), быстрое подтверждение';
+    } else if (effectiveLevel === 1) {
+      titleEl.textContent = 'Хороший момент';
+      textEl.textContent  = 'Умеренная нагрузка — Premium эффективен, стоит $' + (usd || '3–7');
+    } else if (effectiveLevel === 2) {
+      titleEl.textContent = 'Повышенная нагрузка';
+      const mpNote = mpLevel >= 2 ? ` (очередь ${mpCount > 0 ? mpCount.toLocaleString('ru') + ' TX' : 'большая'})` : '';
+      textEl.textContent  = 'Сеть занята' + mpNote + ' — Premium ускорит, цена $' + (usd || '7');
+    } else if (effectiveLevel === 3) {
+      titleEl.textContent = 'Высокая нагрузка';
+      textEl.textContent  = 'Мемпул загружен — Premium критичен для своевременного подтверждения';
+    } else {
+      titleEl.textContent = 'Пиковая загрузка!';
+      textEl.textContent  = 'Мемпул переполнен — без Premium транзакция может зависнуть на часы';
+    }
+    // Цвет заголовка по уровню
+    titleEl.style.color = effectiveLevel === 0 ? 'var(--g)' :
+                          effectiveLevel === 1 ? 'var(--g)' :
+                          effectiveLevel === 2 ? 'var(--a)' :
+                          effectiveLevel === 3 ? '#ff6b35' : '#ff5555';
+  }
+
+  // ── Timing ────────────────────────────────────────────────
   const now = new Date();
   const h = now.getUTCHours();
   const timingEl = document.getElementById('ni-timing');
   if (timingEl) {
-    // Bitcoin сеть обычно разгружается ночью UTC (01–07 UTC)
     if (h >= 1 && h <= 7) {
       timingEl.textContent = '🌙 Сейчас ночь UTC — нагрузка обычно низкая, хороший момент';
     } else if (h >= 13 && h <= 20) {
       timingEl.textContent = '⚡ Пиковые часы США/EU — возможны задержки в сети';
     } else {
-      timingEl.textContent = '🌅 Умеренная активность — ' + (fr <= 30 ? 'комиссии в норме' : 'следите за изменениями');
+      timingEl.textContent = '🌅 Умеренная активность — ' + (effectiveLevel <= 1 ? 'комиссии в норме' : 'следите за изменениями');
     }
   }
 
