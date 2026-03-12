@@ -223,16 +223,62 @@ async function tgNotify(amountSats, amountUsd, txid, ip, type = 'paid') {
   }, 5000).catch(() => {});
 }
 
+// ─── BODY PARSER ──────────────────────────────────────────────
+// Vercel serverless (не Next.js) не парсит req.body автоматически —
+// нужно читать поток вручную.
+function readBody(req) {
+  return new Promise((resolve, reject) => {
+    // Уже распарсен (Next.js / некоторые версии runtime)
+    if (req.body && typeof req.body === 'object') return resolve(req.body);
+    let data = '';
+    req.on('data', chunk => { data += chunk; });
+    req.on('end', () => {
+      try { resolve(JSON.parse(data || '{}')); }
+      catch { resolve({}); }
+    });
+    req.on('error', reject);
+  });
+}
+
 // ─── MAIN HANDLER ─────────────────────────────────────────────
 export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(204).set(CORS).end();
   Object.entries(CORS).forEach(([k,v]) => res.setHeader(k, v));
+
+  // Парсим тело запроса один раз для всего хендлера
+  const body = req.method === 'POST' ? await readBody(req) : {};
+  req.body = body; // нормализуем — дальнейший код читает req.body
 
   const ip = getIp(req);
 
   // ── Webhook от LN-провайдера (BTCPay, LNbits, Voltage) ────────
   if (req.query?.webhook === '1' || req.body?.webhook === true) {
     return handleWebhook(req, res);
+  }
+
+  // ── Debug: GET /api/lightning?debug=1 — диагностика конфига ──
+  if (req.method === 'GET' && req.query?.debug === '1') {
+    const lightningAddress = process.env.LIGHTNING_ADDRESS;
+    const hasTg = !!(process.env.TG_TOKEN && process.env.TG_CHAT_ID);
+    const hasSecret = !!process.env.PREMIUM_SECRET;
+    let lnurlOk = false, lnurlErr = '';
+    if (lightningAddress) {
+      try {
+        const params = await fetchLnurlPayParams(lightningAddress);
+        lnurlOk = !!params.callback;
+      } catch(e) { lnurlErr = e.message; }
+    }
+    let priceOk = false;
+    try { priceOk = !!(await getBtcPrice()); } catch(e) {}
+    return res.status(200).json({
+      ok: true,
+      config: {
+        LIGHTNING_ADDRESS: lightningAddress ? lightningAddress.replace(/^.+@/, '***@') : 'NOT SET',
+        PREMIUM_SECRET: hasSecret ? 'SET' : 'NOT SET',
+        TG_TOKEN: hasTg ? 'SET' : 'NOT SET',
+      },
+      checks: { lnurlOk, lnurlErr: lnurlErr || null, priceOk },
+    });
   }
 
   // ── GET /api/lightning?hash=<paymentHash> — проверить оплату ──
@@ -283,8 +329,9 @@ export default async function handler(req, res) {
   if (!lightningAddress)
     return res.status(503).json({ ok:false, error:'Lightning payments not configured' });
 
-  const { amountUsd, txid, comment } = req.body || {};
-  if (!amountUsd || typeof amountUsd !== 'number' || amountUsd < 1 || amountUsd > 500)
+  const { txid, comment } = req.body || {};
+  const amountUsd = Number(req.body?.amountUsd);
+  if (!amountUsd || isNaN(amountUsd) || amountUsd < 1 || amountUsd > 500)
     return res.status(400).json({ ok:false, error:'amountUsd must be 1-500' });
 
   try {
