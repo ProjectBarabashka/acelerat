@@ -55,7 +55,6 @@ body { background:var(--bg); color:var(--text); font-family:var(--display); line
 .hero h1 span { color:var(--orange); }
 .hero-desc { font-size:1rem; color:var(--muted); max-width:560px; line-height:1.7; margin-bottom:32px; }
 .hero-stats { display:flex; gap:32px; flex-wrap:wrap; }
-.hero-stat { }
 .hero-stat-num { font-family:var(--mono); font-size:1.4rem; font-weight:600; color:var(--text); }
 .hero-stat-lbl { font-size:.65rem; color:var(--muted); font-family:var(--mono); letter-spacing:1px; text-transform:uppercase; margin-top:2px; }
 
@@ -108,13 +107,13 @@ body { background:var(--bg); color:var(--text); font-family:var(--display); line
 .code-copy { font-family:var(--mono); font-size:.5rem; letter-spacing:1px; color:var(--muted); background:none; border:none; cursor:pointer; transition:color .15s; }
 .code-copy:hover { color:var(--orange); }
 pre { padding:16px 18px; overflow-x:auto; font-family:var(--mono); font-size:.72rem; line-height:1.7; }
-.k  { color:var(--purple); } /* keyword */
-.s  { color:var(--green); }  /* string */
-.n  { color:var(--orange); } /* number/key */
-.c  { color:var(--muted); font-style:italic; } /* comment */
-.f  { color:var(--blue); }   /* function */
+.k  { color:var(--purple); }
+.s  { color:var(--green); }
+.n  { color:var(--orange); }
+.c  { color:var(--muted); font-style:italic; }
+.f  { color:var(--blue); }
 
-/* ─── RESPONSE EXAMPLE ─── */
+/* ─── RESPONSE TABS ─── */
 .response-tabs { display:flex; gap:4px; margin-bottom:0; border-bottom:1px solid var(--border); padding:0 16px; }
 .res-tab { font-family:var(--mono); font-size:.58rem; padding:8px 12px; cursor:pointer; color:var(--muted); border-bottom:2px solid transparent; transition:all .15s; background:none; border-top:none; border-left:none; border-right:none; }
 .res-tab.active { color:var(--green); border-bottom-color:var(--green); }
@@ -157,8 +156,9 @@ pre { padding:16px 18px; overflow-x:auto; font-family:var(--mono); font-size:.72
 
 /* ─── BADGE ─── */
 .badge { display:inline-block; font-family:var(--mono); font-size:.48rem; letter-spacing:1px; text-transform:uppercase; padding:2px 7px; border-radius:4px; vertical-align:middle; margin-left:6px; }
-.badge-new { background:rgba(0,232,122,.12); color:var(--green); border:1px solid rgba(0,232,122,.2); }
+.badge-new  { background:rgba(0,232,122,.12); color:var(--green); border:1px solid rgba(0,232,122,.2); }
 .badge-beta { background:rgba(167,139,250,.12); color:var(--purple); border:1px solid rgba(167,139,250,.2); }
+.badge-v14  { background:rgba(247,147,26,.12); color:var(--orange); border:1px solid rgba(247,147,26,.2); }
 
 /* ─── CALLOUT ─── */
 .callout { display:flex; gap:12px; background:rgba(56,189,248,.05); border:1px solid rgba(56,189,248,.15); border-radius:8px; padding:14px 16px; margin:16px 0; font-size:.78rem; color:var(--text); line-height:1.6; }
@@ -173,7 +173,6 @@ pre { padding:16px 18px; overflow-x:auto; font-family:var(--mono); font-size:.72
   .main { padding:28px 20px 80px; }
   .hero h1 { font-size:1.8rem; }
   .auth-methods, .tiers-grid { grid-template-columns:1fr 1fr; }
-  .tiers-grid { grid-template-columns:1fr 1fr; }
 }
 
 /* ─── SCROLLBAR ─── */
@@ -204,24 +203,25 @@ pre { padding:16px 18px; overflow-x:auto; font-family:var(--mono); font-size:.72
 
   <div class="nav-group">
     <div class="nav-group-title">Getting Started</div>
-    <a href="#overview"    class="nav-link active">Overview</a>
-    <a href="#quickstart"  class="nav-link">Quick Start</a>
-    <a href="#auth"        class="nav-link">Authentication</a>
-    <a href="#base-url"    class="nav-link">Base URL</a>
+    <a href="#overview"   class="nav-link active">Overview</a>
+    <a href="#quickstart" class="nav-link">Quick Start</a>
+    <a href="#auth"       class="nav-link">Authentication</a>
+    <a href="#base-url"   class="nav-link">Base URL</a>
   </div>
 
   <div class="nav-group">
     <div class="nav-group-title">Endpoints</div>
     <a href="#ping"         class="nav-link"><span class="nav-method m-get">GET</span>ping</a>
     <a href="#status"       class="nav-link"><span class="nav-method m-get">GET</span>status</a>
+    <a href="#acceleration" class="nav-link"><span class="nav-method m-get">GET</span>acceleration</a>
+    <a href="#accelerate"   class="nav-link"><span class="nav-method m-post">POST</span>accelerate</a>
     <a href="#mempool"      class="nav-link"><span class="nav-method m-get">GET</span>mempool</a>
     <a href="#fees"         class="nav-link"><span class="nav-method m-get">GET</span>fees</a>
     <a href="#price"        class="nav-link"><span class="nav-method m-get">GET</span>price</a>
-    <a href="#acceleration" class="nav-link"><span class="nav-method m-get">GET</span>acceleration</a>
-    <a href="#accelerate"   class="nav-link"><span class="nav-method m-post">POST</span>accelerate</a>
     <a href="#cpfp"         class="nav-link"><span class="nav-method m-get">GET</span>cpfp</a>
     <a href="#rbf"          class="nav-link"><span class="nav-method m-get">GET</span>rbf</a>
     <a href="#health"       class="nav-link"><span class="nav-method m-get">GET</span>health</a>
+    <a href="#stats"        class="nav-link"><span class="nav-method m-get">GET</span>stats</a>
   </div>
 
   <div class="nav-group">
@@ -246,7 +246,7 @@ pre { padding:16px 18px; overflow-x:auto; font-family:var(--mono); font-size:.72
     <h1>TurboTX <span>Public API</span></h1>
     <p class="hero-desc">
       Integrate Bitcoin transaction acceleration directly into your wallet, exchange, or application.
-      Real-time mempool data, smart fee analysis, and instant TX broadcasting to 88% of network hashrate.
+      Real-time mempool data, smart fee analysis, and instant TX broadcasting to ~88% of network hashrate.
     </p>
     <div class="hero-stats">
       <div class="hero-stat">
@@ -269,11 +269,13 @@ pre { padding:16px 18px; overflow-x:auto; font-family:var(--mono); font-size:.72
   </section>
 
   <!-- BASE URL -->
-  <div class="base-url-box" id="base-url">
-    <span class="base-url-label">Base URL</span>
-    <span class="base-url-value">https://acelerat.vercel.app/api/v1</span>
-    <button class="copy-btn" onclick="copyText('https://acelerat.vercel.app/api/v1', this)">Copy</button>
-  </div>
+  <section id="base-url" style="margin-bottom:48px;">
+    <div class="base-url-box">
+      <span class="base-url-label">Base URL</span>
+      <span class="base-url-value">https://acelerat.vercel.app/api/v1</span>
+      <button class="copy-btn" onclick="copyText('https://acelerat.vercel.app/api/v1', this)">Copy</button>
+    </div>
+  </section>
 
   <!-- QUICK START -->
   <section class="section" id="quickstart">
@@ -285,7 +287,7 @@ pre { padding:16px 18px; overflow-x:auto; font-family:var(--mono); font-size:.72
         <div class="step-num">1</div>
         <div class="step-content">
           <div class="step-title">Get an API Key</div>
-          <div class="step-desc">Contact us at <strong style="color:var(--orange)">@turbotx_support</strong> on Telegram or email to receive your API key. Keys look like: <code style="font-family:var(--mono);color:var(--green);font-size:.75rem">ttx_live_...</code></div>
+          <div class="step-desc">Contact us at <strong style="color:var(--orange)">@turbotx_support</strong> on Telegram. Keys look like: <code style="font-family:var(--mono);color:var(--green);font-size:.75rem">ttx_live_...</code></div>
         </div>
       </div>
 
@@ -299,7 +301,7 @@ pre { padding:16px 18px; overflow-x:auto; font-family:var(--mono); font-size:.72
               <span class="code-block-lang">cURL</span>
               <button class="code-copy" onclick="copyCode(this)">Copy</button>
             </div>
-            <pre><span class="f">curl</span> <span class="s">"https://acelerat.vercel.app/api/v1?method=ping"</span> \
+<pre><span class="f">curl</span> <span class="s">"https://acelerat.vercel.app/api/v1?method=ping"</span> \
   <span class="n">-H</span> <span class="s">"Authorization: Bearer ttx_live_YOUR_KEY"</span></pre>
           </div>
         </div>
@@ -316,13 +318,13 @@ pre { padding:16px 18px; overflow-x:auto; font-family:var(--mono); font-size:.72
               <button class="code-copy" onclick="copyCode(this)">Copy</button>
             </div>
 <pre><span class="k">const</span> res = <span class="k">await</span> <span class="f">fetch</span>(
-  <span class="s">'https://acelerat.vercel.app/api/v1?method=status&txid=YOUR_TXID'</span>,
+  <span class="s">'https://acelerat.vercel.app/api/v1?method=status&amp;txid=YOUR_TXID'</span>,
   { headers: { <span class="s">'Authorization'</span>: <span class="s">'Bearer ttx_live_YOUR_KEY'</span> } }
 );
 <span class="k">const</span> data = <span class="k">await</span> res.<span class="f">json</span>();
-console.<span class="f">log</span>(data.status);          <span class="c">// 'mempool' | 'confirmed'</span>
-console.<span class="f">log</span>(data.feeRate);         <span class="c">// e.g. 12 sat/vB</span>
-console.<span class="f">log</span>(data.accelerationAdvice); <span class="c">// { action: 'boost', urgency: 'medium' }</span></pre>
+console.<span class="f">log</span>(data.status);            <span class="c">// 'mempool' | 'confirmed' | 'not_found'</span>
+console.<span class="f">log</span>(data.feeRate);           <span class="c">// e.g. 12 (sat/vB)</span>
+console.<span class="f">log</span>(data.accelerationAdvice); <span class="c">// { action, urgency, text }</span></pre>
           </div>
         </div>
       </div>
@@ -345,13 +347,13 @@ console.<span class="f">log</span>(data.accelerationAdvice); <span class="c">// 
   },
   body: <span class="f">JSON.stringify</span>({
     txid: <span class="s">'YOUR_64_CHAR_TXID'</span>,
-    plan: <span class="s">'premium'</span>,           <span class="c">// 'free' | 'premium'</span>
-    webhookUrl: <span class="s">'https://yourapp.com/webhook'</span>, <span class="c">// optional</span>
+    plan: <span class="s">'premium'</span>,  <span class="c">// 'free' | 'premium'</span>
   })
 });
 <span class="k">const</span> data = <span class="k">await</span> res.<span class="f">json</span>();
-console.<span class="f">log</span>(data.ok);            <span class="c">// true</span>
-console.<span class="f">log</span>(data.hashrateReach); <span class="c">// "~88%"</span></pre>
+console.<span class="f">log</span>(data.ok);             <span class="c">// true</span>
+console.<span class="f">log</span>(data.summary);        <span class="c">// { okCount, totalChannels, hashrateReach }</span>
+console.<span class="f">log</span>(data.waveStrategy);   <span class="c">// { waves, label } — adaptive 3/5/8 waves</span></pre>
           </div>
         </div>
       </div>
@@ -373,7 +375,7 @@ console.<span class="f">log</span>(data.hashrateReach); <span class="c">// "~88%
         <div class="auth-card-code">X-API-Key: ttx_live_...</div>
       </div>
       <div class="auth-card">
-        <div class="auth-card-title">Query Parameter (not for production)</div>
+        <div class="auth-card-title">Query Parameter (dev/test only)</div>
         <div class="auth-card-code">?apikey=ttx_live_...</div>
       </div>
       <div class="auth-card" style="border-color:rgba(255,68,85,.15)">
@@ -386,25 +388,28 @@ console.<span class="f">log</span>(data.hashrateReach); <span class="c">// "~88%
   <!-- ENDPOINTS -->
   <section class="section" id="ping">
     <div class="section-title">Endpoints <span class="anchor">#endpoints</span></div>
-    <p class="section-desc">All endpoints go through <code style="font-family:var(--mono);color:var(--orange)">GET /api/v1?method=&lt;name&gt;</code> or <code style="font-family:var(--mono);color:var(--orange)">POST /api/v1?method=&lt;name&gt;</code></p>
+    <p class="section-desc">All endpoints use <code style="font-family:var(--mono);color:var(--orange)">GET /api/v1?method=&lt;name&gt;</code> or <code style="font-family:var(--mono);color:var(--orange)">POST /api/v1?method=&lt;name&gt;</code></p>
 
     <!-- PING -->
     <div class="endpoint" id="ep-ping">
       <div class="endpoint-header" onclick="toggleEndpoint('ep-ping')">
         <span class="method-badge method-get">GET</span>
         <span class="endpoint-path">?method=ping</span>
-        <span class="endpoint-desc">Test key & check rate limits</span>
+        <span class="endpoint-desc">Test key &amp; check rate limits</span>
       </div>
       <div class="endpoint-body hidden" id="ep-ping-body">
         <p style="font-size:.82rem;color:var(--muted);margin-bottom:16px">Verify authentication and check your current rate limit status.</p>
         <div class="code-block">
-          <div class="code-block-header"><span class="code-block-lang">Response 200</span></div>
+          <div class="code-block-header"><span class="code-block-lang">Response 200</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
 <pre>{
   <span class="n">"ok"</span>: <span class="k">true</span>,
   <span class="n">"message"</span>: <span class="s">"pong"</span>,
+  <span class="n">"apiVersion"</span>: <span class="s">"v1"</span>,
+  <span class="n">"authenticated"</span>: <span class="k">true</span>,
   <span class="n">"keyInfo"</span>: { <span class="n">"tier"</span>: <span class="s">"pro"</span>, <span class="n">"name"</span>: <span class="s">"YourApp"</span> },
   <span class="n">"rateLimit"</span>: { <span class="n">"perMin"</span>: <span class="k">500</span>, <span class="n">"perDay"</span>: <span class="k">50000</span> },
-  <span class="n">"remaining"</span>: { <span class="n">"perMin"</span>: <span class="k">499</span>, <span class="n">"perDay"</span>: <span class="k">49999</span> }
+  <span class="n">"remaining"</span>: { <span class="n">"perMin"</span>: <span class="k">499</span>, <span class="n">"perDay"</span>: <span class="k">49999</span> },
+  <span class="n">"timestamp"</span>: <span class="k">1710000000000</span>
 }</pre>
         </div>
       </div>
@@ -415,10 +420,10 @@ console.<span class="f">log</span>(data.hashrateReach); <span class="c">// "~88%
       <div class="endpoint-header" onclick="toggleEndpoint('ep-status')">
         <span class="method-badge method-get">GET</span>
         <span class="endpoint-path">?method=status&amp;txid=&lt;64hex&gt;</span>
-        <span class="endpoint-desc">Full TX status & analysis</span>
+        <span class="endpoint-desc">Full TX status &amp; analysis</span>
       </div>
       <div class="endpoint-body hidden" id="ep-status-body">
-        <p style="font-size:.82rem;color:var(--muted);margin-bottom:16px">Get comprehensive status of any Bitcoin transaction: confirmation state, fee analysis, stuck detection, ETA, and acceleration advice.</p>
+        <p style="font-size:.82rem;color:var(--muted);margin-bottom:16px">Comprehensive status for any Bitcoin transaction: confirmation state, fee analysis, stuck detection, ETA forecast, fee trend, mempool position, RBF/CPFP info, and acceleration advice.</p>
 
         <table class="param-table">
           <tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr>
@@ -431,75 +436,141 @@ console.<span class="f">log</span>(data.hashrateReach); <span class="c">// "~88%
         </table>
 
         <div class="code-block">
-          <div class="code-block-header"><span class="code-block-lang">Response 200</span></div>
+          <div class="code-block-header"><span class="code-block-lang">Response 200</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
 <pre>{
   <span class="n">"ok"</span>: <span class="k">true</span>,
   <span class="n">"txid"</span>: <span class="s">"a1b2c3...64hex"</span>,
-  <span class="n">"status"</span>: <span class="s">"mempool"</span>,          <span class="c">// "mempool" | "confirmed" | "not_found"</span>
+  <span class="n">"status"</span>: <span class="s">"mempool"</span>,       <span class="c">// "mempool" | "confirmed" | "not_found"</span>
   <span class="n">"confirmed"</span>: <span class="k">false</span>,
   <span class="n">"confirmations"</span>: <span class="k">0</span>,
-  <span class="n">"feeRate"</span>: <span class="k">12</span>,                 <span class="c">// sat/vB</span>
-  <span class="n">"feeRateNeeded"</span>: <span class="k">45</span>,            <span class="c">// fastest fee rate right now</span>
+  <span class="n">"blockHeight"</span>: <span class="k">null</span>,
+  <span class="n">"blockTime"</span>: <span class="k">null</span>,
+  <span class="n">"vsize"</span>: <span class="k">141</span>,
+  <span class="n">"feePaid"</span>: <span class="k">1692</span>,             <span class="c">// sat</span>
+  <span class="n">"feeRate"</span>: <span class="k">12</span>,               <span class="c">// sat/vB</span>
+  <span class="n">"feeRateNeeded"</span>: <span class="k">45</span>,          <span class="c">// current fastest fee rate</span>
   <span class="n">"needsBoost"</span>: <span class="k">true</span>,
   <span class="n">"rbfEnabled"</span>: <span class="k">false</span>,
-  <span class="n">"eta"</span>: <span class="s">"~несколько часов"</span>,
-  <span class="n">"etaMinutes"</span>: <span class="k">240</span>,
+  <span class="n">"fees"</span>: { <span class="n">"fastest"</span>: <span class="k">45</span>, <span class="n">"halfHour"</span>: <span class="k">30</span>, <span class="n">"hour"</span>: <span class="k">20</span>, <span class="n">"economy"</span>: <span class="k">8</span> },
+  <span class="n">"feeTrend"</span>: <span class="s">"dropping"</span>,       <span class="c">// "dropping" | "rising" | "stable"</span>
+  <span class="n">"feeTrendLabel"</span>: <span class="s">"📉 Комиссии падают"</span>,
   <span class="n">"isStuck"</span>: <span class="k">false</span>,
   <span class="n">"stuckHours"</span>: <span class="k">3</span>,
+  <span class="n">"eta"</span>: <span class="s">"~несколько часов"</span>,
+  <span class="n">"etaMinutes"</span>: <span class="k">240</span>,
+  <span class="n">"confidence"</span>: <span class="k">60</span>,             <span class="c">// 0–100 confidence %</span>
   <span class="n">"accelerationAdvice"</span>: {
-    <span class="n">"action"</span>: <span class="s">"cpfp_or_boost"</span>,
-    <span class="n">"urgency"</span>: <span class="s">"high"</span>,
+    <span class="n">"action"</span>: <span class="s">"cpfp_or_boost"</span>,  <span class="c">// boost | rbf | cpfp_or_boost | wait</span>
+    <span class="n">"urgency"</span>: <span class="s">"high"</span>,           <span class="c">// low | medium | high | critical</span>
     <span class="n">"text"</span>: <span class="s">"Комиссия слишком низкая..."</span>
   },
+  <span class="n">"mempoolPosition"</span>: <span class="k">12500</span>,     <span class="c">// TX's ahead in mempool queue</span>
   <span class="n">"mempoolCount"</span>: <span class="k">28000</span>,
-  <span class="n">"mempoolMB"</span>: <span class="k">28.4</span>
+  <span class="n">"mempoolMB"</span>: <span class="k">28.4</span>,
+  <span class="n">"inputs"</span>: <span class="k">1</span>, <span class="n">"outputs"</span>: <span class="k">2</span>,
+  <span class="n">"weight"</span>: <span class="k">564</span>,
+  <span class="n">"firstSeen"</span>: <span class="k">1710000000</span>,      <span class="c">// unix timestamp (null if unknown)</span>
+  <span class="n">"timestamp"</span>: <span class="k">1710000000000</span>
 }</pre>
         </div>
       </div>
     </div>
+
+    <!-- STATUS SECTION ANCHOR -->
+    <div id="status" style="height:0;overflow:hidden;margin:0;padding:0"></div>
 
     <!-- ACCELERATION ADVISOR -->
     <div class="endpoint" id="ep-acceleration">
       <div class="endpoint-header" onclick="toggleEndpoint('ep-acceleration')">
         <span class="method-badge method-get">GET</span>
         <span class="endpoint-path">?method=acceleration&amp;txid=&lt;64hex&gt;</span>
-        <span class="endpoint-desc">Smart acceleration advisor <span class="badge badge-new">New</span></span>
+        <span class="endpoint-desc">Smart Advisor <span class="badge badge-v14">v14</span></span>
       </div>
       <div class="endpoint-body hidden" id="ep-acceleration-body">
-        <p style="font-size:.82rem;color:var(--muted);margin-bottom:16px">Deep analysis: decision engine, cost comparison (CPFP vs RBF vs TurboTX), time forecast, current miner info, cheap fee window forecast, and rescue plan for stuck transactions.</p>
+        <p style="font-size:.82rem;color:var(--muted);margin-bottom:16px">Deep decision engine: CPFP vs RBF vs TurboTX cost comparison, time forecast, current miner detection, dynamic fee-window forecast, and rescue plan for stuck TXs (24h+, 48h+, 72h+).</p>
 
         <div class="callout">
           <span class="callout-icon">💡</span>
-          <div>This endpoint powers the TurboTX Smart Advisor. It answers: <em>"What should I do with this TX right now?"</em> with exact sat amounts, USD costs, and step-by-step instructions.</div>
+          <div>Alias: <code style="font-family:var(--mono);font-size:.72rem;color:var(--orange)">?method=advisor</code> — same response. Powers the TurboTX Smart Advisor UI.</div>
         </div>
 
+        <table class="param-table">
+          <tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr>
+          <tr>
+            <td><span class="param-name">txid</span></td>
+            <td><span class="param-type">string</span></td>
+            <td><span class="param-req required">required</span></td>
+            <td class="param-desc">64-character hex transaction ID</td>
+          </tr>
+        </table>
+
         <div class="code-block">
-          <div class="code-block-header"><span class="code-block-lang">Response 200</span></div>
+          <div class="code-block-header"><span class="code-block-lang">Response 200</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
 <pre>{
   <span class="n">"ok"</span>: <span class="k">true</span>,
-  <span class="n">"decision"</span>: <span class="s">"cpfp_or_boost"</span>,  <span class="c">// boost | rbf | cpfp_or_boost | wait | already_confirmed</span>
-  <span class="n">"urgency"</span>: <span class="s">"high"</span>,             <span class="c">// low | medium | high | critical</span>
+  <span class="n">"decision"</span>: <span class="s">"cpfp_or_boost"</span>,   <span class="c">// boost | boost_aggressive | rbf | cpfp_or_boost | wait | already_confirmed | not_found</span>
+  <span class="n">"urgency"</span>: <span class="s">"high"</span>,              <span class="c">// low | medium | high | critical | none</span>
   <span class="n">"message"</span>: <span class="s">"Очень низкая комиссия (8/45 sat/vB)..."</span>,
+  <span class="n">"txid"</span>: <span class="s">"a1b2c3...64hex"</span>,
+  <span class="n">"feeAnalysis"</span>: {
+    <span class="n">"feeRate"</span>: <span class="k">8</span>, <span class="n">"feeRateNeeded"</span>: <span class="k">45</span>,
+    <span class="n">"ratio"</span>: <span class="k">0.178</span>, <span class="n">"ratioPercent"</span>: <span class="k">18</span>,
+    <span class="n">"feePaid"</span>: <span class="k">1128</span>, <span class="n">"vsize"</span>: <span class="k">141</span>,
+    <span class="n">"rbfEnabled"</span>: <span class="k">false</span>, <span class="n">"rbfInputs"</span>: <span class="k">0</span>
+  },
+  <span class="n">"fees"</span>: { <span class="n">"fastest"</span>: <span class="k">45</span>, <span class="n">"halfHour"</span>: <span class="k">30</span>, <span class="n">"hour"</span>: <span class="k">20</span>, <span class="n">"economy"</span>: <span class="k">8</span> },
+  <span class="n">"stuck"</span>: { <span class="n">"stuckHours"</span>: <span class="k">3</span>, <span class="n">"isStuck48h"</span>: <span class="k">false</span>, <span class="n">"isStuck72h"</span>: <span class="k">false</span> },
+  <span class="n">"actionDetails"</span>: {
+    <span class="n">"cpfp"</span>: { <span class="n">"neededSat"</span>: <span class="k">5247</span>, <span class="n">"neededUsd"</span>: <span class="k">4.49</span>, <span class="n">"childVsize"</span>: <span class="k">110</span> },
+    <span class="n">"rbf"</span>:  { <span class="n">"additionalSat"</span>: <span class="k">5217</span>, <span class="n">"targetFeeRate"</span>: <span class="k">45</span> },
+    <span class="n">"turboTx"</span>: { <span class="n">"recommended"</span>: <span class="k">true</span>, <span class="n">"plan"</span>: <span class="s">"premium"</span> }
+  },
   <span class="n">"timeForecast"</span>: {
     <span class="n">"withoutBoost"</span>: { <span class="n">"blocks"</span>: <span class="k">144</span>, <span class="n">"text"</span>: <span class="s">"24+ часов"</span> },
-    <span class="n">"withBoost"</span>:    { <span class="n">"blocks"</span>: <span class="k">4</span>,   <span class="n">"text"</span>: <span class="s">"~40–90 мин"</span> }
+    <span class="n">"withBoost"</span>:    { <span class="n">"blocks"</span>: <span class="k">4</span>,   <span class="n">"text"</span>: <span class="s">"~40–90 мин"</span> },
+    <span class="n">"improvementBlocks"</span>: <span class="k">140</span>
   },
   <span class="n">"costAnalysis"</span>: {
-    <span class="n">"cpfpOption"</span>:   { <span class="n">"sat"</span>: <span class="k">5400</span>, <span class="n">"usd"</span>: <span class="k">4.32</span> },
-    <span class="n">"turboTxOption"</span>:{ <span class="n">"usd"</span>: <span class="k">7</span> },
-    <span class="n">"cheapest"</span>: <span class="s">"cpfp"</span>
+    <span class="n">"currentFee"</span>:   { <span class="n">"sat"</span>: <span class="k">1128</span>, <span class="n">"usd"</span>: <span class="k">0.96</span> },
+    <span class="n">"cpfpOption"</span>:   { <span class="n">"sat"</span>: <span class="k">5247</span>, <span class="n">"usd"</span>: <span class="k">4.49</span>, <span class="n">"available"</span>: <span class="k">true</span> },
+    <span class="n">"rbfOption"</span>:    { <span class="n">"sat"</span>: <span class="k">5217</span>, <span class="n">"usd"</span>: <span class="k">4.46</span>, <span class="n">"available"</span>: <span class="k">false</span> },
+    <span class="n">"turboTxOption"</span>:{ <span class="n">"usd"</span>: <span class="k">7</span>, <span class="n">"note"</span>: <span class="s">"Фиксированная цена TurboTX Premium"</span> },
+    <span class="n">"cheapest"</span>: <span class="s">"rbf"</span>,
+    <span class="n">"btcPrice"</span>: <span class="k">85420</span>
+  },
+  <span class="n">"mempoolState"</span>: {
+    <span class="n">"txCount"</span>: <span class="k">28000</span>, <span class="n">"vsizeMB"</span>: <span class="k">28.4</span>,
+    <span class="n">"congestion"</span>: <span class="s">"medium"</span>    <span class="c">// low | medium | high | critical</span>
   },
   <span class="n">"cheapWindow"</span>: {
     <span class="n">"isNowCheap"</span>: <span class="k">false</span>,
     <span class="n">"hoursUntilCheap"</span>: <span class="k">4</span>,
-    <span class="n">"cheapWindowMsk"</span>: <span class="s">"04:00–09:00 МСК"</span>,
+    <span class="n">"cheapWindowUtc"</span>: <span class="s">"01:00–04:00 UTC"</span>,
+    <span class="n">"cheapWindowMsk"</span>: <span class="s">"04:00–07:00 МСК"</span>,
+    <span class="n">"dynamicData"</span>: <span class="k">true</span>,       <span class="c">// false = statistical fallback</span>
+    <span class="n">"minFeeRate"</span>: <span class="k">6</span>,
+    <span class="n">"avgFeeRate24h"</span>: <span class="k">18</span>,
     <span class="n">"potentialSavingPct"</span>: <span class="k">35</span>
   },
-  <span class="n">"currentMiners"</span>: { <span class="n">"dominant"</span>: <span class="s">"Foundry"</span>, <span class="n">"dominantHr"</span>: <span class="k">27</span> }
+  <span class="n">"currentMiners"</span>: {
+    <span class="n">"recent"</span>: [<span class="s">"Foundry"</span>, <span class="s">"AntPool"</span>, <span class="s">"ViaBTC"</span>],
+    <span class="n">"dominant"</span>: <span class="s">"Foundry"</span>,
+    <span class="n">"dominantHr"</span>: <span class="k">27</span>          <span class="c">// hashrate % of dominant miner</span>
+  },
+  <span class="n">"rescuePlan"</span>: <span class="k">null</span>,           <span class="c">// populated when stuckHours >= 24</span>
+  <span class="n">"timestamp"</span>: <span class="k">1710000000000</span>
 }</pre>
+        </div>
+
+        <div class="callout warning" style="margin-top:12px">
+          <span class="callout-icon">🚨</span>
+          <div><strong>rescuePlan</strong> is included when <code style="font-family:var(--mono);font-size:.72rem">stuckHours ≥ 24</code> and contains a prioritized step-by-step rescue list with severity levels: <code style="font-family:var(--mono);font-size:.72rem">medium / high / critical</code>.</div>
         </div>
       </div>
     </div>
+
+    <!-- ACCELERATION ANCHOR -->
+    <div id="acceleration" style="height:0;overflow:hidden"></div>
 
     <!-- ACCELERATE -->
     <div class="endpoint" id="ep-accelerate">
@@ -509,7 +580,7 @@ console.<span class="f">log</span>(data.hashrateReach); <span class="c">// "~88%
         <span class="endpoint-desc">Submit TX for acceleration</span>
       </div>
       <div class="endpoint-body hidden" id="ep-accelerate-body">
-        <p style="font-size:.82rem;color:var(--muted);margin-bottom:16px">Broadcast a transaction to all 30 channels — 8 hex nodes and 22 mining pool accelerators covering ~88% of Bitcoin hashrate. Pro/Partner keys automatically use Premium plan.</p>
+        <p style="font-size:.82rem;color:var(--muted);margin-bottom:16px">Broadcast a transaction to all 30 channels — 8 Bitcoin nodes and 22 mining pool accelerators covering ~88% of network hashrate. Number of broadcast waves is adaptive based on fee ratio.</p>
 
         <table class="param-table">
           <tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr>
@@ -523,22 +594,43 @@ console.<span class="f">log</span>(data.hashrateReach); <span class="c">// "~88%
             <td><span class="param-name">plan</span></td>
             <td><span class="param-type">string</span></td>
             <td><span class="param-req optional">optional</span></td>
-            <td class="param-desc"><code style="font-family:var(--mono);font-size:.68rem">"free"</code> or <code style="font-family:var(--mono);font-size:.68rem">"premium"</code>. Default: free. Pro/Partner keys always get premium.</td>
+            <td class="param-desc"><code style="font-family:var(--mono);font-size:.68rem">"free"</code> or <code style="font-family:var(--mono);font-size:.68rem">"premium"</code>. Default: <code style="font-family:var(--mono);font-size:.68rem">"free"</code>. Pro/Partner keys always get premium.</td>
           </tr>
           <tr>
-            <td><span class="param-name">webhookUrl</span></td>
+            <td><span class="param-name">hex</span></td>
             <td><span class="param-type">string</span></td>
             <td><span class="param-req optional">optional</span></td>
-            <td class="param-desc">URL to receive a POST callback when acceleration starts</td>
+            <td class="param-desc">Raw signed TX hex. If omitted, fetched automatically from mempool. Premium only.</td>
           </tr>
         </table>
 
         <div class="callout warning">
           <span class="callout-icon">⚡</span>
-          <div>Premium plan broadcasts to MARA Slipstream (private mempool bypass) and all 22 mining pool accelerators in 8 waves over up to 4 hours.</div>
+          <div>Premium plan uses adaptive wave strategy: <strong>3 waves</strong> (fee ratio ≥ 0.8), <strong>5 waves</strong> (ratio ≥ 0.4), or <strong>8 waves</strong> (stuck/low ratio) — up to 10 total repeat waves via <code style="font-family:var(--mono);font-size:.72rem">/api/repeat</code>. Includes MARA Slipstream private mempool bypass.</div>
+        </div>
+
+        <div class="code-block" style="margin-top:16px">
+          <div class="code-block-header"><span class="code-block-lang">Response 200</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+<pre>{
+  <span class="n">"ok"</span>: <span class="k">true</span>,
+  <span class="n">"results"</span>: [
+    { <span class="n">"name"</span>: <span class="s">"mempool.space"</span>, <span class="n">"ok"</span>: <span class="k">true</span>, <span class="n">"ms"</span>: <span class="k">142</span>, <span class="n">"tier"</span>: <span class="s">"node"</span> },
+    { <span class="n">"name"</span>: <span class="s">"AntPool"</span>,       <span class="n">"ok"</span>: <span class="k">true</span>, <span class="n">"ms"</span>: <span class="k">380</span>, <span class="n">"tier"</span>: <span class="s">"pool"</span> }
+  ],
+  <span class="n">"summary"</span>: {
+    <span class="n">"okCount"</span>: <span class="k">28</span>, <span class="n">"totalChannels"</span>: <span class="k">30</span>,
+    <span class="n">"hashrateReach"</span>: <span class="s">"~85%"</span>, <span class="n">"elapsedMs"</span>: <span class="k">4200</span>
+  },
+  <span class="n">"analysis"</span>: { <span class="n">"confirmed"</span>: <span class="k">false</span>, <span class="n">"feeRate"</span>: <span class="k">8</span>, <span class="n">"fastest"</span>: <span class="k">45</span> },
+  <span class="n">"waveStrategy"</span>: { <span class="n">"waves"</span>: <span class="k">8</span>, <span class="n">"intervalMs"</span>: <span class="k">600000</span>, <span class="n">"label"</span>: <span class="s">"aggressive"</span> },
+  <span class="n">"jobId"</span>: <span class="s">"a1b2c3d4_1710000000000"</span>   <span class="c">// premium only — for tracking repeat waves</span>
+}</pre>
         </div>
       </div>
     </div>
+
+    <!-- ACCELERATE ANCHOR -->
+    <div id="accelerate" style="height:0;overflow:hidden"></div>
 
     <!-- MEMPOOL -->
     <div class="endpoint" id="ep-mempool">
@@ -548,25 +640,40 @@ console.<span class="f">log</span>(data.hashrateReach); <span class="c">// "~88%
         <span class="endpoint-desc">Network mempool state</span>
       </div>
       <div class="endpoint-body hidden" id="ep-mempool-body">
-        <p style="font-size:.82rem;color:var(--muted);margin-bottom:16px">Current mempool state: TX count, vsize, fee rates, congestion level, 24h fee history, and optionally a TX-specific forecast.</p>
+        <p style="font-size:.82rem;color:var(--muted);margin-bottom:16px">Current mempool state: TX count, vsize, fee rates, congestion level, 24h fee history, and block predictions. Pass <code style="font-family:var(--mono);font-size:.72rem">txid</code> for a TX-specific forecast.</p>
+
+        <table class="param-table">
+          <tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr>
+          <tr>
+            <td><span class="param-name">txid</span></td>
+            <td><span class="param-type">string</span></td>
+            <td><span class="param-req optional">optional</span></td>
+            <td class="param-desc">TX ID to include a TX-specific position &amp; forecast in the response</td>
+          </tr>
+        </table>
+
         <div class="code-block">
-          <div class="code-block-header"><span class="code-block-lang">Response 200</span></div>
+          <div class="code-block-header"><span class="code-block-lang">Response 200</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
 <pre>{
   <span class="n">"ok"</span>: <span class="k">true</span>,
   <span class="n">"fees"</span>: { <span class="n">"fastest"</span>: <span class="k">45</span>, <span class="n">"halfHour"</span>: <span class="k">30</span>, <span class="n">"hour"</span>: <span class="k">20</span>, <span class="n">"economy"</span>: <span class="k">8</span> },
   <span class="n">"mempool"</span>: { <span class="n">"count"</span>: <span class="k">28400</span>, <span class="n">"vsizeMB"</span>: <span class="k">28.4</span> },
-  <span class="n">"congestion"</span>: { <span class="n">"level"</span>: <span class="s">"medium"</span>, <span class="n">"emoji"</span>: <span class="s">"🟡"</span> },
+  <span class="n">"congestion"</span>: { <span class="n">"level"</span>: <span class="s">"medium"</span>, <span class="n">"emoji"</span>: <span class="s">"🟡"</span>, <span class="n">"text"</span>: <span class="s">"Средняя загрузка"</span> },
   <span class="n">"history24h"</span>: { <span class="n">"min"</span>: <span class="k">8</span>, <span class="n">"max"</span>: <span class="k">62</span>, <span class="n">"avg"</span>: <span class="k">24</span> },
   <span class="n">"predictions"</span>: {
-    <span class="n">"nextBlock"</span>:  { <span class="n">"minutes"</span>: <span class="k">10</span>,  <span class="n">"feeRate"</span>: <span class="k">45</span> },
-    <span class="n">"thirtyMin"</span>:  { <span class="n">"minutes"</span>: <span class="k">30</span>,  <span class="n">"feeRate"</span>: <span class="k">30</span> },
-    <span class="n">"oneHour"</span>:    { <span class="n">"minutes"</span>: <span class="k">60</span>,  <span class="n">"feeRate"</span>: <span class="k">20</span> },
-    <span class="n">"economy"</span>:    { <span class="n">"minutes"</span>: <span class="k">240</span>, <span class="n">"feeRate"</span>: <span class="k">8</span>  }
-  }
+    <span class="n">"nextBlock"</span>: { <span class="n">"minutes"</span>: <span class="k">10</span>,  <span class="n">"feeRate"</span>: <span class="k">45</span> },
+    <span class="n">"thirtyMin"</span>: { <span class="n">"minutes"</span>: <span class="k">30</span>,  <span class="n">"feeRate"</span>: <span class="k">30</span> },
+    <span class="n">"oneHour"</span>:   { <span class="n">"minutes"</span>: <span class="k">60</span>,  <span class="n">"feeRate"</span>: <span class="k">20</span> },
+    <span class="n">"economy"</span>:   { <span class="n">"minutes"</span>: <span class="k">240</span>, <span class="n">"feeRate"</span>: <span class="k">8</span>  }
+  },
+  <span class="n">"timestamp"</span>: <span class="k">1710000000000</span>
 }</pre>
         </div>
       </div>
     </div>
+
+    <!-- MEMPOOL ANCHOR -->
+    <div id="mempool" style="height:0;overflow:hidden"></div>
 
     <!-- FEES -->
     <div class="endpoint" id="ep-fees">
@@ -576,9 +683,27 @@ console.<span class="f">log</span>(data.hashrateReach); <span class="c">// "~88%
         <span class="endpoint-desc">Recommended fee rates</span>
       </div>
       <div class="endpoint-body hidden" id="ep-fees-body">
-        <p style="font-size:.82rem;color:var(--muted);margin-bottom:16px">Shortcut to get only fee rates and congestion — lighter response than /mempool.</p>
+        <p style="font-size:.82rem;color:var(--muted);margin-bottom:16px">Lightweight shortcut returning only fee rates, congestion, 24h history, and predictions — a subset of <code style="font-family:var(--mono);font-size:.72rem">?method=mempool</code>.</p>
+
+        <div class="code-block">
+          <div class="code-block-header"><span class="code-block-lang">Response 200</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+<pre>{
+  <span class="n">"ok"</span>: <span class="k">true</span>,
+  <span class="n">"fees"</span>: { <span class="n">"fastest"</span>: <span class="k">45</span>, <span class="n">"halfHour"</span>: <span class="k">30</span>, <span class="n">"hour"</span>: <span class="k">20</span>, <span class="n">"economy"</span>: <span class="k">8</span> },
+  <span class="n">"congestion"</span>: { <span class="n">"level"</span>: <span class="s">"medium"</span>, <span class="n">"emoji"</span>: <span class="s">"🟡"</span> },
+  <span class="n">"history24h"</span>: { <span class="n">"min"</span>: <span class="k">8</span>, <span class="n">"max"</span>: <span class="k">62</span>, <span class="n">"avg"</span>: <span class="k">24</span> },
+  <span class="n">"predictions"</span>: {
+    <span class="n">"nextBlock"</span>: { <span class="n">"minutes"</span>: <span class="k">10</span>, <span class="n">"feeRate"</span>: <span class="k">45</span> },
+    <span class="n">"economy"</span>:   { <span class="n">"minutes"</span>: <span class="k">240</span>, <span class="n">"feeRate"</span>: <span class="k">8</span>  }
+  },
+  <span class="n">"timestamp"</span>: <span class="k">1710000000000</span>
+}</pre>
+        </div>
       </div>
     </div>
+
+    <!-- FEES ANCHOR -->
+    <div id="fees" style="height:0;overflow:hidden"></div>
 
     <!-- PRICE -->
     <div class="endpoint" id="ep-price">
@@ -588,21 +713,41 @@ console.<span class="f">log</span>(data.hashrateReach); <span class="c">// "~88%
         <span class="endpoint-desc">Dynamic acceleration pricing</span>
       </div>
       <div class="endpoint-body hidden" id="ep-price-body">
-        <p style="font-size:.82rem;color:var(--muted);margin-bottom:16px">Current pricing tier for TurboTX Premium based on combined mempool + fee signals.</p>
+        <p style="font-size:.82rem;color:var(--muted);margin-bottom:16px">Current TurboTX Premium price — dynamically calculated from combined fee rate + mempool queue signals. Updates every minute. No caching on this endpoint.</p>
+
         <div class="code-block">
-          <div class="code-block-header"><span class="code-block-lang">Response 200</span></div>
+          <div class="code-block-header"><span class="code-block-lang">Response 200</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
 <pre>{
   <span class="n">"ok"</span>: <span class="k">true</span>,
   <span class="n">"usd"</span>: <span class="k">7</span>,
   <span class="n">"btc"</span>: <span class="k">0.000082</span>,
   <span class="n">"sats"</span>: <span class="k">8200</span>,
   <span class="n">"btcPrice"</span>: <span class="k">85420</span>,
+  <span class="n">"feeRate"</span>: <span class="k">32</span>,
+  <span class="n">"fees"</span>: { <span class="n">"fastest"</span>: <span class="k">45</span>, <span class="n">"halfHour"</span>: <span class="k">30</span>, <span class="n">"hour"</span>: <span class="k">20</span>, <span class="n">"economy"</span>: <span class="k">8</span> },
   <span class="n">"congestion"</span>: <span class="s">"high"</span>,
-  <span class="n">"confLabel"</span>: <span class="s">"10–20 мин ⚡"</span>
+  <span class="n">"emoji"</span>: <span class="s">"🔴"</span>,
+  <span class="n">"text"</span>: <span class="s">"Высокая загрузка"</span>,
+  <span class="n">"confLabel"</span>: <span class="s">"10–20 мин ⚡"</span>,
+  <span class="n">"priceSignals"</span>: {
+    <span class="n">"feeDriver"</span>: <span class="k">true</span>,   <span class="c">// fee rate drove the price up</span>
+    <span class="n">"queueDriver"</span>: <span class="k">false</span>, <span class="c">// mempool queue drove it</span>
+    <span class="n">"mpCount"</span>: <span class="k">28000</span>, <span class="n">"mpVsizeMB"</span>: <span class="k">28.4</span>
+  },
+  <span class="n">"mempoolCongestion"</span>: <span class="s">"medium"</span>,
+  <span class="n">"bestTime"</span>: { <span class="n">"label"</span>: <span class="s">"03:00–06:00 UTC"</span>, <span class="n">"hoursAway"</span>: <span class="k">4</span> },
+  <span class="n">"tiers"</span>: [
+    { <span class="n">"usd"</span>: <span class="k">3</span>, <span class="n">"label"</span>: <span class="s">"low"</span>, <span class="n">"emoji"</span>: <span class="s">"🟢"</span>, <span class="n">"confLabel"</span>: <span class="s">"5–10 мин ⚡"</span> },
+    { <span class="n">"usd"</span>: <span class="k">7</span>, <span class="n">"label"</span>: <span class="s">"high"</span>, <span class="n">"emoji"</span>: <span class="s">"🔴"</span>, <span class="n">"confLabel"</span>: <span class="s">"10–20 мин ⚡"</span> }
+  ],
+  <span class="n">"timestamp"</span>: <span class="k">1710000000000</span>
 }</pre>
         </div>
       </div>
     </div>
+
+    <!-- PRICE ANCHOR -->
+    <div id="price" style="height:0;overflow:hidden"></div>
 
     <!-- CPFP -->
     <div class="endpoint" id="ep-cpfp">
@@ -612,7 +757,7 @@ console.<span class="f">log</span>(data.hashrateReach); <span class="c">// "~88%
         <span class="endpoint-desc">CPFP fee calculator</span>
       </div>
       <div class="endpoint-body hidden" id="ep-cpfp-body">
-        <p style="font-size:.82rem;color:var(--muted);margin-bottom:16px">Calculate exact fee needed for a Child-Pays-For-Parent transaction. Returns sat amounts, USD cost, and wallet-specific instructions for Electrum, Sparrow, and BlueWallet.</p>
+        <p style="font-size:.82rem;color:var(--muted);margin-bottom:16px">Calculate exact fee needed for a Child-Pays-For-Parent transaction. Returns sat amounts, USD cost, per-output analysis, mempool position improvement, and step-by-step instructions for Electrum, Sparrow, and BlueWallet.</p>
 
         <table class="param-table">
           <tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr>
@@ -626,17 +771,44 @@ console.<span class="f">log</span>(data.hashrateReach); <span class="c">// "~88%
             <td><span class="param-name">outputIndex</span></td>
             <td><span class="param-type">integer</span></td>
             <td><span class="param-req optional">optional</span></td>
-            <td class="param-desc">Which output to use for CPFP (default: 0, auto-selects largest)</td>
+            <td class="param-desc">Which output to use for CPFP. Default: auto-selects largest spendable output.</td>
           </tr>
           <tr>
             <td><span class="param-name">target</span></td>
             <td><span class="param-type">string</span></td>
             <td><span class="param-req optional">optional</span></td>
-            <td class="param-desc"><code style="font-family:var(--mono);font-size:.68rem">eco | std | fast</code> (default: fast)</td>
+            <td class="param-desc"><code style="font-family:var(--mono);font-size:.68rem">eco | std | fast</code> — target confirmation speed. Default: <code style="font-family:var(--mono);font-size:.68rem">fast</code>.</td>
           </tr>
         </table>
+
+        <div class="code-block">
+          <div class="code-block-header"><span class="code-block-lang">Response 200</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+<pre>{
+  <span class="n">"ok"</span>: <span class="k">true</span>, <span class="n">"needed"</span>: <span class="k">true</span>, <span class="n">"txid"</span>: <span class="s">"..."</span>, <span class="n">"targetMode"</span>: <span class="s">"fast"</span>,
+  <span class="n">"parent"</span>: { <span class="n">"vsize"</span>: <span class="k">141</span>, <span class="n">"feePaid"</span>: <span class="k">1128</span>, <span class="n">"feeRate"</span>: <span class="k">8</span>, <span class="n">"feeUsd"</span>: <span class="k">0.96</span> },
+  <span class="n">"targets"</span>: { <span class="n">"eco"</span>: <span class="k">8</span>, <span class="n">"std"</span>: <span class="k">20</span>, <span class="n">"fast"</span>: <span class="k">45</span>, <span class="n">"selected"</span>: <span class="k">45</span> },
+  <span class="n">"child"</span>: {
+    <span class="n">"vsize"</span>: <span class="k">110</span>, <span class="n">"feeNeeded"</span>: <span class="k">5247</span>, <span class="n">"feeRate"</span>: <span class="k">48</span>,
+    <span class="n">"feeUsd"</span>: <span class="k">4.49</span>, <span class="n">"canAfford"</span>: <span class="k">true</span>,
+    <span class="n">"addressType"</span>: <span class="s">"p2wpkh"</span>, <span class="n">"addressTypeName"</span>: <span class="s">"Native SegWit"</span>
+  },
+  <span class="n">"package"</span>: { <span class="n">"vsize"</span>: <span class="k">251</span>, <span class="n">"totalFee"</span>: <span class="k">6375</span>, <span class="n">"effectiveRate"</span>: <span class="k">25</span> },
+  <span class="n">"output"</span>: { <span class="n">"index"</span>: <span class="k">1</span>, <span class="n">"value"</span>: <span class="k">500000</span>, <span class="n">"valueBtc"</span>: <span class="k">0.005</span>, <span class="n">"canAfford"</span>: <span class="k">true</span> },
+  <span class="n">"allOutputs"</span>: [...],
+  <span class="n">"mempoolPosition"</span>: { <span class="n">"before"</span>: <span class="k">12500</span>, <span class="n">"after"</span>: <span class="k">0</span> },
+  <span class="n">"walletInstructions"</span>: {
+    <span class="n">"electrum"</span>: [<span class="s">"Убедись что TX видна в Electrum"</span>, <span class="s">"Coins → найди UTXO..."</span>],
+    <span class="n">"sparrow"</span>:  [<span class="s">"UTXOs → найди выход #1..."</span>],
+    <span class="n">"bluewallet"</span>: [<span class="s">"Coin Control → выбери UTXO #1..."</span>]
+  },
+  <span class="n">"btcPrice"</span>: <span class="k">85420</span>, <span class="n">"timestamp"</span>: <span class="k">1710000000000</span>
+}</pre>
+        </div>
       </div>
     </div>
+
+    <!-- CPFP ANCHOR -->
+    <div id="cpfp" style="height:0;overflow:hidden"></div>
 
     <!-- RBF -->
     <div class="endpoint" id="ep-rbf">
@@ -646,40 +818,148 @@ console.<span class="f">log</span>(data.hashrateReach); <span class="c">// "~88%
         <span class="endpoint-desc">RBF fee bump calculator</span>
       </div>
       <div class="endpoint-body hidden" id="ep-rbf-body">
-        <p style="font-size:.82rem;color:var(--muted);margin-bottom:16px">Check if RBF is enabled and calculate the fee needed to replace the transaction. Compares RBF vs CPFP cost.</p>
+        <p style="font-size:.82rem;color:var(--muted);margin-bottom:16px">Check if RBF (BIP-125) is signaled and calculate the minimum fee to replace the transaction. Automatically compares RBF vs CPFP cost and recommends the cheaper option. Includes step-by-step wallet instructions.</p>
+
+        <table class="param-table">
+          <tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr>
+          <tr>
+            <td><span class="param-name">txid</span></td>
+            <td><span class="param-type">string</span></td>
+            <td><span class="param-req required">required</span></td>
+            <td class="param-desc">Transaction ID to check for RBF</td>
+          </tr>
+          <tr>
+            <td><span class="param-name">targetFee</span></td>
+            <td><span class="param-type">integer</span></td>
+            <td><span class="param-req optional">optional</span></td>
+            <td class="param-desc">Target fee rate in sat/vB. Default: current fastest fee rate.</td>
+          </tr>
+        </table>
+
+        <div class="code-block">
+          <div class="code-block-header"><span class="code-block-lang">Response 200 — RBF available</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+<pre>{
+  <span class="n">"ok"</span>: <span class="k">true</span>, <span class="n">"rbfEnabled"</span>: <span class="k">true</span>, <span class="n">"rbfPossible"</span>: <span class="k">true</span>, <span class="n">"txid"</span>: <span class="s">"..."</span>,
+  <span class="n">"current"</span>:     { <span class="n">"feeRate"</span>: <span class="k">8</span>, <span class="n">"feePaid"</span>: <span class="k">1128</span>, <span class="n">"vsize"</span>: <span class="k">141</span>, <span class="n">"feeUsd"</span>: <span class="k">0.96</span> },
+  <span class="n">"replacement"</span>: { <span class="n">"feeRate"</span>: <span class="k">45</span>, <span class="n">"feeAbs"</span>: <span class="k">6345</span>, <span class="n">"feeDiff"</span>: <span class="k">5217</span>, <span class="n">"feeDiffUsd"</span>: <span class="k">4.46</span> },
+  <span class="n">"bip125"</span>:      { <span class="n">"minNewFee"</span>: <span class="k">2256</span>, <span class="n">"satisfiesBip125"</span>: <span class="k">true</span> },
+  <span class="n">"vsRbf"</span>: {
+    <span class="n">"rbfFeeDiff"</span>: <span class="k">5217</span>, <span class="n">"cpfpFeeNeeded"</span>: <span class="k">5247</span>, <span class="n">"rbfCheaper"</span>: <span class="k">true</span>,
+    <span class="n">"recommendation"</span>: <span class="s">"RBF дешевле на 30 sat"</span>
+  },
+  <span class="n">"walletInstructions"</span>: {
+    <span class="n">"electrum"</span>:   [<span class="s">"Открой Electrum → История транзакций..."</span>],
+    <span class="n">"sparrow"</span>:    [<span class="s">"Открой Sparrow → Transactions..."</span>],
+    <span class="n">"bluewallet"</span>: [<span class="s">"Открой BlueWallet → транзакция..."</span>]
+  },
+  <span class="n">"btcPrice"</span>: <span class="k">85420</span>, <span class="n">"timestamp"</span>: <span class="k">1710000000000</span>
+}</pre>
+        </div>
+        <div class="code-block" style="margin-top:8px">
+          <div class="code-block-header"><span class="code-block-lang">Response 200 — RBF not available</span></div>
+<pre>{
+  <span class="n">"ok"</span>: <span class="k">true</span>, <span class="n">"rbfEnabled"</span>: <span class="k">false</span>, <span class="n">"rbfPossible"</span>: <span class="k">false</span>,
+  <span class="n">"reason"</span>: <span class="s">"RBF not signaled in any input"</span>,
+  <span class="n">"alternative"</span>: <span class="s">"cpfp"</span>,
+  <span class="n">"alternativeUrl"</span>: <span class="s">"/api/v1?method=cpfp&amp;txid=..."</span>,
+  <span class="n">"txid"</span>: <span class="s">"..."</span>, <span class="n">"feeRate"</span>: <span class="k">8</span>, <span class="n">"vsize"</span>: <span class="k">141</span>, <span class="n">"feePaid"</span>: <span class="k">1128</span>
+}</pre>
+        </div>
       </div>
     </div>
+
+    <!-- RBF ANCHOR -->
+    <div id="rbf" style="height:0;overflow:hidden"></div>
 
     <!-- HEALTH -->
     <div class="endpoint" id="ep-health">
       <div class="endpoint-header" onclick="toggleEndpoint('ep-health')">
         <span class="method-badge method-get">GET</span>
         <span class="endpoint-path">?method=health[&amp;verbose=1]</span>
-        <span class="endpoint-desc">Service & channel health</span>
+        <span class="endpoint-desc">Service &amp; channel health</span>
       </div>
       <div class="endpoint-body hidden" id="ep-health-body">
-        <p style="font-size:.82rem;color:var(--muted);margin-bottom:16px">Live health check of all 30 broadcast channels. Add <code style="font-family:var(--mono);font-size:.72rem">?verbose=1</code> to get per-channel ping times.</p>
+        <p style="font-size:.82rem;color:var(--muted);margin-bottom:16px">Live health check of all 30 broadcast channels (8 nodes + 22 pools). Add <code style="font-family:var(--mono);font-size:.72rem">?verbose=1</code> for per-channel ping times and full result set.</p>
+
+        <table class="param-table">
+          <tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr>
+          <tr>
+            <td><span class="param-name">verbose</span></td>
+            <td><span class="param-type">string</span></td>
+            <td><span class="param-req optional">optional</span></td>
+            <td class="param-desc">Pass <code style="font-family:var(--mono);font-size:.68rem">"1"</code> to get per-channel ping results. Without it, only failed channels are included.</td>
+          </tr>
+        </table>
+
         <div class="code-block">
-          <div class="code-block-header"><span class="code-block-lang">Response 200</span></div>
+          <div class="code-block-header"><span class="code-block-lang">Response 200</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
 <pre>{
   <span class="n">"ok"</span>: <span class="k">true</span>,
-  <span class="n">"status"</span>: <span class="s">"ok"</span>,
+  <span class="n">"status"</span>: <span class="s">"ok"</span>,              <span class="c">// "ok" | "partial" | "degraded"</span>
+  <span class="n">"elapsed"</span>: <span class="k">2140</span>,             <span class="c">// ms to check all channels</span>
   <span class="n">"summary"</span>: {
     <span class="n">"nodes"</span>: { <span class="n">"ok"</span>: <span class="k">8</span>, <span class="n">"total"</span>: <span class="k">8</span> },
     <span class="n">"pools"</span>: { <span class="n">"ok"</span>: <span class="k">21</span>, <span class="n">"total"</span>: <span class="k">22</span> },
-    <span class="n">"hrAvailable"</span>: <span class="k">87</span>,
+    <span class="n">"hrAvailable"</span>: <span class="k">85</span>,           <span class="c">// % hashrate online right now</span>
     <span class="n">"avgPingMs"</span>: <span class="k">183</span>
-  }
+  },
+  <span class="n">"failed"</span>: [                   <span class="c">// only failed channels (empty if all ok)</span>
+    { <span class="n">"name"</span>: <span class="s">"SomePoo"</span>, <span class="n">"tier"</span>: <span class="s">"pool"</span>, <span class="n">"error"</span>: <span class="s">"HTTP 503"</span> }
+  ],
+  <span class="n">"timestamp"</span>: <span class="k">1710000000000</span>
 }</pre>
         </div>
       </div>
     </div>
+
+    <!-- HEALTH ANCHOR -->
+    <div id="health" style="height:0;overflow:hidden"></div>
+
+    <!-- STATS -->
+    <div class="endpoint" id="ep-stats">
+      <div class="endpoint-header" onclick="toggleEndpoint('ep-stats')">
+        <span class="method-badge method-get">GET</span>
+        <span class="endpoint-path">?method=stats</span>
+        <span class="endpoint-desc">Service &amp; network statistics</span>
+      </div>
+      <div class="endpoint-body hidden" id="ep-stats-body">
+        <p style="font-size:.82rem;color:var(--muted);margin-bottom:16px">Combined network and service statistics: current fee market, BTC price, mempool state, and TurboTX service info (channel count, hashrate coverage, version).</p>
+
+        <div class="code-block">
+          <div class="code-block-header"><span class="code-block-lang">Response 200</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+<pre>{
+  <span class="n">"ok"</span>: <span class="k">true</span>,
+  <span class="n">"version"</span>: <span class="s">"v14"</span>,
+  <span class="n">"network"</span>: {
+    <span class="n">"feeFastest"</span>: <span class="k">45</span>, <span class="n">"feeHalfHour"</span>: <span class="k">30</span>, <span class="n">"feeHour"</span>: <span class="k">20</span>, <span class="n">"feeEconomy"</span>: <span class="k">8</span>,
+    <span class="n">"congestion"</span>: <span class="s">"medium"</span>, <span class="n">"congestionText"</span>: <span class="s">"Средняя загрузка"</span>,
+    <span class="n">"btcPrice"</span>: <span class="k">85420</span>,
+    <span class="n">"mempoolCount"</span>: <span class="k">28000</span>, <span class="n">"mempoolMB"</span>: <span class="k">28.4</span>,
+    <span class="n">"hashrateEHs"</span>: <span class="k">780.5</span>   <span class="c">// global hashrate EH/s</span>
+  },
+  <span class="n">"service"</span>: {
+    <span class="n">"version"</span>: <span class="s">"v14"</span>,
+    <span class="n">"nodeChannels"</span>: <span class="k">8</span>, <span class="n">"poolChannels"</span>: <span class="k">22</span>, <span class="n">"totalChannels"</span>: <span class="k">30</span>,
+    <span class="n">"hashrateReach"</span>: <span class="s">"~88%"</span>,
+    <span class="n">"maraSlipstream"</span>: <span class="k">true</span>,
+    <span class="n">"lightningSupport"</span>: <span class="k">true</span>,
+    <span class="n">"batchSupport"</span>: <span class="k">true</span>
+  },
+  <span class="n">"timestamp"</span>: <span class="k">1710000000000</span>
+}</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATS ANCHOR -->
+    <div id="stats" style="height:0;overflow:hidden"></div>
+
   </section>
 
   <!-- RATE LIMITS -->
   <section class="section" id="rate-limits">
     <div class="section-title">Rate Limits <span class="anchor">#rate-limits</span></div>
-    <p class="section-desc">Limits are enforced per API key. Current usage is returned in response headers.</p>
+    <p class="section-desc">Limits are enforced per API key. Current usage is returned in every response under <code style="font-family:var(--mono);color:var(--orange)">_meta</code> and in response headers.</p>
 
     <div class="code-block" style="margin-bottom:20px">
       <div class="code-block-header"><span class="code-block-lang">Response Headers</span></div>
@@ -687,6 +967,17 @@ console.<span class="f">log</span>(data.hashrateReach); <span class="c">// "~88%
 X-RateLimit-Limit-Day: 50000
 X-RateLimit-Remaining-Minute: 498
 X-RateLimit-Remaining-Day: 49997</pre>
+    </div>
+
+    <div class="code-block" style="margin-bottom:20px">
+      <div class="code-block-header"><span class="code-block-lang">_meta in every response</span></div>
+<pre>{
+  <span class="n">"_meta"</span>: {
+    <span class="n">"apiVersion"</span>: <span class="s">"v1"</span>,
+    <span class="n">"tier"</span>: <span class="s">"pro"</span>,
+    <span class="n">"remaining"</span>: { <span class="n">"perMin"</span>: <span class="k">498</span>, <span class="n">"perDay"</span>: <span class="k">49997</span> }
+  }
+}</pre>
     </div>
 
     <div class="tiers-grid" id="pricing">
@@ -742,28 +1033,38 @@ X-RateLimit-Remaining-Day: 49997</pre>
       <tr><th>HTTP</th><th>Code / Reason</th><th>Resolution</th></tr>
       <tr>
         <td class="error-code http-200">200</td>
-        <td>ok: false inside body</td>
-        <td style="font-size:.75rem;color:var(--muted)">TX not found, method returned empty result</td>
+        <td><code style="font-family:var(--mono);font-size:.68rem">ok: false</code> in body</td>
+        <td style="font-size:.75rem;color:var(--muted)">TX not found, already confirmed, or method returned empty result</td>
       </tr>
       <tr>
         <td class="error-code http-400">400</td>
         <td>Invalid txid / method</td>
-        <td style="font-size:.75rem;color:var(--muted)">Check txid is 64 hex chars, check method name</td>
+        <td style="font-size:.75rem;color:var(--muted)">Ensure txid is exactly 64 hex chars. Check method name against <code style="font-family:var(--mono);font-size:.68rem">availableMethods</code> in error body.</td>
       </tr>
       <tr>
         <td class="error-code http-401">401</td>
         <td>Unauthorized</td>
-        <td style="font-size:.75rem;color:var(--muted)">API key missing or invalid — check Authorization header</td>
+        <td style="font-size:.75rem;color:var(--muted)">API key missing or invalid — check <code style="font-family:var(--mono);font-size:.68rem">Authorization: Bearer</code> header</td>
+      </tr>
+      <tr>
+        <td class="error-code http-403">403</td>
+        <td>Forbidden (bot UA)</td>
+        <td style="font-size:.75rem;color:var(--muted)">Request blocked as automated bot. Use a real HTTP client with standard User-Agent.</td>
+      </tr>
+      <tr>
+        <td class="error-code http-404" style="color:#fbbf24">404</td>
+        <td>TX not found</td>
+        <td style="font-size:.75rem;color:var(--muted)">Transaction not in mempool or blockchain. May have been evicted.</td>
       </tr>
       <tr>
         <td class="error-code http-429">429</td>
         <td>Rate limit exceeded</td>
-        <td style="font-size:.75rem;color:var(--muted)">Slow down or upgrade tier. See <code style="font-family:var(--mono);font-size:.68rem">resetAt</code> in response.</td>
+        <td style="font-size:.75rem;color:var(--muted)">Slow down or upgrade tier. See <code style="font-family:var(--mono);font-size:.68rem">retryAfter</code> in response.</td>
       </tr>
       <tr>
         <td class="error-code http-500">500</td>
         <td>Internal server error</td>
-        <td style="font-size:.75rem;color:var(--muted)">Upstream Bitcoin node error. Retry with exponential backoff.</td>
+        <td style="font-size:.75rem;color:var(--muted)">Upstream Bitcoin node error or service issue. Retry with exponential backoff.</td>
       </tr>
     </table>
 
@@ -773,8 +1074,21 @@ X-RateLimit-Remaining-Day: 49997</pre>
   <span class="n">"ok"</span>: <span class="k">false</span>,
   <span class="n">"error"</span>: <span class="s">"Rate limit exceeded (per_minute)"</span>,
   <span class="n">"limit"</span>: <span class="k">30</span>,
-  <span class="n">"resetAt"</span>: <span class="k">1710000000000</span>,
+  <span class="n">"retryAfter"</span>: <span class="k">45000</span>,         <span class="c">// ms until limit resets</span>
   <span class="n">"upgradeUrl"</span>: <span class="s">"https://acelerat.vercel.app/api-docs#pricing"</span>
+}</pre>
+    </div>
+
+    <div class="code-block" style="margin-top:8px">
+      <div class="code-block-header"><span class="code-block-lang">Unknown Method Error</span></div>
+<pre>{
+  <span class="n">"ok"</span>: <span class="k">false</span>,
+  <span class="n">"error"</span>: <span class="s">"Unknown method: \"foo\""</span>,
+  <span class="n">"availableMethods"</span>: [
+    <span class="s">"ping"</span>, <span class="s">"status"</span>, <span class="s">"mempool"</span>, <span class="s">"fees"</span>, <span class="s">"price"</span>,
+    <span class="s">"acceleration"</span>, <span class="s">"accelerate"</span>, <span class="s">"health"</span>, <span class="s">"stats"</span>, <span class="s">"cpfp"</span>, <span class="s">"rbf"</span>
+  ],
+  <span class="n">"docs"</span>: <span class="s">"https://acelerat.vercel.app/api-docs"</span>
 }</pre>
     </div>
   </section>
@@ -785,31 +1099,38 @@ X-RateLimit-Remaining-Day: 49997</pre>
 
     <div style="display:flex;flex-direction:column;gap:16px">
       <div style="display:flex;gap:20px">
+        <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);white-space:nowrap;padding-top:2px">2026-03</div>
+        <div>
+          <div style="font-weight:600;margin-bottom:4px">v14 — Merged architecture + 10-wave repeat <span class="badge badge-v14">v14</span></div>
+          <div style="font-size:.8rem;color:var(--muted)">Merged <code style="font-family:var(--mono);font-size:.7rem">acceleration.js</code> into router and <code style="font-family:var(--mono);font-size:.7rem">keys.js</code> into v1 to fit Vercel Hobby 12-function limit. Repeat waves upgraded from 8 to 10. CORS headers fixed for browser API access.</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:20px">
         <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);white-space:nowrap;padding-top:2px">2026-01</div>
         <div>
           <div style="font-weight:600;margin-bottom:4px">API v1 launch <span class="badge badge-new">New</span></div>
-          <div style="font-size:.8rem;color:var(--muted)">Public API with API key auth, rate limiting, and full endpoint coverage. Partner tier with unlimited requests.</div>
+          <div style="font-size:.8rem;color:var(--muted)">Public API with Bearer auth, per-tier rate limiting, and full endpoint coverage. Partner tier with unlimited requests.</div>
         </div>
       </div>
       <div style="display:flex;gap:20px">
         <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);white-space:nowrap;padding-top:2px">2025-12</div>
         <div>
-          <div style="font-weight:600;margin-bottom:4px">Smart Advisor (acceleration endpoint)</div>
-          <div style="font-size:.8rem;color:var(--muted)">Decision engine with cost analysis, time forecast, current miner detection, and dynamic cheap-window forecast.</div>
+          <div style="font-weight:600;margin-bottom:4px">Smart Advisor — <code style="font-family:var(--mono);font-size:.7rem">?method=acceleration</code></div>
+          <div style="font-size:.8rem;color:var(--muted)">Decision engine with cost analysis, time forecast, current miner detection, dynamic cheap-window forecast, and rescue plan for 24h/48h/72h stuck TXs.</div>
         </div>
       </div>
       <div style="display:flex;gap:20px">
         <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);white-space:nowrap;padding-top:2px">2025-11</div>
         <div>
           <div style="font-weight:600;margin-bottom:4px">MARA Slipstream + 5 new pools</div>
-          <div style="font-size:.8rem;color:var(--muted)">Added direct MARA private mempool bypass. Total hashrate coverage: ~88%.</div>
+          <div style="font-size:.8rem;color:var(--muted)">Added direct MARA private mempool bypass. Total hashrate coverage: ~88% across 30 channels.</div>
         </div>
       </div>
     </div>
   </section>
 
   <!-- FOOTER -->
-  <div style="border-top:1px solid var(--border);padding-top:32px;display:flex;justify-content:space-between;align-items:center;flex-wrap:gap;gap:16px">
+  <div style="border-top:1px solid var(--border);padding-top:32px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px">
     <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted)">TurboTX API v1 · 2026</div>
     <div style="display:flex;gap:20px">
       <a href="/" style="font-family:var(--mono);font-size:.6rem;color:var(--muted);text-decoration:none">acelerat.vercel.app</a>
@@ -821,13 +1142,13 @@ X-RateLimit-Remaining-Day: 49997</pre>
 </div>
 
 <script>
-// Toggle endpoint bodies
+// Toggle endpoint body
 function toggleEndpoint(id) {
   const body = document.getElementById(id + '-body');
   if (body) body.classList.toggle('hidden');
 }
 
-// Copy text
+// Copy arbitrary text
 function copyText(text, btn) {
   navigator.clipboard.writeText(text).then(() => {
     const orig = btn.textContent;
@@ -837,7 +1158,7 @@ function copyText(text, btn) {
   });
 }
 
-// Copy code block
+// Copy code block (strips HTML tags)
 function copyCode(btn) {
   const pre = btn.closest('.code-block').querySelector('pre');
   const text = pre.innerText;
@@ -847,25 +1168,42 @@ function copyCode(btn) {
   });
 }
 
-// Active nav on scroll
-const sections = document.querySelectorAll('[id]');
-const navLinks = document.querySelectorAll('.nav-link');
-const obs = new IntersectionObserver(entries => {
-  entries.forEach(e => {
-    if (e.isIntersecting) {
-      navLinks.forEach(l => l.classList.remove('active'));
-      const link = document.querySelector(`.nav-link[href="#${e.target.id}"]`);
-      if (link) link.classList.add('active');
-    }
-  });
-}, { threshold: 0.3, rootMargin: '-80px 0px -60% 0px' });
-sections.forEach(s => obs.observe(s));
+// Active nav highlighting on scroll
+const navLinks = document.querySelectorAll('.nav-link[href^="#"]');
 
-// Auto-open first endpoint
+function getScrollTarget(link) {
+  const hash = link.getAttribute('href');
+  return document.querySelector(hash);
+}
+
+function updateActiveNav() {
+  const scrollY = window.scrollY + 120;
+  let current = null;
+
+  // Collect all anchored sections in document order
+  const anchors = Array.from(navLinks)
+    .map(l => ({ link: l, el: getScrollTarget(l) }))
+    .filter(x => x.el)
+    .map(x => ({ link: x.link, top: x.el.getBoundingClientRect().top + window.scrollY }))
+    .sort((a, b) => a.top - b.top);
+
+  for (let i = 0; i < anchors.length; i++) {
+    if (anchors[i].top <= scrollY) current = anchors[i].link;
+  }
+
+  navLinks.forEach(l => l.classList.remove('active'));
+  if (current) current.classList.add('active');
+}
+
+window.addEventListener('scroll', updateActiveNav, { passive: true });
+updateActiveNav();
+
+// Auto-open key endpoints on load
 document.addEventListener('DOMContentLoaded', () => {
   toggleEndpoint('ep-ping');
   toggleEndpoint('ep-status');
   toggleEndpoint('ep-accelerate');
+  toggleEndpoint('ep-acceleration');
 });
 </script>
 </body>
