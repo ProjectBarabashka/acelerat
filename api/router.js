@@ -694,6 +694,368 @@ async function handleNotify(req, res) {
   return res.status(200).json({ok,type});
 }
 
+
+// ══════════════════════════════════════════════════════════════
+//  ACCELERATION (SMART ADVISOR)  —  GET /api/acceleration?txid=
+//  Merged from /api/acceleration.js to save Vercel function slots
+// ══════════════════════════════════════════════════════════════
+  return ++e.c<=20;
+
+}
+
+// ─── HASHRATE TABLE Q1 2026 ──────────────────────────────────
+const HR_ACCEL = {
+  Foundry:27, AntPool:16, MARA:11, ViaBTC:9, SpiderPool:8,
+  F2Pool:7, Luxor:5, CloverPool:4, BitFuFu:4, 'BTC.com':3,
+  Ocean:2, EMCDPool:2, SBICrypto:2,
+};
+
+// ─── POOL COINBASE TAGS ───────────────────────────────────────
+const POOL_TAGS_ACCEL = {
+  'foundry':'Foundry','antpool':'AntPool','mara':'MARA','marathon':'MARA',
+  'viabtc':'ViaBTC','spiderpool':'SpiderPool','f2pool':'F2Pool',
+  'luxor':'Luxor','clvpool':'CloverPool','bitfufu':'BitFuFu',
+  'btc.com':'BTC.com','ocean':'Ocean','emcd':'EMCDPool','sbicrypto':'SBICrypto',
+};
+
+// ─── ⑦ CURRENT MINER (последние 3 блока) ─────────────────────
+async function getCurrentMiners() {
+  try {
+    const r = await ft('https://mempool.space/api/v1/blocks/tip', {}, 5000);
+    if (!r.ok) return null;
+    const blocks = await sj(r);
+    const arr = Array.isArray(blocks) ? blocks.slice(0,3) : [blocks];
+    const miners = arr.map(b => {
+      const poolName = (b?.extras?.pool?.name || b?.pool?.name || '').toLowerCase();
+      for (const [key, pool] of Object.entries(POOL_TAGS_ACCEL)) {
+        if (poolName.includes(key)) return pool;
+      }
+      return 'Unknown';
+    }).filter(Boolean);
+
+    const dominantMiner = miners[0]; // Последний блок
+    const dominantHr    = HR_ACCEL[dominantMiner] || 0;
+    return { recent: miners, dominant: dominantMiner, dominantHr };
+  } catch { return null; }
+}
+
+// ─── ⑧ FEE MARKET WINDOW (v14: динамический на основе реальных данных) ─
+// Запрашиваем историю fee за 24ч из mempool.space и находим реальный минимум
+// Fallback: статистическое окно 01:00–06:00 UTC
+let _feeWindowCache = { data: null, at: 0 };
+const FEE_WINDOW_TTL = 15 * 60_000; // обновляем каждые 15 мин
+
+async function cheapWindowForecast(currentFeeRate) {
+  const now = new Date();
+  const utcHour = now.getUTCHours();
+  const isWeekend = now.getUTCDay() === 0 || now.getUTCDay() === 6;
+
+  // Пытаемся получить реальную историю fee за 24ч
+  let cheapHour = null, minFee = null, avgFee = null;
+
+  try {
+    if (!_feeWindowCache.data || Date.now() - _feeWindowCache.at > FEE_WINDOW_TTL) {
+      const r = await ft('https://mempool.space/api/v1/mining/blocks/fee-rates/24h', 7000);
+      if (r.ok) {
+        const blocks = await r.json();
+        if (Array.isArray(blocks) && blocks.length > 0) {
+          _feeWindowCache.data = blocks;
+          _feeWindowCache.at   = Date.now();
+        }
+      }
+    }
+
+    if (_feeWindowCache.data) {
+      const blocks = _feeWindowCache.data;
+      // Группируем блоки по UTC-часам, берём средний fee каждого часа
+      const byHour = {};
+      for (const b of blocks) {
+        const ts = b.timestamp || b.time || 0;
+        if (!ts) continue;
+        const h = new Date(ts * 1000).getUTCHours();
+        if (!byHour[h]) byHour[h] = [];
+        byHour[h].push(b.avgFee || b.medianFee || b.feeRange?.[0] || 0);
+      }
+      const hourlyAvg = Object.entries(byHour).map(([h, fees]) => ({
+        hour: parseInt(h),
+        avg:  Math.round(fees.reduce((a, b) => a + b, 0) / fees.length),
+      })).filter(h => h.avg > 0);
+
+      if (hourlyAvg.length >= 4) {
+        hourlyAvg.sort((a, b) => a.avg - b.avg);
+        cheapHour = hourlyAvg[0].hour;
+        minFee    = hourlyAvg[0].avg;
+        avgFee    = Math.round(hourlyAvg.reduce((s, h) => s + h.avg, 0) / hourlyAvg.length);
+      }
+    }
+  } catch {}
+
+  // Если данных нет — fallback на статистику
+  const STATIC_START = isWeekend ? 0 : 1; // в выходные дешевле почти весь день
+  const STATIC_END   = isWeekend ? 10 : 6;
+  const cheapStart = cheapHour !== null ? cheapHour : STATIC_START;
+  const cheapEnd   = cheapHour !== null ? (cheapHour + 3) % 24 : STATIC_END;
+
+  // Сколько часов до дешёвого окна
+  let hoursUntilCheap;
+  if (utcHour === cheapStart || (utcHour > cheapStart && utcHour < cheapEnd)) {
+    hoursUntilCheap = 0;
+  } else if (utcHour < cheapStart) {
+    hoursUntilCheap = cheapStart - utcHour;
+  } else {
+    hoursUntilCheap = 24 - utcHour + cheapStart;
+  }
+
+  const isNowCheap = hoursUntilCheap === 0;
+  const savingPct  = (avgFee && currentFeeRate && avgFee > minFee)
+    ? Math.round((1 - minFee / currentFeeRate) * 100)
+    : null;
+
+  return {
+    isNowCheap,
+    hoursUntilCheap,
+    cheapWindowUtc: `${String(cheapStart).padStart(2,'0')}:00–${String(cheapEnd).padStart(2,'0')}:00 UTC`,
+    cheapWindowMsk: `${String((cheapStart+3)%24).padStart(2,'0')}:00–${String((cheapEnd+3)%24).padStart(2,'0')}:00 МСК`,
+    currentUtcHour: utcHour,
+    isWeekend,
+    dynamicData: minFee !== null,   // true = данные реальные, false = статистика
+    minFeeRate:   minFee,
+    avgFeeRate24h: avgFee,
+    potentialSavingPct: savingPct,
+    tip: isNowCheap
+      ? `💚 Сейчас дешёвое время — комиссии минимальны${minFee ? ` (~${minFee} sat/vB)` : ''}`
+      : isWeekend
+        ? `📅 Выходной — комиссии обычно ниже. Дешёвое окно через ${hoursUntilCheap}ч`
+        : `⏰ Дешёвое окно через ${hoursUntilCheap}ч (${String(cheapStart).padStart(2,'0')}:00–${String(cheapEnd).padStart(2,'0')}:00 UTC)${savingPct ? ` — экономия ~${savingPct}%` : ''}`,
+  };
+}
+
+// ─── COST ANALYSIS ────────────────────────────────────────────
+function costAnalysis(feeRate, fastest, vsize, feePaid, btcPrice) {
+  if (!btcPrice) return null;
+  const SAT = 1e8;
+
+  // Текущая комиссия TX
+  const currentFeeSat  = feePaid;
+  const currentFeeUsd  = +(currentFeeSat / SAT * btcPrice).toFixed(4);
+
+  // CPFP: дочерняя TX (~110 vB) должна компенсировать нехватку родителя
+  const cpfpNeededSat  = Math.max(0, fastest*(vsize+110) - feePaid);
+  const cpfpFeeUsd     = +(cpfpNeededSat / SAT * btcPrice).toFixed(4);
+
+  // RBF: заменяем TX с нужной fee rate
+  const rbfTotalSat    = fastest * vsize;
+  const rbfAdditSat    = Math.max(0, rbfTotalSat - feePaid);
+  const rbfFeeUsd      = +(rbfAdditSat / SAT * btcPrice).toFixed(4);
+
+  // TurboTX Premium: фиксированная цена (из /api/price логики)
+  const turboUsd       = fastest > 150 ? 18 : fastest > 60 ? 12 : fastest > 30 ? 7 : fastest > 10 ? 4 : 3;
+
+  return {
+    currentFee:   { sat:currentFeeSat,  usd:currentFeeUsd },
+    cpfpOption:   { sat:cpfpNeededSat,  usd:cpfpFeeUsd,  available: cpfpNeededSat > 0 },
+    rbfOption:    { sat:rbfAdditSat,    usd:rbfFeeUsd,   available: rbfAdditSat > 0 },
+    turboTxOption:{ usd:turboUsd,       note:'Фиксированная цена TurboTX Premium' },
+    cheapest: cpfpNeededSat < rbfAdditSat && cpfpNeededSat < turboUsd*SAT/btcPrice
+      ? 'cpfp' : rbfAdditSat < turboUsd*SAT/btcPrice ? 'rbf' : 'turbo',
+    btcPrice,
+  };
+}
+
+// ─── TIME FORECAST ────────────────────────────────────────────
+function timeForecast(feeRate, fastest, halfHour, stuckHours) {
+  const ratio = feeRate / (fastest || 50);
+
+  // Без ускорения
+  const withoutBoost =
+    ratio >= 1.0  ? { blocks:1,  text:'~10 мин' }  :
+    ratio >= 0.8  ? { blocks:1,  text:'~10–20 мин' }:
+    ratio >= 0.5  ? { blocks:3,  text:'~30–60 мин' }:
+    ratio >= 0.3  ? { blocks:6,  text:'~1–2 часа' } :
+    ratio >= 0.1  ? { blocks:20, text:'~3–5 часов' }:
+                    { blocks:144,text:'24+ часов или никогда' };
+
+  // С TurboTX Premium (цель: приоритетная очередь в топ-пулах)
+  const withBoost = ratio >= 0.5
+    ? withoutBoost  // уже быстро
+    : ratio >= 0.3
+      ? { blocks:2, text:'~20–40 мин после ускорения' }
+      : { blocks:4, text:'~40–90 мин после ускорения' };
+
+  return { withoutBoost, withBoost, improvementBlocks: withoutBoost.blocks - withBoost.blocks };
+}
+
+// ─── ⑨ STUCK RESCUE PLAN ──────────────────────────────────────
+function stuckRescuePlan(feeRate, fastest, vsize, feePaid, rbfEnabled, stuckHours) {
+  if (stuckHours < 24) return null;
+
+  const cpfpSat = Math.max(0, fastest*(vsize+110)-feePaid);
+  const steps = [];
+
+  if (stuckHours >= 72) {
+    steps.push({ priority:1, action:'turbo_aggressive', label:'🚀 TurboTX Premium (8 волн, агрессивный режим)', note:'Немедленно — охват ~88% хешрейта за 4 часа' });
+    if (rbfEnabled) steps.push({ priority:2, action:'rbf', label:`🔄 RBF: замените TX с ${fastest} sat/vB`, note:'Быстро, но нужен доступ к кошельку' });
+    steps.push({ priority:3, action:'cpfp', label:`⚡ CPFP: дочерняя TX +${cpfpSat} sat`, note:'Если нет RBF — создайте дочернюю TX с высокой fee' });
+    steps.push({ priority:4, action:'wait_window', label:'🌙 Ждите дешёвого окна (01:00–06:00 UTC)', note:'Мемпул чистится ночью — шанс пройти без дополнительных затрат' });
+  } else if (stuckHours >= 48) {
+    steps.push({ priority:1, action:'turbo', label:'⚡ TurboTX Premium (5 волн)', note:'Рекомендуется сейчас' });
+    if (rbfEnabled) steps.push({ priority:2, action:'rbf', label:`🔄 RBF с ${fastest} sat/vB`, note:'Надёжный вариант' });
+  } else {
+    steps.push({ priority:1, action:'turbo_free', label:'🆓 Попробуйте TurboTX Free', note:'Часто помогает для TX 24–48ч' });
+    steps.push({ priority:2, action:'wait', label:'⏳ Подождите дешёвое окно', note:'Может пройти само ночью' });
+  }
+
+  return {
+    stuckHours,
+    severity: stuckHours>=72 ? 'critical' : stuckHours>=48 ? 'high' : 'medium',
+    severityLabel: stuckHours>=72 ? '🚨 Критически зависла' : stuckHours>=48 ? '⚠️ Давно в мемпуле' : '⏳ Зависает',
+    steps,
+  };
+}
+
+// ─── MAIN DECISION ENGINE ─────────────────────────────────────
+async function makeDecision(txid, btcPrice, fees, tx, status, mp, miners) {
+  const confirmed = status?.confirmed || tx?.status?.confirmed || false;
+  if (confirmed) return {
+    decision:'already_confirmed',
+    urgency:'none',
+    message:'✅ Транзакция уже подтверждена',
+    blockHeight: status?.block_height || tx?.status?.block_height,
+  };
+
+  if (!tx?.txid) return {
+    decision:'not_found',
+    urgency:'none',
+    message:'TX не найдена в мемпуле или блокчейне. Проверьте TXID.',
+  };
+
+  const fastest  = fees.fastestFee    || 50;
+  const halfHour = fees.halfHourFee   || 30;
+  const hour     = fees.hourFee       || 20;
+  const vsize    = tx.weight ? Math.ceil(tx.weight/4) : (tx.size||250);
+  const feePaid  = tx.fee || 0;
+  const feeRate  = feePaid&&vsize ? Math.round(feePaid/vsize) : 0;
+  const ratio    = feeRate / fastest;
+  const rbfEnabled = Array.isArray(tx.vin) && tx.vin.some(i=>i.sequence<=0xFFFFFFFD);
+  const mpVsizeMB  = mp.vsize ? +(mp.vsize/1e6).toFixed(1) : 0;
+
+  // Stuck detection
+  const firstSeen  = tx.firstSeen || null;
+  const stuckHours = firstSeen ? Math.round((Date.now()/1000 - firstSeen)/3600) : 0;
+  const isStuck72h = stuckHours >= 72;
+  const isStuck48h = stuckHours >= 48;
+
+  // Decision
+  let decision, urgency, message;
+
+  if (ratio >= 1.0) {
+    decision = 'wait'; urgency = 'low';
+    message = `Комиссия отличная (${feeRate}/${fastest} sat/vB). Следующий–второй блок.`;
+  } else if (ratio >= 0.8 && !isStuck48h) {
+    decision = 'wait'; urgency = 'low';
+    message = `Комиссия хорошая (${feeRate}/${fastest} sat/vB). Подтверждение в течение 30 мин.`;
+  } else if (isStuck72h) {
+    decision = 'boost_aggressive'; urgency = 'critical';
+    message = `TX зависла ${stuckHours}ч! Нужны срочные меры.`;
+  } else if (ratio >= 0.5) {
+    decision = 'boost'; urgency = 'medium';
+    message = `TurboTX ускорит на 1–3 часа (${feeRate}/${fastest} sat/vB).`;
+  } else if (rbfEnabled) {
+    decision = 'rbf'; urgency = 'high';
+    message = `Низкая комиссия (${feeRate}/${fastest} sat/vB). RBF доступен — лучшее решение.`;
+  } else {
+    decision = 'cpfp_or_boost'; urgency = 'high';
+    message = `Очень низкая комиссия (${feeRate}/${fastest} sat/vB). Нужны CPFP или ускорение.`;
+  }
+
+  const costs = costAnalysis(feeRate, fastest, vsize, feePaid, btcPrice);
+  const timing = timeForecast(feeRate, fastest, halfHour, stuckHours);
+  const cheapWindow = await cheapWindowForecast(feeRate); // v14: async + динамический
+  const rescuePlan = stuckRescuePlan(feeRate, fastest, vsize, feePaid, rbfEnabled, stuckHours);
+
+  // ③ Exact numbers for action
+  const cpfpSat = Math.max(0, fastest*(vsize+110)-feePaid);
+  const rbfSat  = Math.max(0, fastest*vsize - feePaid);
+
+  return {
+    decision, urgency, message,
+    txid,
+    feeAnalysis: {
+      feeRate, feeRateNeeded:fastest,
+      ratio:        +ratio.toFixed(3),
+      ratioPercent: Math.round(ratio*100),
+      feePaid,      vsize,
+      rbfEnabled,
+      rbfInputs: Array.isArray(tx.vin) ? tx.vin.filter(i=>i.sequence<=0xFFFFFFFD).length : 0,
+    },
+    fees: { fastest, halfHour, hour, economy: fees.economyFee||fees.minimumFee||1 },
+    stuck: { stuckHours, isStuck48h, isStuck72h, firstSeen },
+    // ③ exact numbers
+    actionDetails: {
+      cpfp: { neededSat:cpfpSat, neededUsd: btcPrice ? +(cpfpSat/1e8*btcPrice).toFixed(2):null, childVsize:110 },
+      rbf:  { additionalSat:rbfSat, targetFeeRate:fastest },
+      turboTx: { recommended: decision!=='wait', plan: isStuck72h?'premium_aggressive':ratio>=0.5?'free':'premium' },
+    },
+    // ④ time forecast
+    timeForecast: timing,
+    // ⑤ cost analysis
+    costAnalysis: costs,
+    // ⑥ mempool
+    mempoolState: {
+      txCount: mp.count||null,
+      vsizeMB: mpVsizeMB,
+      congestion: fastest>150?'critical':fastest>60?'high':fastest>20?'medium':'low',
+    },
+    // ⑦ current miner
+    currentMiners: miners,
+    // ⑧ cheap window
+    cheapWindow,
+    // ⑨ rescue plan (только если stuck)
+    rescuePlan,
+    timestamp: Date.now(),
+  };
+}
+
+async function handleAcceleration(req, res) {
+  const ip = req.headers['x-real-ip']||req.headers['x-forwarded-for']?.split(',')[0]?.trim()||'unknown';
+  if (!checkRl(ip, 20)) return res.status(429).json({ok:false,error:'Too many requests'});
+
+  const txid = req.query?.txid || req.body?.txid;
+  if (!txid||!/^[a-fA-F0-9]{64}$/.test(txid))
+    return res.status(400).json({ok:false,error:'Invalid TXID'});
+
+  try {
+    // Параллельно — все данные сразу
+    const [txR, statusR, feesR, mpR, priceR, minersR] = await Promise.allSettled([
+      ft(`https://mempool.space/api/tx/${txid}`),
+      ft(`https://mempool.space/api/tx/${txid}/status`),
+      ft('https://mempool.space/api/v1/fees/recommended'),
+      ft('https://mempool.space/api/mempool'),
+      ft('https://mempool.space/api/v1/prices'),
+      getCurrentMiners(),
+    ]);
+
+    const get = s=>(s.status==='fulfilled'&&s.value?.ok)?s.value:null;
+    let tx = get(txR) ? await sj(get(txR)) : null;
+    if (!tx) {
+      try { const fb=await ft(`https://blockstream.info/api/tx/${txid}`,7000); if(fb.ok) tx=await sj(fb); }
+      catch {}
+    }
+
+    const status  = get(statusR) ? await sj(get(statusR))  : null;
+    const fees    = get(feesR)   ? await sj(get(feesR))    : {};
+    const mp      = get(mpR)     ? await sj(get(mpR))      : {};
+    const priceData = get(priceR)? await sj(get(priceR))   : {};
+    const miners  = minersR.status==='fulfilled' ? minersR.value : null;
+    const btcPrice = priceData.USD || null;
+
+    const result = await makeDecision(txid, btcPrice, fees, tx, status, mp, miners);
+    return res.status(200).json({ ok:true, ...result });
+  } catch(e) {
+    return res.status(500).json({ok:false,error:e.message});
+  }
+}
+
 // ══════════════════════════════════════════════════════════════
 //  MAIN DISPATCHER
 // ══════════════════════════════════════════════════════════════
@@ -713,6 +1075,7 @@ export default async function handler(req, res) {
     case 'cpfp':    return handleCpfp(req, res);
     case 'rbf':     return handleRbf(req, res);
     case 'notify':  return handleNotify(req, res);
+    case 'acceleration': return handleAcceleration(req, res);
     default:
       return res.status(400).json({ ok:false, error:`Unknown endpoint: ${fn}. Use _fn=health|status|stats|price|mempool|cpfp|rbf|notify` });
   }
