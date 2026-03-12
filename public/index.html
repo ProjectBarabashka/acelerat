@@ -4249,8 +4249,10 @@ function openM() {
   if (window._TurboPrice) window._TurboPrice.load();
   else { _updateDirectAmount(); _updateUsdtAmount(); }
 
-  // Проверяем: есть ли активный LN invoice (в памяти или в localStorage после F5)
-  const savedLn = !_lnActiveHash ? _lnLoadState() : null;
+  // Проверяем: есть ли активный LN invoice
+  // BUG FIX: _lnResumeOnLoad мог уже установить _lnActiveHash до вызова openM(),
+  // поэтому проверяем localStorage напрямую — не только когда _lnActiveHash == null
+  const savedLn = _lnLoadState();
   if (savedLn) {
     activeModalTab = 'ln';
     document.querySelectorAll('.pay-tab').forEach(t => t.classList.remove('on'));
@@ -4434,7 +4436,8 @@ function _lnRestoreFromState(s) {
   }
 
   lnStartCountdown(_lnTotalSecs);
-  lnStartPolling(_lnActiveHash);
+  // Polling мог быть уже запущен _lnResumeOnLoad — не перезапускаем
+  if (!_lnPollingTimer) lnStartPolling(_lnActiveHash);
 }
 
 function lnResetToInit() {
