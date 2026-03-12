@@ -2653,6 +2653,7 @@ async function fetchLiveStats() {
       }
       if (count) {
         const avgMin = Math.round(total / count / 60);
+        window._avgBlockMin = avgMin; // глобально — используется сердечком
         const el = document.getElementById('avg-time');
         const iconEl = document.getElementById('block-icon');
         if (el) {
@@ -5318,21 +5319,24 @@ function _rtApplyTicker(p) {
                         mc.level === 'medium' ? 'var(--a)' : '#ff5555';
   }
 
-  // ── Все сердечки страницы — по congestion с учётом TX-count И размера мемпула ──
-  // BUG FIX: сердце синее ТОЛЬКО если mpCount < 30000 И vsize < 100 МБ И fee низкая
+  // ── Все сердечки страницы — по congestion с учётом TX-count, размера мемпула И времени блока ──
+  // BUG FIX: сердце синее ТОЛЬКО если mpCount < 30000 И vsize < 100 МБ И fee < 20 И блоки норм
   const congestion = p.congestion || 'low';
   // Переопределяем heartLevel локально с учётом mpCount и vsize
   const _mpCount = p.mempool?.count ?? mpCount ?? 0;
   const _mpVsizeMb = p.mempool?.vsize ? p.mempool.vsize / 1_000_000 : (mpVsize ? mpVsize / 1_000_000 : 0);
   const _feeRate = p.fees?.fastest ?? p.feeRate ?? 0;
+  // Среднее время блока: медленные блоки (>15 мин) = TX копятся, нагрузка растёт
+  const _blockMin = window._avgBlockMin || 10;
+  const _blockSignal = _blockMin > 20 ? 'critical' : _blockMin > 15 ? 'high' : _blockMin > 12 ? 'medium' : 'low';
   // Комбинируем: если хотя бы один сигнал говорит о нагрузке — повышаем уровень
   let heartLevel;
-  if (congestion === 'critical' || congestion === 'extreme' || _mpCount > 80000 || _mpVsizeMb > 300 || _feeRate > 100) {
+  if (congestion === 'critical' || congestion === 'extreme' || _mpCount > 80000 || _mpVsizeMb > 300 || _feeRate > 100 || _blockSignal === 'critical') {
     heartLevel = 'busy';
-  } else if (congestion === 'high' || congestion === 'medium' || _mpCount > 30000 || _mpVsizeMb > 100 || _feeRate > 20) {
+  } else if (congestion === 'high' || congestion === 'medium' || _mpCount > 30000 || _mpVsizeMb > 100 || _feeRate > 20 || _blockSignal === 'high' || _blockSignal === 'medium') {
     heartLevel = 'mid';
   } else {
-    heartLevel = 'calm'; // синее только если мемпул свободен: < 30000 TX, < 100 МБ, fee < 20
+    heartLevel = 'calm'; // синее только если мемпул свободен: < 30000 TX, < 100 МБ, fee < 20, блоки ≤ 12 мин
   }
 
   ['net-pulse-dot','fee-dot','price-tag-dot','modal-heart-dot'].forEach(function(id) {
@@ -6530,6 +6534,10 @@ window._TurboAPI = {
     } else if (_apMpCount > 30000 || _apMpMb > 100 || _apFeeRate > 20) {
       if (congKey === 'low') congKey = 'medium';
     }
+    // Учитываем среднее время блока: медленные блоки = TX накапливаются
+    const _apBlockMin = window._avgBlockMin || 10;
+    if (_apBlockMin > 20 && ['low','medium'].includes(congKey)) congKey = 'high';
+    else if (_apBlockMin > 15 && congKey === 'low') congKey = 'medium';
     const state     = CONGESTION_STATE[congKey] || CONGESTION_STATE.low;
     const { level, color: accentColor, bg: bgColor, netText } = state;
 
