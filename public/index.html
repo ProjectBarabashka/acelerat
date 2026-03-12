@@ -4252,7 +4252,6 @@ function openM() {
   // Проверяем: есть ли активный LN invoice (в памяти или в localStorage после F5)
   const savedLn = !_lnActiveHash ? _lnLoadState() : null;
   if (savedLn) {
-    // Восстанавливаем invoice и открываем на LN вкладке
     activeModalTab = 'ln';
     document.querySelectorAll('.pay-tab').forEach(t => t.classList.remove('on'));
     const lt = document.getElementById('ptab-ln');
@@ -4268,16 +4267,15 @@ function openM() {
     if (note) note.textContent = 'Lightning Network — мгновенная оплата ⚡';
     _lnRestoreFromState(savedLn);
   } else {
-    activeModalTab = 'btc';
+    activeModalTab = activeModalTab || 'btc';
     document.querySelectorAll('.pay-tab').forEach(t => t.classList.remove('on'));
-    const bt = document.getElementById('ptab-btc');
+    const bt = document.getElementById('ptab-' + activeModalTab) || document.getElementById('ptab-btc');
     if (bt) bt.classList.add('on');
     document.querySelectorAll('.pay-tab-content').forEach(c => c.classList.remove('show'));
-    const bc = document.getElementById('mtab-btc');
+    const bc = document.getElementById('mtab-' + activeModalTab) || document.getElementById('mtab-btc');
     if (bc) bc.classList.add('show');
   }
 
-  // Показать кнопку premium как t('status.awaiting_pay')
   const _op = document.getElementById('op');
   if (_op && plan !== 'premium') {
     _op.style.borderColor = 'rgba(247,147,26,.5)';
@@ -4285,10 +4283,14 @@ function openM() {
   }
 
   const _modal = document.getElementById('modal'); if (_modal) _modal.classList.add('open');
+  // Сохраняем состояние — переживёт F5
+  try { sessionStorage.setItem('turbotx_modal', activeModalTab); } catch(e) {}
 }
 
 function closeM() {
   const _modalEl = document.getElementById('modal'); if (_modalEl) _modalEl.classList.remove('open');
+  // Сбрасываем сохранённое состояние модалки
+  try { sessionStorage.removeItem('turbotx_modal'); } catch(e) {}
   const vs = document.getElementById('verify-section');
   const svb = document.getElementById('show-verify-btn');
   if (vs) vs.style.display = 'none';
@@ -4320,6 +4322,7 @@ function closeM() {
 
 function switchModalTab(tab, el) {
   activeModalTab = tab;
+  try { sessionStorage.setItem('turbotx_modal', tab); } catch(e) {}
   document.querySelectorAll('.pay-tab').forEach(t => t.classList.remove('on'));
   el.classList.add('on');
   document.querySelectorAll('.pay-tab-content').forEach(c => c.classList.remove('show'));
@@ -6487,18 +6490,35 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ── LN RESTORE AFTER F5 ───────────────────────────────────────
-// При загрузке страницы: если есть активный invoice — возобновляем polling в фоне.
-// Пользователь увидит восстановленный QR когда откроет модалку (openM).
 (function _lnResumeOnLoad() {
   const s = _lnLoadState();
   if (!s) return;
-  // Устанавливаем state в память — openM увидит _lnActiveHash и не сбросит
   _lnActiveHash = s.paymentHash;
   _lnInvoiceStr = s.invoice;
   _lnExpiresAt  = s.expiresAt;
   _lnTotalSecs  = Math.max(0, Math.ceil((s.expiresAt - Date.now()) / 1000));
-  // Запускаем фоновый polling — платёж может прийти пока модалка закрыта
   lnStartPolling(s.paymentHash);
+})();
+
+// ── MODAL RESTORE AFTER F5 ────────────────────────────────────
+// sessionStorage живёт только в рамках вкладки — F5 не очищает,
+// но закрытие вкладки/браузера очищает автоматически.
+(function _modalResumeOnLoad() {
+  try {
+    const savedTab = sessionStorage.getItem('turbotx_modal');
+    if (!savedTab) return;
+    // Восстанавливаем после загрузки DOM
+    const restore = () => {
+      activeModalTab = savedTab;
+      openM();
+    };
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', restore);
+    } else {
+      // DOM уже готов (скрипт внизу страницы)
+      setTimeout(restore, 0);
+    }
+  } catch(e) {}
 })();
 
 let _histPoller = null;
