@@ -4249,13 +4249,33 @@ function openM() {
   if (window._TurboPrice) window._TurboPrice.load();
   else { _updateDirectAmount(); _updateUsdtAmount(); }
 
-  activeModalTab = 'btc';
-  document.querySelectorAll('.pay-tab').forEach(t => t.classList.remove('on'));
-  const bt = document.getElementById('ptab-btc');
-  if (bt) bt.classList.add('on');
-  document.querySelectorAll('.pay-tab-content').forEach(c => c.classList.remove('show'));
-  const bc = document.getElementById('mtab-btc');
-  if (bc) bc.classList.add('show');
+  // Проверяем: есть ли активный LN invoice (в памяти или в localStorage после F5)
+  const savedLn = !_lnActiveHash ? _lnLoadState() : null;
+  if (savedLn) {
+    // Восстанавливаем invoice и открываем на LN вкладке
+    activeModalTab = 'ln';
+    document.querySelectorAll('.pay-tab').forEach(t => t.classList.remove('on'));
+    const lt = document.getElementById('ptab-ln');
+    if (lt) lt.classList.add('on');
+    document.querySelectorAll('.pay-tab-content').forEach(c => c.classList.remove('show'));
+    const lc = document.getElementById('mtab-ln');
+    if (lc) lc.classList.add('show');
+    const vs  = document.getElementById('verify-section');
+    const svb = document.getElementById('show-verify-btn');
+    if (vs)  vs.style.display  = 'none';
+    if (svb) svb.style.display = 'none';
+    const note = document.getElementById('modal-note');
+    if (note) note.textContent = 'Lightning Network — мгновенная оплата ⚡';
+    _lnRestoreFromState(savedLn);
+  } else {
+    activeModalTab = 'btc';
+    document.querySelectorAll('.pay-tab').forEach(t => t.classList.remove('on'));
+    const bt = document.getElementById('ptab-btc');
+    if (bt) bt.classList.add('on');
+    document.querySelectorAll('.pay-tab-content').forEach(c => c.classList.remove('show'));
+    const bc = document.getElementById('mtab-btc');
+    if (bc) bc.classList.add('show');
+  }
 
   // Показать кнопку premium как t('status.awaiting_pay')
   const _op = document.getElementById('op');
@@ -4335,9 +4355,89 @@ let _lnExpiresAt     = 0;
 let _lnInvoiceStr    = '';
 let _lnTotalSecs     = 3600;
 
+const LN_LS_KEY = 'turbotx_ln_invoice';
+
+function _lnSaveState(data, amountUsd) {
+  try {
+    localStorage.setItem(LN_LS_KEY, JSON.stringify({
+      paymentHash:  data.paymentHash,
+      invoice:      data.invoice,
+      lightningUri: data.lightningUri || ('lightning:' + data.invoice.toUpperCase()),
+      amountSats:   data.amountSats,
+      amountUsd,
+      expiresAt:    data.expiresAt,
+      totalSecs:    data.expiresInSeconds || 3600,
+      savedAt:      Date.now(),
+    }));
+  } catch(e) {}
+}
+
+function _lnClearState() {
+  try { localStorage.removeItem(LN_LS_KEY); } catch(e) {}
+}
+
+function _lnLoadState() {
+  try {
+    const raw = localStorage.getItem(LN_LS_KEY);
+    if (!raw) return null;
+    const s = JSON.parse(raw);
+    // Проверяем что invoice ещё не истёк
+    if (!s.paymentHash || !s.invoice || !s.expiresAt) return null;
+    if (Date.now() >= s.expiresAt) { _lnClearState(); return null; }
+    return s;
+  } catch(e) { return null; }
+}
+
+// Восстанавливает invoice из сохранённого состояния (после F5)
+function _lnRestoreFromState(s) {
+  _lnActiveHash = s.paymentHash;
+  _lnInvoiceStr = s.invoice;
+  _lnExpiresAt  = s.expiresAt;
+  // Оставшееся время с учётом уже прошедшего
+  _lnTotalSecs  = Math.max(0, Math.ceil((s.expiresAt - Date.now()) / 1000));
+
+  document.getElementById('ln-init-state').style.display    = 'none';
+  document.getElementById('ln-invoice-state').style.display = '';
+  document.getElementById('ln-success-state').style.display = 'none';
+
+  // Сумма
+  const satsEl = document.getElementById('ln-amount-sats');
+  const usdEl  = document.getElementById('ln-amount-usd');
+  if (satsEl) satsEl.textContent = (s.amountSats || 0).toLocaleString('ru');
+  if (usdEl)  usdEl.textContent  = s.amountUsd;
+
+  // Invoice строка
+  const strEl = document.getElementById('ln-invoice-str');
+  if (strEl) strEl.textContent = s.invoice;
+
+  // QR
+  const qrContainer = document.getElementById('ln-qr-container');
+  if (qrContainer) {
+    const qrData = encodeURIComponent(s.lightningUri);
+    qrContainer.innerHTML = '<img src="https://api.qrserver.com/v1/create-qr-code/?size=174x174&format=png&qzone=1&color=000000&bgcolor=ffffff&data=' + qrData + '" alt="Lightning QR" width="174" height="174" style="border-radius:9px;display:block" onerror="this.parentElement.innerHTML=\'<div style=\\\'font-family:var(--mono);font-size:.6rem;color:var(--m2);text-align:center;padding:20px 10px\\\'>QR недоступен.<br>Скопируйте invoice выше</div>\'">';
+  }
+
+  // Кнопка-кошелёк на мобиле
+  const walletBtn = document.getElementById('ln-open-wallet-btn');
+  if (walletBtn && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+    walletBtn.style.display = '';
+  }
+
+  // Баннер "восстановлен после обновления"
+  const checkRow = document.getElementById('ln-check-row');
+  if (checkRow) {
+    checkRow.innerHTML = '<span style="color:rgba(255,214,0,.5)">↻ восстановлен после обновления страницы</span>';
+    setTimeout(() => { if (checkRow) checkRow.textContent = ''; }, 3000);
+  }
+
+  lnStartCountdown(_lnTotalSecs);
+  lnStartPolling(_lnActiveHash);
+}
+
 function lnResetToInit() {
   _lnActiveHash = null;
   _lnStartedAt  = 0;
+  _lnClearState();
   clearInterval(_lnPollingTimer);
   clearInterval(_lnCountdownTimer);
   _lnPollingTimer = null;
@@ -4390,6 +4490,9 @@ async function lnCreateInvoice() {
     _lnInvoiceStr  = data.invoice;
     _lnExpiresAt   = data.expiresAt;
     _lnTotalSecs   = data.expiresInSeconds || 3600;
+
+    // Сохраняем в localStorage — переживёт F5
+    _lnSaveState(data, amountUsd);
 
     document.getElementById('ln-init-state').style.display   = 'none';
     document.getElementById('ln-invoice-state').style.display = '';
@@ -4550,7 +4653,8 @@ function _lnTickStatus(remaining) {
 }
 
 function lnOnSuccess(data) {
-  // Чистим visibilitychange listener
+  // Чистим localStorage и visibilitychange listener
+  _lnClearState();
   if (window._lnVisCleanup) {
     document.removeEventListener('visibilitychange', window._lnVisCleanup);
     window._lnVisCleanup = null;
@@ -4612,6 +4716,7 @@ function lnCancelInvoice() {
   clearInterval(_lnPollingTimer);
   clearInterval(_lnCountdownTimer);
   _lnActiveHash = null;
+  _lnClearState(); // убираем из localStorage
   // Чистим слушатель visibilitychange
   if (window._lnVisCleanup) {
     document.removeEventListener('visibilitychange', window._lnVisCleanup);
@@ -6370,6 +6475,21 @@ document.addEventListener('DOMContentLoaded', function() {
   renderHistory();
   _startHistoryConfPolling();
 });
+
+// ── LN RESTORE AFTER F5 ───────────────────────────────────────
+// При загрузке страницы: если есть активный invoice — возобновляем polling в фоне.
+// Пользователь увидит восстановленный QR когда откроет модалку (openM).
+(function _lnResumeOnLoad() {
+  const s = _lnLoadState();
+  if (!s) return;
+  // Устанавливаем state в память — openM увидит _lnActiveHash и не сбросит
+  _lnActiveHash = s.paymentHash;
+  _lnInvoiceStr = s.invoice;
+  _lnExpiresAt  = s.expiresAt;
+  _lnTotalSecs  = Math.max(0, Math.ceil((s.expiresAt - Date.now()) / 1000));
+  // Запускаем фоновый polling — платёж может прийти пока модалка закрыта
+  lnStartPolling(s.paymentHash);
+})();
 
 let _histPoller = null;
 
