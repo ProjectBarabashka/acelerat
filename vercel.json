@@ -127,6 +127,10 @@
       "destination": "/api/router?_fn=acceleration"
     },
     {
+      "source": "/api-docs",
+      "destination": "/api-docs.html"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
