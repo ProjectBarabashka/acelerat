@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════════════
-//  TurboTX v11 — client-api.js
+//  TurboTX v14 — client-api.js
 //  Вставляется в index.html перед </body>
 //
 //  ✦ serverBroadcast    — одиночный broadcast через /api/broadcast
@@ -35,7 +35,7 @@ async function serverBroadcast(txid, plan, token) {
 }
 
 // ─── BATCH BROADCAST ──────────────────────────────────────────
-// Уникально для TurboTX v11 — ни один конкурент не умеет
+// Уникально для TurboTX v14 — ни один конкурент не умеет
 async function batchBroadcast(txids, token) {
   if (!Array.isArray(txids) || txids.length === 0) throw new Error('txids array required');
   const headers = { 'Content-Type': 'application/json' };
@@ -271,4 +271,4 @@ window._TurboAPI = {
   waitPayment:   waitForLightningPayment,
 };
 
-console.log('[TurboTX] v11 Server API connected ✓ (broadcast + batch + lightning + waves)');
+console.log('[TurboTX] v14 Server API connected ✓ (broadcast + batch + lightning + waves + acceleration)');
