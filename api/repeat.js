@@ -30,36 +30,15 @@
 
 export const config = { maxDuration: 35 };
 
-const CORS = {
-  'Access-Control-Allow-Origin':  '*',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, X-TurboTX-Token',
-};
+import { CORS, ft, getIp, sj, sleep, makeRl } from './_shared.js';
 
-// ─── УТИЛИТЫ ──────────────────────────────────────────────────
-async function ft(url, opts = {}, ms = 10000) {
-  const ac = new AbortController();
-  const t  = setTimeout(() => ac.abort(), ms);
-  try { const r = await fetch(url, { ...opts, signal: ac.signal }); clearTimeout(t); return r; }
-  catch(e) { clearTimeout(t); throw e; }
-}
-const sleep = ms => new Promise(r => setTimeout(r, ms));
-async function sj(r) { try { return await r.json(); } catch { return {}; } }
+// ─── УТИЛИТЫ — из _shared.js ──────────────────────────────────
+
 
 // ─── RATE LIMITER ─────────────────────────────────────────────
-const _rl = new Map();
-function checkRl(ip) {
-  const now = Date.now(), h = 3_600_000;
-  if (_rl.size > 500) for (const [k,v] of _rl) if (v.r < now) _rl.delete(k);
-  let e = _rl.get(ip);
-  if (!e || e.r < now) { e = {c:0, r:now+h}; _rl.set(ip, e); }
-  return ++e.c <= 30; // 30 repeat-запросов в час с одного IP
-}
+const checkRl = makeRl(30, 3_600_000); // 30 repeat-запросов / час с одного IP
 
-function getIp(req) {
-  return req.headers['x-real-ip'] ||
-    req.headers['x-forwarded-for']?.split(',')[0]?.trim() || 'unknown';
-}
+
 
 // ─── ИНТЕРВАЛЫ ВОЛН ───────────────────────────────────────────
 // Каждый элемент — задержка ПЕРЕД этой волной (в мс)

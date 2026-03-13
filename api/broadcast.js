@@ -43,15 +43,9 @@
 
 export const config = { maxDuration: 60 };
 
-// BUG FIX: импортируем счётчики статистики из router.js
-// Без этого /api/stats всегда показывал broadcasts:0, errors:0 и т.д.
-import { incBroadcast, incError } from './router.js';
+import { CORS, getIp, sj, sleep } from './_shared.js';
+import { incBroadcast } from './router.js'; // счётчики статистики /api/stats
 
-const CORS = {
-  'Access-Control-Allow-Origin':  '*',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, X-TurboTX-Token',
-};
 
 // ─── USER-AGENT ROTATION ──────────────────────────────────────
 // Разные UA — меньше шанс блокировки по одному паттерну
@@ -86,11 +80,6 @@ const LIMITS = {
 const MAX_TXIDS_PER_IP_HOUR = 15;
 const MAX_HEX_BYTES = 400_000;
 
-function getIp(req) {
-  return req.headers['x-real-ip'] ||
-    req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
-    req.socket?.remoteAddress || 'unknown';
-}
 
 function checkLimits(ip, txid, plan) {
   const now = Date.now(), hour = 3_600_000;
@@ -138,8 +127,7 @@ function setCachedHex(txid, hex) {
 }
 
 // ─── УТИЛИТЫ ──────────────────────────────────────────────────
-const sleep = ms => new Promise(r => setTimeout(r, ms));
-async function safeJson(r) { try { return await r.json(); } catch { return {}; } }
+const safeJson = sj; // алиас для обратной совместимости внутри файла
 async function safeText(r) { try { return await r.text(); } catch { return ''; } }
 function ve(r) { return r?.headers?.get?.('x-vercel-error') || ''; }
 

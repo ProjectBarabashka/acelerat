@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════════════
-//  TurboTX v6 ★ TELEGRAM BOT ★  —  /api/telegram.js
+//  TurboTX v14 ★ TELEGRAM BOT ★  —  /api/telegram.js
 //  Vercel Serverless · Node.js 20  · Telegram Bot Webhook
 //
 //  Команды: /start /help /status /accelerate /price /cpfp
@@ -23,6 +23,8 @@
 
 export const config = { maxDuration: 20 };
 
+import { ft } from './_shared.js';
+
 const TOKEN   = process.env.TG_TOKEN;
 const SUPPORT = process.env.TG_SUPPORT_CHAT;
 const PREM_SECRET = process.env.PREMIUM_SECRET || '';
@@ -37,12 +39,6 @@ function base() {
     (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
 }
 
-async function ft(url, opts = {}, ms = 10000) {
-  const ac = new AbortController();
-  const t  = setTimeout(() => ac.abort(), ms);
-  try { const r = await fetch(url, { ...opts, signal: ac.signal }); clearTimeout(t); return r; }
-  catch(e) { clearTimeout(t); throw e; }
-}
 
 async function tgApi(method, body) {
   if (!TOKEN) return null;
@@ -73,7 +69,7 @@ function bar(ok, total) {
 
 async function cmdStart(chatId) {
   return send(chatId, [
-    '⚡ *TurboTX v6 — Bitcoin Accelerator*',
+    '⚡ *TurboTX v14 — Bitcoin Accelerator*',
     '',
     'Ускоряю застрявшие BTC транзакции.',
     'Broadcast в *30 каналов* · ~88% хешрейта сети.',
@@ -100,7 +96,7 @@ async function cmdStart(chatId) {
 
 async function cmdHelp(chatId) {
   return send(chatId, [
-    '❓ *Как работает TurboTX v6:*',
+    '❓ *Как работает TurboTX v14:*',
     '',
     '*Проблема:* TX зависла → майнеры её игнорируют.',
     '*Решение:* Broadcast в 24 канала одновременно:',
@@ -492,7 +488,7 @@ async function cmdRbf(chatId, txid) {
 async function cmdStats(chatId) {
   const uptime = Math.round((Date.now() - _stats.startedAt) / 60000);
   return send(chatId, [
-    '📈 *TurboTX v6 — Статистика сессии*',
+    '📈 *TurboTX v14 — Статистика сессии*',
     '',
     `⚡ Broadcast запусков: ${_stats.broadcasts}`,
     `🔍 Проверок статуса:   ${_stats.statusChecks}`,

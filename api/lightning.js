@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════════════
-//  TurboTX v9 ★ LIGHTNING PAYMENT ★  —  /api/lightning.js
+//  TurboTX v14 ★ LIGHTNING PAYMENT ★  —  /api/lightning.js
 //  Vercel Serverless · Node.js 20
 //
 //  POST /api/lightning          — создать invoice
@@ -19,29 +19,13 @@
 
 export const config = { maxDuration: 20 };
 
-// BUG FIX: импортируем счётчик статистики
+import { CORS, ft, getIp, sj, makeRl } from './_shared.js';
 import { incLightning } from './router.js';
 
-const CORS = {
-  'Access-Control-Allow-Origin':  '*',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, X-TurboTX-Token',
-};
-
 // ─── RATE LIMITER ─────────────────────────────────────────────
-const _rl = new Map();
-function checkRl(ip) {
-  const now = Date.now(), h = 3_600_000;
-  if (_rl.size > 1000) for (const [k,v] of _rl) if (v.r < now) _rl.delete(k);
-  let e = _rl.get(ip);
-  if (!e || e.r < now) { e = {c:0, r:now+h}; _rl.set(ip, e); }
-  return ++e.c <= 20; // 20 invoice/час с одного IP
-}
+const checkRl = makeRl(20, 3_600_000); // 20 invoice/час с одного IP
 
-function getIp(req) {
-  return req.headers['x-real-ip'] ||
-    req.headers['x-forwarded-for']?.split(',')[0]?.trim() || 'unknown';
-}
+
 
 // ─── In-memory invoice store ──────────────────────────────────
 // Хранит pending invoices с TTL (Vercel instance живёт часами)
@@ -63,13 +47,8 @@ function cleanInvoices() {
 }
 
 // ─── УТИЛИТЫ ──────────────────────────────────────────────────
-async function ft(url, opts = {}, ms = 10000) {
-  const ac = new AbortController();
-  const t  = setTimeout(() => ac.abort(), ms);
-  try { const r = await fetch(url, { ...opts, signal: ac.signal }); clearTimeout(t); return r; }
-  catch(e) { clearTimeout(t); throw e; }
-}
-async function sj(r) { try { return await r.json(); } catch { return {}; } }
+
+
 
 // ─── BTC PRICE ────────────────────────────────────────────────
 async function getBtcPrice() {

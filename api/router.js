@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════════════
-//  TurboTX v11 ★ UNIFIED ROUTER ★  —  /api/router.js
+//  TurboTX v14 ★ UNIFIED ROUTER ★  —  /api/router.js
 //  Vercel Serverless · Node.js 20 · Hobby Plan
 //
 //  Единый файл объединяет 8 endpoints, экономя слоты функций:
@@ -15,37 +15,15 @@
 
 export const config = { maxDuration: 20 };
 
-// ─── CORS ─────────────────────────────────────────────────────
-const CORS_ALL = {
-  'Access-Control-Allow-Origin':  '*',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, X-TurboTX-Token',
-};
+import { CORS as CORS_ALL, ft, getIp, sj, makeRl } from './_shared.js';
 
 // ─── УТИЛИТЫ ──────────────────────────────────────────────────
-async function ft(url, opts = {}, ms = 7000) {
-  const ac = new AbortController();
-  const t  = setTimeout(() => ac.abort(), ms);
-  try { const r = await fetch(url, { ...opts, signal: ac.signal }); clearTimeout(t); return r; }
-  catch(e) { clearTimeout(t); throw e; }
-}
-async function sj(r) { try { return await r.json(); } catch { return {}; } }
+// ft(), sj(), getIp(), makeRl() — из _shared.js
+// router.js передаёт явный ms=7000 там где нужен короткий таймаут
 
-function getIp(req) {
-  return req.headers['x-real-ip'] ||
-    req.headers['x-forwarded-for']?.split(',')[0]?.trim() || 'unknown';
-}
 
 // ─── RATE LIMITER (shared across all handlers) ─────────────────
-const _rlMap = new Map();
-function checkRl(ip, maxPerMin = 30) {
-  const now = Date.now(), min = 60_000;
-  if (_rlMap.size > 4000) for (const [k,v] of _rlMap) if (v.r < now) _rlMap.delete(k);
-  const key = `${ip}`;
-  let e = _rlMap.get(key);
-  if (!e || e.r < now) { e = { c:0, r:now+min }; _rlMap.set(key, e); }
-  return ++e.c <= maxPerMin;
-}
+const checkRl = makeRl(30, 60_000); // 30 запросов / минуту с одного IP
 
 // ══════════════════════════════════════════════════════════════
 //  HEALTH  —  GET /api/health[?verbose=1]
@@ -56,10 +34,10 @@ const HR_HEALTH = {
   F2Pool:7, Luxor:5, CloverPool:4, BitFuFu:4, 'BTC.com':3,
   Ocean:2, EMCDPool:2, SBICrypto:2,
   TxBoost:1, mempoolAccel:1, bitaccelerate:1, '360btc':1, txfaster:1, btcspeed:1,
-  '2Miners':1, Rawpool:1,
+  '2Miners':1, Rawpool:1, Lincoin:1,
 };
 
-// v13: 8 nodes + 22 pools = 30 каналов, ~88% хешрейта
+// v14: 8 nodes + 23 pools = 31 канал, ~88% хешрейта
 const HEALTH_CHANNELS = [
   // ── Hex nodes ─────────────────────────────────────────────
   { name:'mempool.space',    tier:'node', url:'https://mempool.space/api/blocks/tip/height',   method:'GET' },
@@ -670,7 +648,7 @@ async function handleNotify(req, res) {
   const txLink=txid?`https://mempool.space/tx/${txid}`:null;
   let text='',extra={};
   if(type==='payment'){
-    text=['💰 *НОВАЯ ОПЛАТА — TurboTX v11*','━━━━━━━━━━━━━━━━',`💵 Сумма: \`${paidStr||'?'}\``,`💳 Способ: ${method||'?'}`,txShort?`🔗 TX: \`${txShort}\``:'',`📋 Тариф: *${(plan||'free').toUpperCase()}*`,`🕐 ${now} МСК`].filter(Boolean).join('\n');
+    text=['💰 *НОВАЯ ОПЛАТА — TurboTX v14*','━━━━━━━━━━━━━━━━',`💵 Сумма: \`${paidStr||'?'}\``,`💳 Способ: ${method||'?'}`,txShort?`🔗 TX: \`${txShort}\``:'',`📋 Тариф: *${(plan||'free').toUpperCase()}*`,`🕐 ${now} МСК`].filter(Boolean).join('\n');
     if(txLink) extra.reply_markup={inline_keyboard:[[{text:'🔍 Открыть TX',url:txLink}]]};
   } else if(type==='broadcast'){
     const pct=total?Math.round((okCount||0)/total*100):0,bar='█'.repeat(Math.round(pct/10))+'░'.repeat(10-Math.round(pct/10));
@@ -680,14 +658,14 @@ async function handleNotify(req, res) {
     text=[`✅ *TX ПОДТВЕРЖДЕНА!*`,`📋 \`${txShort||txid?.slice(0,14)||'?'}\``,`🎉 Premium отработал${wave?` (волна ${wave})`:''}`,`🕐 ${now} МСК`].filter(Boolean).join('\n');
     if(txLink) extra.reply_markup={inline_keyboard:[[{text:'🔍 Mempool',url:txLink}]]};
   } else if(type==='lightning'){
-    text=['⚡ *Lightning — TurboTX v11*',`⚡ ${Number(amountSats||0).toLocaleString()} sats оплачено`,paymentHash?`📋 Hash: \`${String(paymentHash).slice(0,20)}…\``:'',`🕐 ${now} МСК`].filter(Boolean).join('\n');
+    text=['⚡ *Lightning — TurboTX v14*',`⚡ ${Number(amountSats||0).toLocaleString()} sats оплачено`,paymentHash?`📋 Hash: \`${String(paymentHash).slice(0,20)}…\``:'',`🕐 ${now} МСК`].filter(Boolean).join('\n');
   } else if(type==='batch'){
     const {total:bt,ok:bok}=req.body||{};
-    text=['📦 *Batch Broadcast — TurboTX v11*',`✅ ${bok||0}/${bt||0} TX ускорено параллельно`,`🕐 ${now} МСК`].filter(Boolean).join('\n');
+    text=['📦 *Batch Broadcast — TurboTX v14*',`✅ ${bok||0}/${bt||0} TX ускорено параллельно`,`🕐 ${now} МСК`].filter(Boolean).join('\n');
   } else if(type==='error'){
-    text=[`❌ *Ошибка — TurboTX v11*`,error?`\`${String(error).slice(0,200)}\``:'',`🕐 ${now} МСК`].filter(Boolean).join('\n');
+    text=[`❌ *Ошибка — TurboTX v14*`,error?`\`${String(error).slice(0,200)}\``:'',`🕐 ${now} МСК`].filter(Boolean).join('\n');
   } else {
-    text=`📌 *TurboTX v11* — ${type||'event'}\n🕐 ${now} МСК`;
+    text=`📌 *TurboTX v14* — ${type||'event'}\n🕐 ${now} МСК`;
   }
   const ok=await tgSend(tgToken,chatId,text,extra);
   return res.status(200).json({ok,type});
@@ -704,14 +682,27 @@ const HR_ACCEL = {
   Foundry:27, AntPool:16, MARA:11, ViaBTC:9, SpiderPool:8,
   F2Pool:7, Luxor:5, CloverPool:4, BitFuFu:4, 'BTC.com':3,
   Ocean:2, EMCDPool:2, SBICrypto:2,
+  TxBoost:1, '2Miners':1, Rawpool:1, Lincoin:1,
 };
 
 // ─── POOL COINBASE TAGS ───────────────────────────────────────
 const POOL_TAGS_ACCEL = {
-  'foundry':'Foundry','antpool':'AntPool','mara':'MARA','marathon':'MARA',
-  'viabtc':'ViaBTC','spiderpool':'SpiderPool','f2pool':'F2Pool',
-  'luxor':'Luxor','clvpool':'CloverPool','bitfufu':'BitFuFu',
-  'btc.com':'BTC.com','ocean':'Ocean','emcd':'EMCDPool','sbicrypto':'SBICrypto',
+  'foundry':'Foundry', 'foundryusa':'Foundry',
+  'antpool':'AntPool',
+  'mara':'MARA', 'marathon':'MARA',
+  'viabtc':'ViaBTC',
+  'spiderpool':'SpiderPool',
+  'f2pool':'F2Pool',
+  'luxor':'Luxor',
+  'clvpool':'CloverPool', 'clover':'CloverPool',
+  'bitfufu':'BitFuFu',
+  'btc.com':'BTC.com',
+  'ocean':'Ocean', 'ocean.xyz':'Ocean',
+  'emcd':'EMCDPool',
+  'sbicrypto':'SBICrypto',
+  '2miners':'2Miners',
+  'rawpool':'Rawpool',
+  'lincoin':'Lincoin',
 };
 
 // ─── ⑦ CURRENT MINER (последние 3 блока) ─────────────────────

@@ -25,11 +25,7 @@
 
 export const config = { maxDuration: 30 };
 
-const CORS = {
-  'Access-Control-Allow-Origin':  '*',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-API-Key, X-TurboTX-Token',
-};
+import { CORS_API as CORS, ft, getIp, sj } from './_shared.js';
 
 // ─── API KEY STORE (env-driven) ────────────────────────────────
 // В продакшне замените на KV / Firebase / Postgres
@@ -106,21 +102,7 @@ function authenticate(req) {
   return { ok: true, key, ...info };
 }
 
-// ─── FETCH UTILS ──────────────────────────────────────────────
-async function ft(url, opts = {}, ms = 8000) {
-  const ac = new AbortController();
-  const t = setTimeout(() => ac.abort(), ms);
-  try {
-    const r = await fetch(url, { ...opts, signal: ac.signal });
-    clearTimeout(t); return r;
-  } catch(e) { clearTimeout(t); throw e; }
-}
-async function sj(r) { try { return await r.json(); } catch { return {}; } }
-
-function getIp(req) {
-  return req.headers['x-real-ip'] ||
-    req.headers['x-forwarded-for']?.split(',')[0]?.trim() || 'unknown';
-}
+// ─── FETCH UTILS — из _shared.js ────────────────────────────
 
 // ─── INTERNAL PROXY TO EXISTING ENDPOINTS ─────────────────────
 // Переиспользуем логику из router.js / acceleration.js

@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════════════
-//  TurboTX v9 ★ PAYMENT VERIFY ★  —  /api/verify.js
+//  TurboTX v14 ★ PAYMENT VERIFY ★  —  /api/verify.js
 //  Vercel Serverless · Node.js 20
 //
 //  POST /api/verify
@@ -16,14 +16,10 @@
 
 export const config = { maxDuration: 20 };
 
-// BUG FIX: импортируем счётчик статистики
+import { CORS, ft, getIp, sj, makeRl } from './_shared.js';
 import { incVerify } from './router.js';
 
-const CORS = {
-  'Access-Control-Allow-Origin':  '*',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
-};
+const checkIpLimit = makeRl(10, 3_600_000); // 10 верификаций / час с одного IP
 
 // Кошельки (из env — безопаснее чем хардкод)
 const BTC_WALLET  = process.env.BTC_WALLET  || '';
@@ -31,31 +27,11 @@ const USDT_WALLET = process.env.USDT_WALLET || '';
 const PREMIUM_SECRET = process.env.PREMIUM_SECRET || '';
 
 // In-memory rate limit
-const _ipMap = new Map();
-function checkIpLimit(ip) {
-  const now = Date.now(), hour = 3_600_000;
-  // Cleanup stale entries to prevent memory leak
-  if (_ipMap.size > 1000)
-    for (const [k,v] of _ipMap) if (v.resetAt < now) _ipMap.delete(k);
-  let e = _ipMap.get(ip);
-  if (!e || e.resetAt < now) { e = { count:0, resetAt:now+hour }; _ipMap.set(ip,e); }
-  if (e.count >= 10) return false;
-  e.count++; return true;
-}
 
-function getIp(req) {
-  return req.headers['x-real-ip'] ||
-    req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
-    req.socket?.remoteAddress || 'unknown';
-}
 
-async function ft(url, opts={}, ms=10000) {
-  const ac=new AbortController();
-  const t=setTimeout(()=>ac.abort(),ms);
-  try{ const r=await fetch(url,{...opts,signal:ac.signal}); clearTimeout(t); return r; }
-  catch(e){ clearTimeout(t); throw e; }
-}
-async function sj(r){ try{ return await r.json(); } catch{ return {}; } }
+
+
+
 
 // ─── LIGHTNING VERIFICATION ───────────────────────────────────
 // Проверяем оплату invoice по paymentHash
@@ -276,7 +252,7 @@ async function tgNotify(result, ip) {
     : result.method === 'lightning'  ? 'Lightning Network'
     : 'USDT TRC-20';
   const text = [
-    `${emoji} *ОПЛАТА — TurboTX v9*`,
+    `${emoji} *ОПЛАТА — TurboTX v14*`,
     `━━━━━━━━━━━━━━━━`,
     `${emoji} Сумма: \`${result.paid}\``,
     `💳 Метод: ${methodName}`,
